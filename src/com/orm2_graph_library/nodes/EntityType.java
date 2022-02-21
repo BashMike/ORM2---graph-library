@@ -1,6 +1,7 @@
 package com.orm2_graph_library.nodes;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.stream.Stream;
 
 import com.orm2_graph_library.attributes.StringAttribute;
@@ -14,11 +15,6 @@ public class EntityType extends ObjectType {
     public EntityType() { super(); }
 
     // ---------------- attributes ----------------
-    @Override
-    public Stream<? extends SubtypeConnectorEdge> getIncidentElements(Class<? extends DiagramElement> elementType) {
-        return null;
-    }
-
     // ---------------- connection ----------------
     @Override
     public String basicName() { return "Entity Type"; }

@@ -7,7 +7,7 @@ import java.util.Set;
 
 public class AttributeManager {
     // ================ ATTRIBUTES ================
-    private Set<Attribute> _attributes = new HashSet<>();
+    private final Set<Attribute> _attributes = new HashSet<>();
 
     // ================ OPERATIONS ================
     // ----------------- contract -----------------

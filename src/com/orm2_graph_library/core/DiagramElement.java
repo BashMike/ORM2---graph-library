@@ -1,14 +1,13 @@
 package com.orm2_graph_library.core;
 
 import java.util.ArrayList;
-import java.util.stream.Stream;
 
 public abstract class DiagramElement {
     // ================ ATTRIBUTES ================
     protected AttributeManager _attributes = new AttributeManager();
 
     // ---------------- connection ----------------
-    private Diagram _owner = null;
+    protected Diagram _owner = null;
 
     // ================ OPERATIONS ================
     // ---------------- attributes ----------------
@@ -25,7 +24,5 @@ public abstract class DiagramElement {
     protected abstract void _initSelf(Diagram owner);
 
     // ----------------- contract -----------------
-    public Stream<? extends DiagramElement> getIncidentElements(Class<? extends DiagramElement> elementType) {
-        return null;
-    }
+    abstract public <T extends DiagramElement> ArrayList<T> getIncidentElements(Class<T> elementType);
 }

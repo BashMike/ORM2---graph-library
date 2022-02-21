@@ -7,6 +7,8 @@ public class ActionManager {
     private ArrayList<Action> _actions         = new ArrayList<>();
     private int               _currActionIndex = -1;
 
+    private boolean           _recordActions   = true;
+
     // ================ OPERATIONS ================
     // ----------------- contract -----------------
     public boolean canUndo() { return (this._currActionIndex >=  0 && this._currActionIndex < this._actions.size()  ); }
@@ -31,11 +33,16 @@ public class ActionManager {
     }
 
     public Action addAction(Action action) {
-        this._currActionIndex++;
+        if (this._recordActions) {
+            this._actions.add(action);
+            this._actions = new ArrayList<>(this._actions.subList(0, ++this._currActionIndex + 1));
 
-        this._actions.add(action);
-        this._actions = new ArrayList<>(this._actions.subList(0, this._currActionIndex+1));
+            return action;
+        }
 
-        return action;
+        return null;
     }
+
+    public void startRecordingActions() { this._recordActions = true; }
+    public void stopRecordingActions()  { this._recordActions = false; }
 }
