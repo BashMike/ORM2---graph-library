@@ -32,7 +32,9 @@ public class ActionManager {
         this._actions.get(this._currActionIndex).execute();
     }
 
-    public Action addAction(Action action) {
+    public Action executeAction(Action action) {
+        action.execute();
+
         if (this._recordActions) {
             this._actions.add(action);
             this._actions = new ArrayList<>(this._actions.subList(0, ++this._currActionIndex + 1));

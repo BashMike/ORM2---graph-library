@@ -1,34 +1,37 @@
 package com.orm2_graph_library.core;
 
 import com.orm2_graph_library.edges.SubtypeConnectorEdge;
-import com.orm2_graph_library.nodes.ObjectType;
+import com.orm2_graph_library.nodes.common.EntityType;
+import com.orm2_graph_library.nodes.common.ObjectType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Diagram {
     // ================ ATTRIBUTES ================
     private final ArrayList<DiagramElement> _innerElements = new ArrayList<>();
 
-    protected final ActionManager _actionManager = new ActionManager();
-    // TODO - @add :: Make post-validation process after executing some action, undo and redo state of the diagram.
+    protected final ActionManager           _actionManager = new ActionManager();
+    protected ArrayList<LogicError>         _logicErrors   = new ArrayList<>();
 
     // ================ OPERATIONS ================
+    // ---------------- attributes ----------------
+    public ArrayList<LogicError> logicErrors() { return new ArrayList<>(this._logicErrors); }
+
+    void _addLogicError(@NotNull LogicError logicError) { this._logicErrors.add(logicError); }
+    void _removeLogicError(@NotNull LogicError logicError) { this._logicErrors.remove(logicError); }
+
     // ----------------- contract -----------------
     public <T extends Node> T addNode(T node) {
-        this._actionManager.addAction(new AddNodeAction(this, node));
-
-        this._addElement(node);
+        this._actionManager.executeAction(new AddNodeAction(this, node));
         return node;
     }
     public void removeNode(Node node) {
-        this._actionManager.addAction(new RemoveNodeAction(this, node));
-        this._removeElement(node);
+        this._actionManager.executeAction(new RemoveNodeAction(this, node));
     }
 
-    public <T extends ObjectType, G extends ObjectType> SubtypeConnectorEdge connectWithSubtypeConnector(T begin, G end) {
+    public <T extends EntityType, G extends EntityType> SubtypeConnectorEdge connectWithSubtypeConnector(T begin, G end) {
         SubtypeConnectorEdge edge = new SubtypeConnectorEdge(begin, end);
         ((Edge)edge).setOwner(this);
         this._innerElements.add(edge);
@@ -42,11 +45,8 @@ public class Diagram {
     public void connectWithConstraintConnector(Node begin, Node end) {
     }
 
-    public <T extends DiagramElement> ArrayList<T> getElements(Class<T> elementType) {
-        Stream<T>    stream = (Stream<T>)this._innerElements.stream().filter(elem -> elementType.isAssignableFrom(elem.getClass()));
-        ArrayList<T> result = new ArrayList<>( stream.collect(Collectors.toList()) );
-
-        return result;
+    public <T extends DiagramElement> Stream<T> getElements(Class<T> elementType) {
+        return (Stream<T>)this._innerElements.stream().filter(elem -> elementType.isAssignableFrom(elem.getClass()));
     }
 
     // Undo & redo state
@@ -55,18 +55,18 @@ public class Diagram {
     public boolean canRedoState() { return this._actionManager.canRedo(); }
     public void redoState()       { this._actionManager.redo(); }
 
-    // TODO - @robust :: Add non-public connection to the action manager (object type uses it to disable recording action of setting its name).
+    // TODO - @structure :: Add non-public connection to the action manager (object type uses it to disable recording action of setting its name).
     public ActionManager _actionManager() { return this._actionManager; }
 
     // -------------- sub-operations --------------
-    <T extends DiagramElement> T _addElement(T element) {
+    private <T extends DiagramElement> T _addElement(T element) {
         element.setOwner(this);
         this._innerElements.add(element);
 
         return element;
     }
 
-    public void _removeElement(DiagramElement element) {
+    private void _removeElement(DiagramElement element) {
         element.unsetOwner();
         this._innerElements.remove(element);
     }
@@ -84,6 +84,8 @@ public class Diagram {
         public void _execute() { this._diagram._addElement(this._node); }
         @Override
         public void _undo() { this._diagram._removeElement(this._node); }
+        @Override
+        public void _validate() {}
     }
 
     private class RemoveNodeAction extends Action {
@@ -108,6 +110,9 @@ public class Diagram {
             this._diagram._addElement(this._node);
             for (var edge : this._incidentEdges) { this._diagram._addElement(edge); }
         }
+
+        @Override
+        public void _validate() {}
     }
 
     private abstract class ConnectAction extends Action {
@@ -122,6 +127,8 @@ public class Diagram {
         public void _execute() { this._diagram._removeElement(this._edge); }
         @Override
         public void _undo() { this._diagram._addElement(this._edge); }
+        @Override
+        public void _validate() {}
     }
 
     private class ConnectSubtypeAction extends ConnectAction {

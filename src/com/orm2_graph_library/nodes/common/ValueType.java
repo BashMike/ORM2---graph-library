@@ -1,7 +1,4 @@
-package com.orm2_graph_library.nodes;
-
-import com.orm2_graph_library.attributes.StringAttribute;
-import com.orm2_graph_library.core.Diagram;
+package com.orm2_graph_library.nodes.common;
 
 public class ValueType extends ObjectType {
     // ================ OPERATIONS ================

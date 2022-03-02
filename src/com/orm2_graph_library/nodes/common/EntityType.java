@@ -1,18 +1,15 @@
-package com.orm2_graph_library.nodes;
+package com.orm2_graph_library.nodes.common;
 
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.stream.Stream;
-
-import com.orm2_graph_library.attributes.StringAttribute;
-import com.orm2_graph_library.core.Diagram;
-import com.orm2_graph_library.core.DiagramElement;
-import com.orm2_graph_library.edges.SubtypeConnectorEdge;
+import com.orm2_graph_library.nodes_geometry.EllipseGeometry;
 
 public class EntityType extends ObjectType {
+    // ================ ATTRIBUTES ================
     // ================ OPERATIONS ================
     // ----------------- creating -----------------
-    public EntityType() { super(); }
+    public EntityType() {
+        super();
+        this._geometry = new EllipseGeometry();
+    }
 
     // ---------------- attributes ----------------
     // ---------------- connection ----------------
