@@ -1,6 +1,6 @@
 package com.orm2_graph_library.core;
 
-import com.orm2_graph_library.edges.SubtypeConnectorEdge;
+import com.orm2_graph_library.edges.SubtypeRelationEdge;
 import com.orm2_graph_library.nodes.common.EntityType;
 import com.orm2_graph_library.nodes.common.ObjectType;
 import org.jetbrains.annotations.NotNull;
@@ -27,22 +27,20 @@ public class Diagram {
         this._actionManager.executeAction(new AddNodeAction(this, node));
         return node;
     }
-    public void removeNode(Node node) {
-        this._actionManager.executeAction(new RemoveNodeAction(this, node));
-    }
 
-    public <T extends EntityType, G extends EntityType> SubtypeConnectorEdge connectWithSubtypeConnector(T begin, G end) {
-        SubtypeConnectorEdge edge = new SubtypeConnectorEdge(begin, end);
-        ((Edge)edge).setOwner(this);
-        this._innerElements.add(edge);
+    public void removeNode(Node node) { this._actionManager.executeAction(new RemoveNodeAction(this, node)); }
+
+    public <T extends EntityType, G extends EntityType> SubtypeRelationEdge connectBySubtypeRelation(T begin, G end) {
+        SubtypeRelationEdge edge = new SubtypeRelationEdge(begin, end);
+        this._actionManager.executeAction(new ConnectSubtypeAction(this, edge));
 
         return edge;
     }
 
-    public void connectWithRoleConnector(Node begin, Node end) {
+    public void connectByRoleRelation(Node begin, Node end) {
     }
 
-    public void connectWithConstraintConnector(Node begin, Node end) {
+    public void connectByConstraintRelation(Node begin, Node end) {
     }
 
     public <T extends DiagramElement> Stream<T> getElements(Class<T> elementType) {
@@ -84,8 +82,6 @@ public class Diagram {
         public void _execute() { this._diagram._addElement(this._node); }
         @Override
         public void _undo() { this._diagram._removeElement(this._node); }
-        @Override
-        public void _validate() {}
     }
 
     private class RemoveNodeAction extends Action {
@@ -110,15 +106,32 @@ public class Diagram {
             this._diagram._addElement(this._node);
             for (var edge : this._incidentEdges) { this._diagram._addElement(edge); }
         }
-
-        @Override
-        public void _validate() {}
     }
 
     private abstract class ConnectAction extends Action {
+        protected final Edge _edge;
+
+        public ConnectAction(@NotNull Diagram diagram, @NotNull Edge edge) {
+            super(diagram);
+            this._edge = edge;
+        }
+
+        @Override
+        public void _execute() { this._diagram._addElement(this._edge); }
+        @Override
+        public void _undo() { this._diagram._removeElement(this._edge); }
+    }
+
+    private class ConnectSubtypeAction extends ConnectAction {
+        public ConnectSubtypeAction(@NotNull Diagram diagram, @NotNull SubtypeRelationEdge edge) {
+            super(diagram, edge);
+        }
+    }
+
+    private abstract class DisconnectAction extends Action {
         private final Edge _edge;
 
-        public ConnectAction(Diagram diagram, @NotNull Edge edge) {
+        public DisconnectAction(@NotNull Diagram diagram, @NotNull Edge edge) {
             super(diagram);
             this._edge = edge;
         }
@@ -127,13 +140,11 @@ public class Diagram {
         public void _execute() { this._diagram._removeElement(this._edge); }
         @Override
         public void _undo() { this._diagram._addElement(this._edge); }
-        @Override
-        public void _validate() {}
     }
 
-    private class ConnectSubtypeAction extends ConnectAction {
-        public ConnectSubtypeAction(Diagram diagram, @NotNull ObjectType begin, @NotNull ObjectType end) {
-            super(diagram, new SubtypeConnectorEdge(begin, end));
+    private class DisconnectSubtypeAction extends DisconnectAction {
+        public DisconnectSubtypeAction(@NotNull Diagram diagram, @NotNull SubtypeRelationEdge edge) {
+            super(diagram, edge);
         }
     }
 }

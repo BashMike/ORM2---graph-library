@@ -3,6 +3,7 @@ package com.orm2_graph_library.nodes.common;
 import com.orm2_graph_library.core.*;
 import com.orm2_graph_library.logic_errors.ObjectTypesNameDuplicationLogicError;
 import com.orm2_graph_library.nodes.predicates.RoleParticipant;
+import com.orm2_graph_library.post_validators.ObjectTypesNameDuplicationPostValidator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -44,41 +45,19 @@ public abstract class ObjectType extends MovableNode implements RoleParticipant 
         private final String     _oldName;
         private final String     _newName;
 
-        public RenameObjectTypeAction(Diagram diagram, @NotNull ObjectType node, String oldName, String newName) {
+        public RenameObjectTypeAction(@NotNull Diagram diagram, @NotNull ObjectType node, @NotNull String oldName, @NotNull String newName) {
             super(diagram);
 
             this._node    = node;
             this._oldName = oldName;
             this._newName = newName;
+
+            this._postValidators.add(new ObjectTypesNameDuplicationPostValidator(diagram, this, node, oldName, newName));
         }
 
         @Override
         public void _execute() { this._node._name = this._newName; }
         @Override
         public void _undo() { this._node._name = this._oldName; }
-        @Override
-        public void _validate() {
-            ArrayList<ObjectType> sameNameObjectTypes = this._diagram.getElements(ObjectType.class).filter(e -> e._name.equals(this._newName)).collect(Collectors.toCollection(ArrayList::new));
-
-            ObjectTypesNameDuplicationLogicError sameNameLogicError = null;
-            for (LogicError logicError : this._diagram.logicErrors()) {
-                if (logicError instanceof ObjectTypesNameDuplicationLogicError && ((ObjectTypesNameDuplicationLogicError)logicError).name().equals(this._newName)) {
-                    sameNameLogicError = (ObjectTypesNameDuplicationLogicError)logicError;
-                    break;
-                }
-            }
-
-            if (sameNameObjectTypes.size() > 1) {
-                if (sameNameLogicError == null) {
-                    this._addLogicErrorToDiagram(new ObjectTypesNameDuplicationLogicError(this._newName, sameNameObjectTypes));
-                }
-                else {
-                    sameNameLogicError.update(sameNameObjectTypes);
-                }
-            }
-            else if (sameNameLogicError != null) {
-                this._removeLogicErrorFromDiagram(sameNameLogicError);
-            }
-        }
     }
 }

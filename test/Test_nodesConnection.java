@@ -1,5 +1,6 @@
 import com.orm2_graph_library.core.Diagram;
 import com.orm2_graph_library.core.DiagramElement;
+import com.orm2_graph_library.edges.SubtypeRelationEdge;
 import com.orm2_graph_library.nodes.common.EntityType;
 import com.orm2_graph_library.nodes.common.ObjectType;
 import org.junit.jupiter.api.Assertions;
@@ -16,22 +17,24 @@ class Test_nodesConnection {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
         ArrayList<EntityType> createdEntityTypes = new ArrayList<>();
-        ArrayList<EntityType> gottenEntityTypes;
 
         for (int i=0; i<5; i++) { createdEntityTypes.add(diagram.addNode(new EntityType())); }
-        gottenEntityTypes = diagram.getElements(EntityType.class).collect(Collectors.toCollection(ArrayList::new));
+        diagram.connectBySubtypeRelation(createdEntityTypes.get(0), createdEntityTypes.get(1));
+        diagram.connectBySubtypeRelation(createdEntityTypes.get(0), createdEntityTypes.get(2));
+        diagram.connectBySubtypeRelation(createdEntityTypes.get(1), createdEntityTypes.get(3));
+
+        ArrayList<EntityType> gottenEntityTypes = diagram.getElements(EntityType.class).collect(Collectors.toCollection(ArrayList::new));
 
         // Check result
         Assertions.assertEquals(gottenEntityTypes, createdEntityTypes);
-        Assertions.assertTrue(diagram.getElements(DiagramElement.class).allMatch(DiagramElement::hasOwner));
+        Assertions.assertEquals(3, diagram.getElements(SubtypeRelationEdge.class).collect(Collectors.toCollection(ArrayList::new)).size());
 
-        Set<String> names     = new HashSet<>();
-        Set<String> exp_names = new HashSet<>();
-
-        diagram.getElements(ObjectType.class).forEach(e -> names.add(e.name()));
-        for (int i=0; i<5; i++) { exp_names.add("Entity Type " + (i+1)); }
-
-        Assertions.assertEquals(names, exp_names);
+        Assertions.assertTrue(diagram.getElements(SubtypeRelationEdge.class).anyMatch(e -> e.begin() == createdEntityTypes.get(0) && e.end() == createdEntityTypes.get(1)));
+        Assertions.assertNotNull(diagram.getElements(SubtypeRelationEdge.class).filter(e -> e.begin() == createdEntityTypes.get(0) && e.end() == createdEntityTypes.get(1)).findFirst().get());
+        Assertions.assertTrue(diagram.getElements(SubtypeRelationEdge.class).anyMatch(e -> e.begin() == createdEntityTypes.get(0) && e.end() == createdEntityTypes.get(2)));
+        Assertions.assertNotNull(diagram.getElements(SubtypeRelationEdge.class).filter(e -> e.begin() == createdEntityTypes.get(0) && e.end() == createdEntityTypes.get(2)).findFirst().get());
+        Assertions.assertTrue(diagram.getElements(SubtypeRelationEdge.class).anyMatch(e -> e.begin() == createdEntityTypes.get(1) && e.end() == createdEntityTypes.get(3)));
+        Assertions.assertNotNull(diagram.getElements(SubtypeRelationEdge.class).filter(e -> e.begin() == createdEntityTypes.get(1) && e.end() == createdEntityTypes.get(3)).findFirst().get());
     }
 
     @Test
@@ -39,22 +42,25 @@ class Test_nodesConnection {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
         ArrayList<EntityType> createdEntityTypes = new ArrayList<>();
-        ArrayList<EntityType> gottenEntityTypes;
 
         for (int i=0; i<5; i++) { createdEntityTypes.add(diagram.addNode(new EntityType())); }
-        gottenEntityTypes = diagram.getElements(EntityType.class).collect(Collectors.toCollection(ArrayList::new));
+        diagram.connectBySubtypeRelation(createdEntityTypes.get(0), createdEntityTypes.get(1));
+        diagram.connectBySubtypeRelation(createdEntityTypes.get(0), createdEntityTypes.get(2));
+        diagram.connectBySubtypeRelation(createdEntityTypes.get(1), createdEntityTypes.get(3));
+
+        diagram.undoState();
+
+        ArrayList<EntityType> gottenEntityTypes = diagram.getElements(EntityType.class).collect(Collectors.toCollection(ArrayList::new));
 
         // Check result
         Assertions.assertEquals(gottenEntityTypes, createdEntityTypes);
-        Assertions.assertTrue(diagram.getElements(DiagramElement.class).allMatch(DiagramElement::hasOwner));
+        Assertions.assertEquals(2, diagram.getElements(SubtypeRelationEdge.class).collect(Collectors.toCollection(ArrayList::new)).size());
 
-        Set<String> names     = new HashSet<>();
-        Set<String> exp_names = new HashSet<>();
-
-        diagram.getElements(ObjectType.class).forEach(e -> names.add(e.name()));
-        for (int i=0; i<5; i++) { exp_names.add("Entity Type " + (i+1)); }
-
-        Assertions.assertEquals(names, exp_names);
+        Assertions.assertTrue(diagram.getElements(SubtypeRelationEdge.class).anyMatch(e -> e.begin() == createdEntityTypes.get(0) && e.end() == createdEntityTypes.get(1)));
+        Assertions.assertNotNull(diagram.getElements(SubtypeRelationEdge.class).filter(e -> e.begin() == createdEntityTypes.get(0) && e.end() == createdEntityTypes.get(1)).findFirst().get());
+        Assertions.assertTrue(diagram.getElements(SubtypeRelationEdge.class).anyMatch(e -> e.begin() == createdEntityTypes.get(0) && e.end() == createdEntityTypes.get(2)));
+        Assertions.assertNotNull(diagram.getElements(SubtypeRelationEdge.class).filter(e -> e.begin() == createdEntityTypes.get(0) && e.end() == createdEntityTypes.get(2)).findFirst().get());
+        Assertions.assertTrue(diagram.getElements(SubtypeRelationEdge.class).noneMatch(e -> e.begin() == createdEntityTypes.get(1) && e.end() == createdEntityTypes.get(3)));
     }
 
     @Test
@@ -62,22 +68,27 @@ class Test_nodesConnection {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
         ArrayList<EntityType> createdEntityTypes = new ArrayList<>();
-        ArrayList<EntityType> gottenEntityTypes;
 
-        for (int i=0; i<5; i++) { createdEntityTypes.add( diagram.addNode(new EntityType()) ); }
-        gottenEntityTypes = diagram.getElements(EntityType.class).collect(Collectors.toCollection(ArrayList::new));
+        for (int i=0; i<5; i++) { createdEntityTypes.add(diagram.addNode(new EntityType())); }
+        diagram.connectBySubtypeRelation(createdEntityTypes.get(0), createdEntityTypes.get(1));
+        diagram.connectBySubtypeRelation(createdEntityTypes.get(0), createdEntityTypes.get(2));
+        diagram.connectBySubtypeRelation(createdEntityTypes.get(1), createdEntityTypes.get(3));
+
+        diagram.undoState();
+        diagram.undoState();
+        diagram.redoState();
+
+        ArrayList<EntityType> gottenEntityTypes = diagram.getElements(EntityType.class).collect(Collectors.toCollection(ArrayList::new));
 
         // Check result
         Assertions.assertEquals(gottenEntityTypes, createdEntityTypes);
-        Assertions.assertTrue(diagram.getElements(DiagramElement.class).allMatch(DiagramElement::hasOwner));
+        Assertions.assertEquals(2, diagram.getElements(SubtypeRelationEdge.class).collect(Collectors.toCollection(ArrayList::new)).size());
 
-        Set<String> names     = new HashSet<>();
-        Set<String> exp_names = new HashSet<>();
-
-        diagram.getElements(ObjectType.class).forEach(e -> names.add(e.name()));
-        for (int i=0; i<5; i++) { exp_names.add("Entity Type " + (i+1)); }
-
-        Assertions.assertEquals(names, exp_names);
+        Assertions.assertTrue(diagram.getElements(SubtypeRelationEdge.class).anyMatch(e -> e.begin() == createdEntityTypes.get(0) && e.end() == createdEntityTypes.get(1)));
+        Assertions.assertNotNull(diagram.getElements(SubtypeRelationEdge.class).filter(e -> e.begin() == createdEntityTypes.get(0) && e.end() == createdEntityTypes.get(1)).findFirst().get());
+        Assertions.assertTrue(diagram.getElements(SubtypeRelationEdge.class).anyMatch(e -> e.begin() == createdEntityTypes.get(0) && e.end() == createdEntityTypes.get(2)));
+        Assertions.assertNotNull(diagram.getElements(SubtypeRelationEdge.class).filter(e -> e.begin() == createdEntityTypes.get(0) && e.end() == createdEntityTypes.get(2)).findFirst().get());
+        Assertions.assertTrue(diagram.getElements(SubtypeRelationEdge.class).noneMatch(e -> e.begin() == createdEntityTypes.get(1) && e.end() == createdEntityTypes.get(3)));
     }
 
     @Test

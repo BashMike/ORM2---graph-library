@@ -34,7 +34,5 @@ public abstract class MovableNode extends Node {
         public void _execute() { this._node._geometry.moveTo(this._newPos.x, this._newPos.y); }
         @Override
         public void _undo() { this._node._geometry.moveTo(this._oldPos.x, this._oldPos.y); }
-        @Override
-        public void _validate() {}
     }
 }

@@ -8,8 +8,10 @@ public abstract class Action {
     // ================ ATTRIBUTES ================
     protected Diagram _diagram;
 
-    protected ArrayList<LogicError> _solvedLogicErrors  = new ArrayList<>();
-    protected ArrayList<LogicError> _emergedLogicErrors = new ArrayList<>();
+    protected ArrayList<PostValidator> _postValidators     = new ArrayList<>();
+
+    protected ArrayList<LogicError>    _solvedLogicErrors  = new ArrayList<>();
+    protected ArrayList<LogicError>    _emergedLogicErrors = new ArrayList<>();
 
     // ================ OPERATIONS ================
     // ----------------- creating -----------------
@@ -22,7 +24,7 @@ public abstract class Action {
         this._diagram._actionManager.startRecordingActions();
 
         if (this._emergedLogicErrors.isEmpty()) {
-            this._validate();
+            for (PostValidator postValidator : this._postValidators) { postValidator.validate(); }
         }
         else {
             for (LogicError logicError : this._emergedLogicErrors) { this._diagram._addLogicError(logicError); }
@@ -41,15 +43,4 @@ public abstract class Action {
 
     public abstract void _execute();
     public abstract void _undo();
-    public abstract void _validate();
-
-    protected void _addLogicErrorToDiagram(LogicError logicError) {
-        this._diagram._addLogicError(logicError);
-        this._emergedLogicErrors.add(logicError);
-    }
-
-    protected void _removeLogicErrorFromDiagram(LogicError logicError) {
-        this._diagram._addLogicError(logicError);
-        this._solvedLogicErrors.add(logicError);
-    }
 }

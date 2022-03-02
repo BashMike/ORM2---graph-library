@@ -4,8 +4,8 @@ import com.orm2_graph_library.core.Diagram;
 import com.orm2_graph_library.core.Edge;
 import com.orm2_graph_library.nodes.common.ObjectType;
 
-public class SubtypeConnectorEdge extends Edge {
-    public SubtypeConnectorEdge(ObjectType beginNode, ObjectType endNode) {
+public class SubtypeRelationEdge extends Edge {
+    public SubtypeRelationEdge(ObjectType beginNode, ObjectType endNode) {
         super(beginNode, endNode);
     }
 
