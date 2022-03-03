@@ -1,8 +1,12 @@
 package com.orm2_graph_library.core;
 
+import com.orm2_graph_library.edges.ConstraintRelationEdge;
+import com.orm2_graph_library.edges.RoleRelationEdge;
 import com.orm2_graph_library.edges.SubtypeRelationEdge;
 import com.orm2_graph_library.nodes.common.EntityType;
 import com.orm2_graph_library.nodes.common.ObjectType;
+import com.orm2_graph_library.nodes.predicates.Role;
+import com.orm2_graph_library.nodes.predicates.RoleParticipant;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -32,12 +36,17 @@ public class Diagram {
 
     public <T extends EntityType, G extends EntityType> SubtypeRelationEdge connectBySubtypeRelation(T begin, G end) {
         SubtypeRelationEdge edge = new SubtypeRelationEdge(begin, end);
-        this._actionManager.executeAction(new ConnectSubtypeAction(this, edge));
+        this._actionManager.executeAction(new ConnectBySubtypeRelationAction(this, edge));
 
         return edge;
     }
 
-    public void connectByRoleRelation(Node begin, Node end) {
+    public <T extends Role, G extends RoleParticipant> RoleRelationEdge connectByRoleRelation(T begin, G end) {
+        return null;
+    }
+
+    public <T extends RoleParticipant, G extends Role> RoleRelationEdge connectByRoleRelation(T begin, G end) {
+        return null;
     }
 
     public void connectByConstraintRelation(Node begin, Node end) {
@@ -122,8 +131,20 @@ public class Diagram {
         public void _undo() { this._diagram._removeElement(this._edge); }
     }
 
-    private class ConnectSubtypeAction extends ConnectAction {
-        public ConnectSubtypeAction(@NotNull Diagram diagram, @NotNull SubtypeRelationEdge edge) {
+    private class ConnectBySubtypeRelationAction extends ConnectAction {
+        public ConnectBySubtypeRelationAction(@NotNull Diagram diagram, @NotNull SubtypeRelationEdge edge) {
+            super(diagram, edge);
+        }
+    }
+
+    private class ConnectByRoleRelationAction extends ConnectAction {
+        public ConnectByRoleRelationAction(@NotNull Diagram diagram, @NotNull RoleRelationEdge edge) {
+            super(diagram, edge);
+        }
+    }
+
+    private class ConnectByConstraintRelationAction extends ConnectAction {
+        public ConnectByConstraintRelationAction(@NotNull Diagram diagram, @NotNull ConstraintRelationEdge edge) {
             super(diagram, edge);
         }
     }

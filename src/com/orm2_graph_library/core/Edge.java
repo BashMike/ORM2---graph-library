@@ -17,8 +17,8 @@ public abstract class Edge <B extends DiagramElement, E extends DiagramElement> 
     }
 
     // ---------------- attributes ----------------
-    public B begin()    { return this._begin; }
-    public E end()      { return this._end; }
+    public B begin() { return this._begin; }
+    public E end()   { return this._end; }
 
     // ----------------- contract -----------------
     @Override

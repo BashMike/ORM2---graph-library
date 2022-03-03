@@ -15,7 +15,7 @@ public abstract class PostValidator {
     }
 
     // ----------------- contract -----------------
-    public abstract void validate();
+    protected abstract void validate();
 
     protected void _addLogicErrorToDiagram(LogicError logicError) {
         this._diagram._addLogicError(logicError);

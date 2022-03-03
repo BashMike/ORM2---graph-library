@@ -29,7 +29,7 @@ public class ObjectTypesNameDuplicationPostValidator extends PostValidator {
 
     // ----------------- contract -----------------
     @Override
-    public void validate() {
+    protected void validate() {
         ArrayList<ObjectType> sameNameObjectTypes = this._diagram.getElements(ObjectType.class).filter(e -> e.name().equals(this._newName)).collect(Collectors.toCollection(ArrayList::new));
 
         ObjectTypesNameDuplicationLogicError sameNameLogicError = null;
