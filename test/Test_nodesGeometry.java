@@ -1,122 +1,128 @@
 import com.orm2_graph_library.core.Diagram;
+import com.orm2_graph_library.core.DiagramElement;
 import com.orm2_graph_library.nodes.common.EntityType;
+import com.orm2_graph_library.nodes.predicates.Predicate;
+import com.orm2_graph_library.nodes.predicates.Role;
+import com.orm2_graph_library.nodes.predicates.StandalonePredicate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.awt.*;
 
 public class Test_nodesGeometry {
     // ================ ENTITY TYPES ================
     @Test
-    void moveEntityTypeToPos() {
+    void entityType_moveToPos() {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
         EntityType entityType = new EntityType();
 
         diagram.addNode(entityType);
-        entityType.moveTo(20, 30);
+        entityType.moveTo(new Point(20, 30));
 
         // Check result
-        Assertions.assertEquals(entityType.geometry().borderArea().leftTop().x, 20);
-        Assertions.assertEquals(entityType.geometry().borderArea().leftTop().y, 30);
+        Assertions.assertEquals(entityType.borderLeftTop().x, 20);
+        Assertions.assertEquals(entityType.borderLeftTop().y, 30);
     }
 
     @Test
-    void moveEntityTypeByValue() {
+    void entityType_moveByShiftValue() {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
         EntityType entityType = new EntityType();
 
         diagram.addNode(entityType);
-        entityType.moveTo(20, 30);
+        entityType.moveTo(new Point(20, 30));
         entityType.moveBy(15, -34);
 
         // Check result
-        Assertions.assertEquals(entityType.geometry().borderArea().leftTop().x, 35);
-        Assertions.assertEquals(entityType.geometry().borderArea().leftTop().y, -4);
+        Assertions.assertEquals(entityType.borderLeftTop().x, 35);
+        Assertions.assertEquals(entityType.borderLeftTop().y, -4);
     }
 
     @Test
-    void undoMoveEntityTypeToPos() {
+    void entityType_undoMoveToPos() {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
         EntityType entityType = new EntityType();
 
         diagram.addNode(entityType);
-        entityType.moveTo(20, 30);
+        entityType.moveTo(new Point(20, 30));
 
         diagram.undoState();
 
         // Check result
-        Assertions.assertNotEquals(entityType.geometry().borderArea().leftTop().x, 20);
-        Assertions.assertNotEquals(entityType.geometry().borderArea().leftTop().y, 30);
+        Assertions.assertNotEquals(entityType.borderLeftTop().x, 20);
+        Assertions.assertNotEquals(entityType.borderLeftTop().y, 30);
         Assertions.assertTrue(diagram.canRedoState());
     }
 
     @Test
-    void undoMoveEntityTypeByValue() {
+    void entityType_undoMoveByShiftValue() {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
         EntityType entityType = new EntityType();
 
         diagram.addNode(entityType);
-        entityType.moveTo(20, 30);
+        entityType.moveTo(new Point(20, 30));
         entityType.moveBy(15, -34);
 
         diagram.undoState();
 
         // Check result
-        Assertions.assertEquals(entityType.geometry().borderArea().leftTop().x, 20);
-        Assertions.assertEquals(entityType.geometry().borderArea().leftTop().y, 30);
+        Assertions.assertEquals(entityType.borderLeftTop().x, 20);
+        Assertions.assertEquals(entityType.borderLeftTop().y, 30);
         Assertions.assertTrue(diagram.canRedoState());
     }
 
     @Test
-    void redoMoveEntityTypeToPos() {
+    void entityType_redoMoveToPos() {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
         EntityType entityType = new EntityType();
 
         diagram.addNode(entityType);
-        entityType.moveTo(20, 30);
+        entityType.moveTo(new Point(20, 30));
 
         diagram.undoState();
         diagram.redoState();
 
         // Check result
-        Assertions.assertEquals(entityType.geometry().borderArea().leftTop().x, 20);
-        Assertions.assertEquals(entityType.geometry().borderArea().leftTop().y, 30);
+        Assertions.assertEquals(entityType.borderLeftTop().x, 20);
+        Assertions.assertEquals(entityType.borderLeftTop().y, 30);
         Assertions.assertFalse(diagram.canRedoState());
     }
 
     @Test
-    void redoMoveEntityTypeByValue() {
+    void entityType_redoMoveByShiftValue() {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
         EntityType entityType = new EntityType();
 
         diagram.addNode(entityType);
-        entityType.moveTo(20, 30);
+        entityType.moveTo(new Point(20, 30));
         entityType.moveBy(15, -34);
 
         diagram.undoState();
         diagram.redoState();
 
         // Check result
-        Assertions.assertEquals(entityType.geometry().borderArea().leftTop().x, 35);
-        Assertions.assertEquals(entityType.geometry().borderArea().leftTop().y, -4);
+        Assertions.assertEquals(entityType.borderLeftTop().x, 35);
+        Assertions.assertEquals(entityType.borderLeftTop().y, -4);
         Assertions.assertFalse(diagram.canRedoState());
     }
 
     @Test
-    void moveEntityTypeToPosAfterUndo() {
+    void entityType_moveToPosAfterUndo() {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
         EntityType entityType = new EntityType();
 
         diagram.addNode(entityType);
-        entityType.moveTo(20, 30);
-        entityType.moveTo(30, -30);
-        entityType.moveTo(40, 30);
-        entityType.moveTo(50, -30);
+        entityType.moveTo(new Point(20, 30));
+        entityType.moveTo(new Point(30, -30));
+        entityType.moveTo(new Point(40, 30));
+        entityType.moveTo(new Point(50, -30));
 
         diagram.undoState();
         diagram.undoState();
@@ -124,24 +130,24 @@ public class Test_nodesGeometry {
         entityType.moveBy(15, 15);
 
         // Check result
-        Assertions.assertEquals(entityType.geometry().borderArea().leftTop().x, 45);
-        Assertions.assertEquals(entityType.geometry().borderArea().leftTop().y, -15);
+        Assertions.assertEquals(entityType.borderLeftTop().x, 45);
+        Assertions.assertEquals(entityType.borderLeftTop().y, -15);
         Assertions.assertFalse(diagram.canRedoState());
     }
 
     @Test
-    void complexMoveEntityTypeToPos() {
+    void entityType_complexMovement() {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
         EntityType entityType = new EntityType();
 
         diagram.addNode(entityType);
-        entityType.moveTo(20, 30);
+        entityType.moveTo(new Point(20, 30));
         entityType.moveBy(-100, 3);
         entityType.moveBy(-100, 20);
         entityType.moveBy(-149, -1001);
         entityType.moveBy(10, 3);
-        entityType.moveTo(10, 3);
+        entityType.moveTo(new Point(10, 3));
 
         diagram.undoState();
         diagram.undoState();
@@ -150,12 +156,102 @@ public class Test_nodesGeometry {
         diagram.undoState();
 
         // Check result
-        Assertions.assertEquals(entityType.geometry().borderArea().leftTop().x, -319);
-        Assertions.assertEquals(entityType.geometry().borderArea().leftTop().y, -945);
+        Assertions.assertEquals(entityType.borderLeftTop().x, -319);
+        Assertions.assertEquals(entityType.borderLeftTop().y, -945);
         Assertions.assertTrue(diagram.canRedoState());
     }
 
     // ================= VALUE TYPES ================
-    // ============ OBJECTIFIED PREDICATE ===========
+    // ================== PREDICATE =================
+    @Test
+    void predicate_changeOrientationToVertical() {
+        // Prepare data and start testing
+        Diagram diagram = new Diagram();
+        Predicate predicate = new StandalonePredicate(3);
+        diagram.addNode(predicate);
+
+        predicate.setOrientation(DiagramElement.Orientation.VERTICAL);
+
+        // Check result
+        Assertions.assertEquals(Role.width(),  predicate.roles().get(0).borderHeight());
+        Assertions.assertEquals(Role.height(), predicate.roles().get(0).borderWidth());
+        Assertions.assertEquals(predicate.roles().get(0).borderWidth(),      predicate.borderWidth());
+        Assertions.assertEquals(predicate.roles().get(0).borderHeight() * 3, predicate.borderHeight());
+    }
+
+    @Test
+    void predicate_changeOrientationBackToHorizontal() {
+        // Prepare data and start testing
+        Diagram diagram = new Diagram();
+        Predicate predicate = new StandalonePredicate(3);
+        diagram.addNode(predicate);
+
+        predicate.setOrientation(DiagramElement.Orientation.VERTICAL);
+        predicate.setOrientation(DiagramElement.Orientation.HORIZONTAL);
+
+        // Check result
+        Assertions.assertEquals(Role.width(),  predicate.roles().get(0).borderWidth());
+        Assertions.assertEquals(Role.height(), predicate.roles().get(0).borderHeight());
+        Assertions.assertEquals(predicate.roles().get(0).borderWidth() * 3, predicate.borderWidth());
+        Assertions.assertEquals(predicate.roles().get(0).borderHeight(),    predicate.borderHeight());
+    }
+
+    @Test
+    void predicate_changeOrientationToHorizontalTwice() {
+        // Prepare data and start testing
+        Diagram diagram = new Diagram();
+        Predicate predicate = new StandalonePredicate(3);
+        diagram.addNode(predicate);
+
+        predicate.setOrientation(DiagramElement.Orientation.HORIZONTAL);
+        predicate.setOrientation(DiagramElement.Orientation.HORIZONTAL);
+
+        // Check result
+        Assertions.assertEquals(Role.width(),  predicate.roles().get(0).borderWidth());
+        Assertions.assertEquals(Role.height(), predicate.roles().get(0).borderHeight());
+        Assertions.assertEquals(predicate.roles().get(0).borderWidth() * 3, predicate.borderWidth());
+        Assertions.assertEquals(predicate.roles().get(0).borderHeight(),    predicate.borderHeight());
+    }
+
+    @Test
+    void predicate_changeOrientationToVerticalTwice() {
+        // Prepare data and start testing
+        Diagram diagram = new Diagram();
+        Predicate predicate = new StandalonePredicate(3);
+        diagram.addNode(predicate);
+
+        predicate.setOrientation(DiagramElement.Orientation.VERTICAL);
+        predicate.setOrientation(DiagramElement.Orientation.VERTICAL);
+
+        // Check result
+        Assertions.assertEquals(Role.width(),  predicate.roles().get(0).borderHeight());
+        Assertions.assertEquals(Role.height(), predicate.roles().get(0).borderWidth());
+        Assertions.assertEquals(predicate.roles().get(0).borderWidth(),      predicate.borderWidth());
+        Assertions.assertEquals(predicate.roles().get(0).borderHeight() * 3, predicate.borderHeight());
+    }
+
+    @Test
+    void predicate_complexChangingOrientation() {
+        // Prepare data and start testing
+        Diagram diagram = new Diagram();
+        Predicate predicate = new StandalonePredicate(3);
+        diagram.addNode(predicate);
+
+        predicate.setOrientation(DiagramElement.Orientation.VERTICAL);
+        predicate.setOrientation(DiagramElement.Orientation.HORIZONTAL);
+        predicate.setOrientation(DiagramElement.Orientation.VERTICAL);
+        predicate.setOrientation(DiagramElement.Orientation.HORIZONTAL);
+        predicate.setOrientation(DiagramElement.Orientation.VERTICAL);
+        predicate.setOrientation(DiagramElement.Orientation.VERTICAL);
+        predicate.setOrientation(DiagramElement.Orientation.HORIZONTAL);
+
+        // Check result
+        Assertions.assertEquals(Role.width(),  predicate.roles().get(0).borderWidth());
+        Assertions.assertEquals(Role.height(), predicate.roles().get(0).borderHeight());
+        Assertions.assertEquals(predicate.roles().get(0).borderWidth() * 3, predicate.borderWidth());
+        Assertions.assertEquals(predicate.roles().get(0).borderHeight(),    predicate.borderHeight());
+    }
+
+    // =========== OBJECTIFIED PREDICATES ===========
     // ================= CONSTRAINTS ================
 }

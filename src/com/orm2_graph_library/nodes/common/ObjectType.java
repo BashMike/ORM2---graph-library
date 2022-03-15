@@ -1,21 +1,32 @@
 package com.orm2_graph_library.nodes.common;
 
 import com.orm2_graph_library.core.*;
-import com.orm2_graph_library.logic_errors.ObjectTypesNameDuplicationLogicError;
+import com.orm2_graph_library.core.Action;
 import com.orm2_graph_library.nodes.predicates.RoleParticipant;
+import com.orm2_graph_library.nodes_shapes.EllipseShape;
 import com.orm2_graph_library.post_validators.ObjectTypesNameDuplicationPostValidator;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.stream.Collectors;
+import java.awt.*;
+import java.awt.font.FontRenderContext;
 
-public abstract class ObjectType extends MovableNode implements RoleParticipant {
+public abstract class ObjectType extends RoleParticipant {
+    // ================== STATIC ==================
+    static private int _verticalEmptyGap   = 10;
+    static private int _horizontalEmptyGap = 10;
+
+    static public int verticalEmptyGap()   { return ObjectType._verticalEmptyGap; }
+    static public int horizontalEmptyGap() { return ObjectType._horizontalEmptyGap; }
+
+    static public void setVerticalEmptyGap(int verticalEmptyGap)     { ObjectType._verticalEmptyGap   = verticalEmptyGap; }
+    static public void setHorizontalEmptyGap(int horizontalEmptyGap) { ObjectType._horizontalEmptyGap = horizontalEmptyGap; }
+
     // ================ ATTRIBUTES ================
     private String _name = "";
 
     // ================ OPERATIONS ================
     // ----------------- creating -----------------
-    public ObjectType() {}
+    public ObjectType() { this._shape = new EllipseShape(); }
 
     // ---------------- connection ----------------
     @Override
@@ -38,6 +49,10 @@ public abstract class ObjectType extends MovableNode implements RoleParticipant 
     }
 
     public abstract String basicName();
+
+    // TODO - @check :: Check that getting font size like that is proper.
+    @Override public int borderWidth()  { return ObjectType._horizontalEmptyGap * 2 + 80; }
+    @Override public int borderHeight() { return ObjectType._verticalEmptyGap   * 2 + 30; }
 
     // ================= SUBTYPES =================
     private class RenameObjectTypeAction extends Action {

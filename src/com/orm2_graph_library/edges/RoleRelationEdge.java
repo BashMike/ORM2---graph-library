@@ -1,15 +1,15 @@
 package com.orm2_graph_library.edges;
 
+import com.orm2_graph_library.core.AnchorPoint;
 import com.orm2_graph_library.core.Diagram;
 import com.orm2_graph_library.core.Edge;
-import com.orm2_graph_library.core.Node;
-import com.orm2_graph_library.nodes.constraints.Constraint;
 import com.orm2_graph_library.nodes.predicates.Role;
+import com.orm2_graph_library.nodes.predicates.RoleParticipant;
 
-public class RoleRelationEdge extends Edge {
+public class RoleRelationEdge extends Edge<Role, RoleParticipant> {
     // ================ OPERATIONS ================
     // ----------------- creating -----------------
-    public RoleRelationEdge(Node begin, Role end) { super(begin, end); }
+    public RoleRelationEdge(AnchorPoint<Role> beginAnchorPoint, AnchorPoint<RoleParticipant> endAnchorPoint) { super(beginAnchorPoint, endAnchorPoint); }
 
     // ---------------- connection ----------------
     @Override

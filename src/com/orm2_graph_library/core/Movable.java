@@ -1,14 +1,18 @@
 package com.orm2_graph_library.core;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.awt.*;
 
-public abstract class MovableNode extends Node {
-    // ================ OPERATIONS ================
-    // ---------------- attributes ----------------
-    public void moveTo(int x, int y) {
-        this._owner._actionManager.executeAction(new MoveNodeAction(this._owner, this, (Point)this._geometry._area.leftTop().clone(), new Point(x, y)));
+// TODO - @modify :: Change abstract class to interface.
+// TODO - @modify :: Two interfaces for moving self: 1. Move with recording actions and 2. Move without recording actions!?
+// TODO - @modify :: Record inner components movement (Different movement actions :: GOOD!).
+public interface Movable {
+    void moveTo(Point leftTop);
+    void moveBy(int shiftX, int shiftY);
+}
+
+/*
+    public void moveTo(Point leftTop) {
+        this._owner._actionManager.executeAction(new MoveNodeAction(this._owner, this, (Point)this._geometry._area.leftTop().clone(), new Point(leftTop)));
     }
 
     public void moveBy(int shiftX, int shiftY) {
@@ -18,11 +22,11 @@ public abstract class MovableNode extends Node {
 
     // ================= SUBTYPES =================
     private class MoveNodeAction extends Action {
-        private final MovableNode _node;
-        private final Point       _oldPos;
-        private final Point       _newPos;
+        private final Movable _node;
+        private final Point   _oldPos;
+        private final Point   _newPos;
 
-        public MoveNodeAction(Diagram diagram, @NotNull MovableNode node, Point oldPos, Point newPos) {
+        public MoveNodeAction(Diagram diagram, @NotNull Movable node, Point oldPos, Point newPos) {
             super(diagram);
 
             this._node   = node;
@@ -35,4 +39,4 @@ public abstract class MovableNode extends Node {
         @Override
         public void _undo() { this._node._geometry.moveTo(this._oldPos.x, this._oldPos.y); }
     }
-}
+ */

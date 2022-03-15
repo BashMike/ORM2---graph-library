@@ -2,23 +2,34 @@ package com.orm2_graph_library.core;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.*;
 import java.util.ArrayList;
 
 public abstract class Edge <B extends DiagramElement, E extends DiagramElement> extends DiagramElement {
     // ================ ATTRIBUTES ================
-    private final B _begin;
-    private final E _end;
+    private final AnchorPoint<B> _beginAnchorPoint;
+    private final AnchorPoint<E> _endAnchorPoint;
 
     // ================ OPERATIONS ================
     // ----------------- creating -----------------
-    public Edge(@NotNull B begin, @NotNull E end) {
-        this._begin = begin;
-        this._end   = end;
+    public Edge(@NotNull AnchorPoint<B> beginAnchorPoint, @NotNull AnchorPoint<E> endAnchorPoint) {
+        this._beginAnchorPoint = beginAnchorPoint;
+        this._endAnchorPoint   = endAnchorPoint;
     }
 
     // ---------------- attributes ----------------
-    public B begin() { return this._begin; }
-    public E end()   { return this._end; }
+    public AnchorPoint<B> beginAnchorPoint() { return this._beginAnchorPoint; }
+    public AnchorPoint<E> endAnchorPoint()   { return this._endAnchorPoint; }
+
+    // TODO - @add :: Getting starting and ending points depending on attachment points of begin and end elements.
+    @Override
+    public GeometryApproximation geometryApproximation() {
+        ArrayList<Point> points = new ArrayList<>();
+        points.add(this._beginAnchorPoint.position());
+        points.add(this._endAnchorPoint.position());
+
+        return new GeometryApproximation(points);
+    }
 
     // ----------------- contract -----------------
     @Override
