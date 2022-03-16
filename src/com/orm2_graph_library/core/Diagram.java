@@ -1,9 +1,12 @@
 package com.orm2_graph_library.core;
 
+import com.orm2_graph_library.action_errors.DiagramElementSelfConnectedActionError;
 import com.orm2_graph_library.edges.RoleConstraintRelationEdge;
 import com.orm2_graph_library.edges.RoleRelationEdge;
+import com.orm2_graph_library.edges.SubtypingConstraintRelationEdge;
 import com.orm2_graph_library.edges.SubtypingRelationEdge;
 import com.orm2_graph_library.nodes.common.EntityType;
+import com.orm2_graph_library.nodes.constraints.Constraint;
 import com.orm2_graph_library.nodes.predicates.Role;
 import com.orm2_graph_library.nodes.predicates.RoleParticipant;
 import com.orm2_graph_library.nodes.predicates.RolesSequence;
@@ -32,10 +35,11 @@ public class Diagram {
     static public void setFont(Font font) { Diagram._font = font; }
 
     // ================ ATTRIBUTES ================
-    private final ArrayList<DiagramElement> _innerElements = new ArrayList<>();
+    private final ArrayList<DiagramElement>  _innerElements        = new ArrayList<>();
 
-    protected final ActionManager           _actionManager = new ActionManager();
-    protected ArrayList<LogicError>         _logicErrors   = new ArrayList<>();
+    protected final ActionManager            _actionManager        = new ActionManager();
+    protected ArrayList<LogicError>          _logicErrors          = new ArrayList<>();
+    protected ArrayList<ActionErrorListener> _actionErrorListeners = new ArrayList<>();
 
     // ================ OPERATIONS ================
     // ---------------- attributes ----------------
@@ -43,6 +47,8 @@ public class Diagram {
 
     void _addLogicError(@NotNull LogicError logicError) { this._logicErrors.add(logicError); }
     void _removeLogicError(@NotNull LogicError logicError) { this._logicErrors.remove(logicError); }
+
+    public void addActionErrorListener(ActionErrorListener actionErrorListener) { this._actionErrorListeners.add(actionErrorListener); }
 
     // ----------------- contract -----------------
     public <T extends Node> T addNode(T node) {
@@ -53,23 +59,32 @@ public class Diagram {
 
     public void removeNode(Node node) { this._actionManager.executeAction(new RemoveNodeAction(this, node)); }
 
-    public <T extends EntityType, G extends EntityType> SubtypingRelationEdge connectBySubtypeRelation(AnchorPoint<T> beginAnchorPoint, AnchorPoint<G> endAnchorPoint) {
-        SubtypingRelationEdge edge = new SubtypingRelationEdge((AnchorPoint<EntityType>)beginAnchorPoint, (AnchorPoint<EntityType>)endAnchorPoint);
+    public <T extends EntityType, G extends EntityType> SubtypingRelationEdge connectBySubtypingRelation(AnchorPoint<T> begin, AnchorPoint<G> end) {
+        SubtypingRelationEdge edge = new SubtypingRelationEdge((AnchorPoint<EntityType>)begin, (AnchorPoint<EntityType>)end);
         this._actionManager.executeAction(new ConnectBySubtypeRelationAction(this, edge));
 
         return edge;
     }
 
     public <T extends Role, G extends RoleParticipant> RoleRelationEdge connectByRoleRelation(AnchorPoint<T> begin, AnchorPoint<G> end) {
-        return null;
+        RoleRelationEdge edge = new RoleRelationEdge((AnchorPoint<Role>)begin, (AnchorPoint<RoleParticipant>)end);
+        this._actionManager.executeAction(new ConnectByRoleRelationAction(this, edge));
+
+        return edge;
     }
 
-    public <T extends RolesSequence, G extends Role> RoleConstraintRelationEdge connectByRoleConstraintRelation(AnchorPoint<T> begin, AnchorPoint<G> end) {
-        return null;
+    public <T extends Constraint> RoleConstraintRelationEdge connectByRoleConstraintRelation(RolesSequence begin, AnchorPoint<T> end) {
+        RoleConstraintRelationEdge edge = new RoleConstraintRelationEdge(begin.anchorPoint(), (AnchorPoint<Constraint>)end);
+        this._actionManager.executeAction(new ConnectByRoleConstraintRelationAction(this, edge));
+
+        return edge;
     }
 
-    public <T extends RolesSequence, G extends Role> RoleConstraintRelationEdge connectBySubtypingConstraintRelation(AnchorPoint<T> begin, AnchorPoint<G> end) {
-        return null;
+    public <T extends SubtypingRelationEdge, G extends Constraint> SubtypingConstraintRelationEdge connectBySubtypingConstraintRelation(AnchorPoint<T> begin, AnchorPoint<G> end) {
+        SubtypingConstraintRelationEdge edge = new SubtypingConstraintRelationEdge((AnchorPoint<SubtypingRelationEdge>)begin, (AnchorPoint<Constraint>)end);
+        this._actionManager.executeAction(new ConnectBySubtypingConstraintRelationAction(this, edge));
+
+        return edge;
     }
 
     public <T extends DiagramElement> Stream<T> getElements(Class<T> elementType) {
@@ -137,16 +152,24 @@ public class Diagram {
         }
     }
 
-    private abstract class ConnectAction extends Action {
-        protected final Edge _edge;
+    private abstract class ConnectAction<T extends DiagramElement, G extends DiagramElement> extends Action {
+        protected final Edge<T, G> _edge;
 
-        public ConnectAction(@NotNull Diagram diagram, @NotNull Edge edge) {
+        public ConnectAction(@NotNull Diagram diagram, @NotNull Edge<T, G> edge) {
             super(diagram);
             this._edge = edge;
         }
 
         @Override
-        public void _execute() { this._diagram._addElement(this._edge); }
+        public void _execute() {
+            if (this._edge.beginAnchorPoint().owner() == this._edge.endAnchorPoint().owner()) {
+                this._throwActionError(new DiagramElementSelfConnectedActionError(this._edge.beginAnchorPoint().owner()));
+                return;
+            }
+
+            this._diagram._addElement(this._edge);
+        }
+
         @Override
         public void _undo() { this._diagram._removeElement(this._edge); }
     }
@@ -163,8 +186,14 @@ public class Diagram {
         }
     }
 
-    private class ConnectByConstraintRelationAction extends ConnectAction {
-        public ConnectByConstraintRelationAction(@NotNull Diagram diagram, @NotNull RoleConstraintRelationEdge edge) {
+    private class ConnectByRoleConstraintRelationAction extends ConnectAction {
+        public ConnectByRoleConstraintRelationAction(@NotNull Diagram diagram, @NotNull RoleConstraintRelationEdge edge) {
+            super(diagram, edge);
+        }
+    }
+
+    private class ConnectBySubtypingConstraintRelationAction extends ConnectAction {
+        public ConnectBySubtypingConstraintRelationAction(@NotNull Diagram diagram, @NotNull SubtypingConstraintRelationEdge edge) {
             super(diagram, edge);
         }
     }
@@ -182,134 +211,4 @@ public class Diagram {
         @Override
         public void _undo() { this._diagram._addElement(this._edge); }
     }
-
-    private class DisconnectSubtypeAction extends DisconnectAction {
-        public DisconnectSubtypeAction(@NotNull Diagram diagram, @NotNull SubtypingRelationEdge edge) {
-            super(diagram, edge);
-        }
-    }
 }
-
-/*
-
-    TODO - @technical_task :: Установить соответствующий доступ к геометрии у каждого типа узла в иерархии узлов.
-    [
-        Requirements:
-         - Пользователям классов должны быть:
-           1) доступен весь необходимый функционал достаточный для взаимодействия с геометрией у каждого типа узлов;
-           2) недоступен лишний функционал взаимодействия с геометрией у каждого типа узлов;
-           3) недоступен не предусмотрено опасный функционал взаимодействия с геометрией у каждого типа узлов (например, доступ к
-              менеджеру действий, из которого можно удалить записанные действия).
-    ]
-
-    TODO - @technical_task :: Хранение и формирование информации о дугах, которые могут поддерживать соединение узла и дуги и разных определенных типов узлов.
-    [
-        Requirements:
-         - Поддержка всех соединений;
-         - Пользователям должны быть доступен только необходимый и достаточный функционал для взаимодействия с дугами;
-         - Соблюдение безопасности по типу.
-    ]
-
-    ----------------------------------------------------------------
-    GEOMETRY FUNCTIONALITY FOR NODES
-    ----------------------------------------------------------------
-    1. Object types;
-        [self.x, self.y, self.width, self.height, self.shape]
-
-        moveTo(x, y)                [ move itself to location ]
-        moveBy(shiftX, shiftY)      [ move itself by shift value ]
-
-    2. Objectified Predicate;
-        [self.x, self.y, Predicate.width, Predicate.height, self.shape]
-
-        moveTo(x, y)                [ move itself and predicate to location;    inner predicate cannot be moved ]
-        moveBy(shiftX, shiftY)      [ move itself and predicate by shift value; inner predicate cannot be moved ]
-
-    3. Constraint nodes;
-        [self.x, self.y, self.width, self.height, self.shape]
-
-        moveTo(x, y)                [ move itself to location ]
-        moveBy(shiftX, shiftY)      [ move itself by shift value ]
-
-    4. Predicate;
-        [self.x, self.y, sum(Role.width), sum(Role.height), self.shape]
-
-        moveTo(x, y)                [ move itself and self roles to location ]
-        moveBy(shiftX, shiftY)      [ move itself and self roles by shift value ]
-
-    5. Role;
-        [Predicate.x, Predicate.y, self.width, self.height, self.shape]
-
-    6. Roles sequence.
-        [no geometry attributes and operations]
-
-    ----------------------------------------------------------------
-    POSSIBLE CLASSES HIERARCHY
-    ----------------------------------------------------------------
-    abstract class DiagramElement;
-    abstract class Node             -> DiagramElement;
-    interface Movable;
-
-    class ObjectType                -> Node # Movable;
-    class ValueType                 -> ObjectType;
-    class EntityType                -> ObjectType;
-
-    class Predicate                 -> Node;
-    class StandalonePredicate       -> Predicate # Movable;
-    class InnerPredicate            -> Predicate;
-    class Role                      -> Node;
-    class RolesSequence             -> DiagramElement;
-
-    ----------------------------------------------------------------
-    POSSIBLE CLASSES CONTENTS
-    ----------------------------------------------------------------
-    abstract class DiagramElement {
-        protected Diagram _owner :: @init fromPackagedMethod;
-    }
-
-    abstract class Node {
-        protected Geometry _geometry :: @init fromConstructor;
-    }
-
-    interface Movable {
-        public void moveTo(int x, int y);
-        public void moveBy(int shiftX, int shiftY);
-    }
-
-    class ObjectType {
-        public void moveTo(int x, int y) {
-            this._geometry.moveTo(x, y);
-        }
-
-        public void moveBy(int shiftX, int shiftY) {
-            this._geometry.moveTo(x, y);
-        }
-    }
-
-    class ValueType  {}
-    class EntityType {}
-
-    class Predicate {
-        protected ArrayList<Role> _roles :: @init fromConstructor
-    }
-
-    class StandalonePredicate {
-        public void moveTo(int x, int y) {
-            this._geometry.moveTo(x, y);
-
-            for (Role role : this._roles) {
-                role._moveTo(x, y);
-            }
-        }
-    }
-
-    class InnerPredicate {
-    }
-
-    class Role {
-    }
-
-    class RolesSequence {
-    }
- */
-

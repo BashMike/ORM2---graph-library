@@ -1,5 +1,6 @@
 package com.orm2_graph_library.nodes.predicates;
 
+import com.orm2_graph_library.core.AnchorPoint;
 import com.orm2_graph_library.core.Diagram;
 import com.orm2_graph_library.core.DiagramElement;
 import com.orm2_graph_library.core.GeometryApproximation;
@@ -14,6 +15,8 @@ public class RolesSequence extends DiagramElement {
     protected void _initSelf(Diagram owner) {}
 
     // ---------------- attributes ----------------
+    public AnchorPoint<RolesSequence> anchorPoint() { return new AnchorPoint<>(this, new Point(0, 0)); }
+
     @Override
     public GeometryApproximation geometryApproximation() { return null; }
 

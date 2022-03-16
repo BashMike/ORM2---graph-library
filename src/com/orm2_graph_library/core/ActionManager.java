@@ -45,6 +45,13 @@ public class ActionManager {
         return null;
     }
 
+    void _popLastAction() {
+        if (!this._actions.isEmpty()) {
+            this._actions.remove(this._actions.size() - 1);
+            this._currActionIndex--;
+        }
+    }
+
     public void startRecordingActions() { this._recordActions = true; }
     public void stopRecordingActions()  { this._recordActions = false; }
 }

@@ -43,4 +43,11 @@ public abstract class Action {
 
     public abstract void _execute();
     public abstract void _undo();
+
+    protected void _throwActionError(@NotNull ActionError actionError) {
+        this._diagram._actionManager._popLastAction();
+        for (ActionErrorListener actionErrorListener : this._diagram._actionErrorListeners) {
+            actionErrorListener.handle(actionError);
+        }
+    }
 }
