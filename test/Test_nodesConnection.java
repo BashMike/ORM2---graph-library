@@ -1,4 +1,5 @@
 import com.orm2_graph_library.action_errors.DiagramElementSelfConnectedActionError;
+import com.orm2_graph_library.action_errors.DoubleConnectionActionError;
 import com.orm2_graph_library.core.*;
 import com.orm2_graph_library.edges.SubtypingRelationEdge;
 import com.orm2_graph_library.nodes.common.EntityType;
@@ -100,7 +101,7 @@ class Test_nodesConnection {
     }
 
     @Test
-    void entityType_connectElementWithSelf() {
+    void entityType_connectWithSelf() {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
         EntityType entityType = diagram.addNode(new EntityType());
@@ -110,11 +111,52 @@ class Test_nodesConnection {
 
         diagram.connectBySubtypingRelation(entityType.centerAnchorPoint(), entityType.centerAnchorPoint());
 
-        ArrayList<EntityType> gottenEntityTypes = diagram.getElements(EntityType.class).collect(Collectors.toCollection(ArrayList::new));
-
         // Check result
         Assertions.assertEquals(0, diagram.getElements(SubtypingRelationEdge.class).count());
         Assertions.assertEquals(1, actionErrorListener.actionErrors().size());
         Assertions.assertTrue(actionErrorListener.actionErrors().get(0) instanceof DiagramElementSelfConnectedActionError);
+        Assertions.assertEquals(entityType, ((DiagramElementSelfConnectedActionError)actionErrorListener.actionErrors().get(0)).diagramElement());
+    }
+
+    @Test
+    void entityType_doubleConnect() {
+        // Prepare data and start testing
+        Diagram diagram = new Diagram();
+        EntityType entityType0 = diagram.addNode(new EntityType());
+        EntityType entityType1 = diagram.addNode(new EntityType());
+
+        TestActionErrorListener actionErrorListener = new TestActionErrorListener();
+        diagram.addActionErrorListener(actionErrorListener);
+
+        diagram.connectBySubtypingRelation(entityType0.centerAnchorPoint(), entityType1.centerAnchorPoint());
+        diagram.connectBySubtypingRelation(entityType0.centerAnchorPoint(), entityType1.centerAnchorPoint());
+
+        // Check result
+        Assertions.assertEquals(1, diagram.getElements(SubtypingRelationEdge.class).count());
+        Assertions.assertEquals(1, actionErrorListener.actionErrors().size());
+        Assertions.assertTrue(actionErrorListener.actionErrors().get(0) instanceof DoubleConnectionActionError);
+        Assertions.assertEquals(entityType0, ((DoubleConnectionActionError)actionErrorListener.actionErrors().get(0)).beginDiagramElement());
+        Assertions.assertEquals(entityType1, ((DoubleConnectionActionError)actionErrorListener.actionErrors().get(0)).endDiagramElement());
+
+        SubtypingRelationEdge edge = diagram.getElements(SubtypingRelationEdge.class).findFirst().get();
+        Assertions.assertEquals(edge, ((DoubleConnectionActionError)actionErrorListener.actionErrors().get(0)).existEdge());
+    }
+
+    @Test
+    void entityType_doubleConnectInOppositeDirection() {
+        // Prepare data and start testing
+        Diagram diagram = new Diagram();
+        EntityType entityType0 = diagram.addNode(new EntityType());
+        EntityType entityType1 = diagram.addNode(new EntityType());
+
+        TestActionErrorListener actionErrorListener = new TestActionErrorListener();
+        diagram.addActionErrorListener(actionErrorListener);
+
+        diagram.connectBySubtypingRelation(entityType0.centerAnchorPoint(), entityType1.centerAnchorPoint());
+        diagram.connectBySubtypingRelation(entityType1.centerAnchorPoint(), entityType0.centerAnchorPoint());
+
+        // Check result
+        Assertions.assertEquals(2, diagram.getElements(SubtypingRelationEdge.class).count());
+        Assertions.assertTrue(actionErrorListener.actionErrors().isEmpty());
     }
 }

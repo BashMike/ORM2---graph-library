@@ -1,6 +1,7 @@
 package com.orm2_graph_library.core;
 
 import com.orm2_graph_library.action_errors.DiagramElementSelfConnectedActionError;
+import com.orm2_graph_library.action_errors.DoubleConnectionActionError;
 import com.orm2_graph_library.edges.RoleConstraintRelationEdge;
 import com.orm2_graph_library.edges.RoleRelationEdge;
 import com.orm2_graph_library.edges.SubtypingConstraintRelationEdge;
@@ -14,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 // TODO - @add :: Movement of anchor points when moving node or edge.
@@ -162,8 +164,17 @@ public class Diagram {
 
         @Override
         public void _execute() {
+            // Check if edge connects diagram element with itself
             if (this._edge.beginAnchorPoint().owner() == this._edge.endAnchorPoint().owner()) {
                 this._throwActionError(new DiagramElementSelfConnectedActionError(this._edge.beginAnchorPoint().owner()));
+                return;
+            }
+
+            // Check if edge connects diagram elements twice
+            var existEdges = this._diagram.getElements(Edge.class).filter(e -> e.isSameTo(this._edge) || e.isOppositeTo(this._edge)).collect(Collectors.toCollection(ArrayList::new));
+
+            if (!existEdges.isEmpty() && !(existEdges.get(0) instanceof SubtypingRelationEdge && existEdges.get(0).isOppositeTo(this._edge))) {
+                this._throwActionError(new DoubleConnectionActionError(this._edge.beginAnchorPoint().owner(), this._edge.endAnchorPoint().owner(), existEdges.get(0)));
                 return;
             }
 

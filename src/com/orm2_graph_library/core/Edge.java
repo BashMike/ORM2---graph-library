@@ -38,4 +38,7 @@ public abstract class Edge <B extends DiagramElement, E extends DiagramElement> 
         assert false : "TODO";
         return result;
     }
+
+    public boolean isSameTo(@NotNull Edge other)     { return (this._beginAnchorPoint.owner() == other._beginAnchorPoint.owner() && this._endAnchorPoint.owner() == other._endAnchorPoint  .owner()); }
+    public boolean isOppositeTo(@NotNull Edge other) { return (this._beginAnchorPoint.owner() == other._endAnchorPoint  .owner() && this._endAnchorPoint.owner() == other._beginAnchorPoint.owner()); }
 }
