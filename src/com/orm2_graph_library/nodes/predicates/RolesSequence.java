@@ -15,7 +15,7 @@ public class RolesSequence extends DiagramElement {
     protected void _initSelf(Diagram owner) {}
 
     // ---------------- attributes ----------------
-    public AnchorPoint<RolesSequence> anchorPoint() { return new AnchorPoint<>(this, new Point(0, 0)); }
+    public AnchorPoint<RolesSequence> anchorPoint() { return null; }
 
     @Override
     public GeometryApproximation geometryApproximation() { return null; }

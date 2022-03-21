@@ -18,5 +18,5 @@ public class DiagramElementSelfConnectedActionError<T extends DiagramElement> ex
 
     // ----------------- contract -----------------
     @Override
-    public String description() { return "ACTION ERROR :: Diagram element \"" + this._diagramElement + "\" is self connected."; }
+    public String description() { return "Diagram element \"" + this._diagramElement + "\" is self connected."; }
 }

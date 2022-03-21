@@ -23,7 +23,7 @@ public abstract class PostValidator {
     }
 
     protected void _removeLogicErrorFromDiagram(LogicError logicError) {
-        this._diagram._addLogicError(logicError);
+        this._diagram._removeLogicError(logicError);
         this._action._solvedLogicErrors.add(logicError);
     }
 }

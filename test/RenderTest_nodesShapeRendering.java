@@ -20,6 +20,7 @@ public class RenderTest_nodesShapeRendering extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setVisible(true);
         this.setBackground(Color.BLACK);
+        this.getContentPane().setBackground(Color.BLACK);
 
         // Render nodes
         ArrayList<DiagramElement> diagramElementsToRender = new ArrayList<>();
@@ -43,31 +44,34 @@ public class RenderTest_nodesShapeRendering extends JFrame {
         node2.moveTo(new Point(150, 150));
         diagramElementsToRender.add(node2);
 
+        EntityType node21 = diagram.addNode(new EntityType());
+        node21.moveTo(new Point(350, 150));
+        diagramElementsToRender.add(node21);
+
         Constraint node3 = diagram.addNode(new SubsetConstraint());
         node3.moveTo(new Point(30, 30));
         diagramElementsToRender.add(node3);
 
-        ObjectifiedPredicate node4 = diagram.addNode(new ObjectifiedPredicate(20));
+        ObjectifiedPredicate node4 = diagram.addNode(new ObjectifiedPredicate(10));
         node4.moveTo(new Point(100, 30));
         node4.innerPredicate().setOrientation(DiagramElement.Orientation.VERTICAL);
         diagramElementsToRender.add(node4);
 
+        diagramElementsToRender.add(diagram.connectBySubtypingRelation(node2.upAnchorPoint(), node21.downAnchorPoint()));
+
+        node21.moveTo(new Point(450, 250));
+
         diagramElementsToRender.add(node4.innerPredicate());
         for (Role role : node4.innerPredicate().roles()) { diagramElementsToRender.add(role); }
 
-        this.getContentPane().add(new DiagramElementsPanel(diagramElementsToRender, DiagramElementsPanel.RenderMode.NORMAL));
+        this.getContentPane().add(new DiagramElementsPanel(diagramElementsToRender, DiagramElementsPanel.RenderMode.WIREFRAME));
     }
 
     static public void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new RenderTest_nodesShapeRendering();
-            }
-        });
+        SwingUtilities.invokeLater(RenderTest_nodesShapeRendering::new);
     }
 
-    class DiagramElementsPanel extends JPanel {
+    static class DiagramElementsPanel extends JPanel {
         public enum RenderMode { NORMAL, WIREFRAME }
 
         private final ArrayList<DiagramElement> _diagramElements;
@@ -85,29 +89,38 @@ public class RenderTest_nodesShapeRendering extends JFrame {
             for (DiagramElement de : this._diagramElements) {
                 ArrayList<Point> diagramElementPoints = de.geometryApproximation().points();
 
-                int[] pointsX = new int[diagramElementPoints.size()];
-                int[] pointsY = new int[diagramElementPoints.size()];
+                if (de instanceof Node) {
+                    int[] pointsX = new int[diagramElementPoints.size()];
+                    int[] pointsY = new int[diagramElementPoints.size()];
 
-                for (int i=0; i<pointsX.length; i++) { pointsX[i] = diagramElementPoints.get(i).x; }
-                for (int i=0; i<pointsY.length; i++) { pointsY[i] = diagramElementPoints.get(i).y; }
+                    for (int i = 0; i < pointsX.length; i++) { pointsX[i] = diagramElementPoints.get(i).x; }
+                    for (int i = 0; i < pointsY.length; i++) { pointsY[i] = diagramElementPoints.get(i).y; }
 
-                Shape diagramElementShape = new Polygon(pointsX, pointsY, pointsX.length);
+                    Shape diagramElementShape = new Polygon(pointsX, pointsY, pointsX.length);
 
-                if (this._renderMode == RenderMode.NORMAL) {
-                    g2.setColor(Color.WHITE);
-                    g2.draw(diagramElementShape);
-                }
-                else if (this._renderMode == RenderMode.WIREFRAME) {
-                    if (de instanceof Node) {
-                        g2.setColor(Color.BLUE);
-                        g2.fill(diagramElementShape);
+                    if (this._renderMode == RenderMode.NORMAL) {
+                        g2.setColor(Color.WHITE);
+                        g2.draw(diagramElementShape);
+                    } else if (this._renderMode == RenderMode.WIREFRAME) {
+                        if (de instanceof Node) {
+                            g2.setColor(Color.BLUE);
+                            g2.fill(diagramElementShape);
+                        }
+                        g2.setColor(Color.MAGENTA);
+                        g2.draw(diagramElementShape);
+
+                        for (Point p : diagramElementPoints) {
+                            g2.setColor(Color.GREEN);
+                            g2.drawRect(p.x, p.y, 0, 0);
+                        }
                     }
-                    g2.setColor(Color.MAGENTA);
-                    g2.draw(diagramElementShape);
+                }
+                else if (diagramElementPoints.size() > 1) {
+                    if (this._renderMode == RenderMode.NORMAL)         { g2.setColor(Color.WHITE); }
+                    else if (this._renderMode == RenderMode.WIREFRAME) { g2.setColor(Color.GREEN); }
 
-                    for (Point p : diagramElementPoints) {
-                        g2.setColor(Color.GREEN);
-                        g2.drawRect(p.x, p.y, 0, 0);
+                    for (int i=0; i<diagramElementPoints.size()-1; i++) {
+                        g2.drawLine(diagramElementPoints.get(i).x, diagramElementPoints.get(i).y, diagramElementPoints.get(i+1).x, diagramElementPoints.get(i+1).y);
                     }
                 }
             }

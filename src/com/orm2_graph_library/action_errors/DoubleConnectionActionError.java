@@ -26,5 +26,5 @@ public class DoubleConnectionActionError<T extends DiagramElement, G extends Dia
 
     // ----------------- contract -----------------
     @Override
-    public String description() { return "ACTION ERROR :: Double connection between \"" + this._beginDiagramElement + "\" and \"" + this._endDiagramElement + "\"" + "."; }
+    public String description() { return "Double connection between \"" + this._beginDiagramElement + "\" and \"" + this._endDiagramElement + "\"" + "."; }
 }

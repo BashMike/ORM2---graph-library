@@ -6,11 +6,12 @@ import com.orm2_graph_library.edges.RoleConstraintRelationEdge;
 import com.orm2_graph_library.edges.RoleRelationEdge;
 import com.orm2_graph_library.edges.SubtypingConstraintRelationEdge;
 import com.orm2_graph_library.edges.SubtypingRelationEdge;
+import com.orm2_graph_library.logic_errors.EntityTypeWithNoneRefModeLogicError;
 import com.orm2_graph_library.nodes.common.EntityType;
-import com.orm2_graph_library.nodes.constraints.Constraint;
-import com.orm2_graph_library.nodes.predicates.Role;
-import com.orm2_graph_library.nodes.predicates.RoleParticipant;
-import com.orm2_graph_library.nodes.predicates.RolesSequence;
+import com.orm2_graph_library.nodes.common.ValueType;
+import com.orm2_graph_library.nodes.constraints.*;
+import com.orm2_graph_library.nodes.predicates.*;
+import com.orm2_graph_library.post_validators.SubtypingCyclePostValidator;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -47,14 +48,35 @@ public class Diagram {
     // ---------------- attributes ----------------
     public ArrayList<LogicError> logicErrors() { return new ArrayList<>(this._logicErrors); }
 
-    void _addLogicError(@NotNull LogicError logicError) { this._logicErrors.add(logicError); }
+    void _addLogicError(@NotNull LogicError logicError)    { this._logicErrors.add(logicError); }
     void _removeLogicError(@NotNull LogicError logicError) { this._logicErrors.remove(logicError); }
 
     public void addActionErrorListener(ActionErrorListener actionErrorListener) { this._actionErrorListeners.add(actionErrorListener); }
 
     // ----------------- contract -----------------
+    /*
+    public EntityType               addNode(EntityType node)           {            return node; }
+    public ValueType                addNode(ValueType node)            { this._actionManager.executeAction(new AddValueTypeAction(this, node));            return node; }
+    public <T extends Predicate> T  addNode(T node)                    { this._actionManager.executeAction(new AddPredicateAction(this, node));            return node; }
+    public ObjectifiedPredicate     addNode(ObjectifiedPredicate node) { this._actionManager.executeAction(new AddObjectifiedPredicateAction(this, node)); return node; }
+    public <T extends Constraint> T addNode(T node)                    { this._actionManager.executeAction(new AddConstraintAction(this, node));           return node; }
+    */
+
     public <T extends Node> T addNode(T node) {
-        this._actionManager.executeAction(new AddNodeAction(this, node));
+        if      (node instanceof EntityType)            { this._actionManager.executeAction(new AddEntityTypeAction(this, (EntityType)node)); }
+        else if (node instanceof ValueType)             { this._actionManager.executeAction(new AddValueTypeAction (this, (ValueType)node)); }
+
+        else if (node instanceof StandalonePredicate)   { this._actionManager.executeAction(new AddPredicateAction(this, (StandalonePredicate)node)); }
+        else if (node instanceof InnerPredicate)        { this._actionManager.executeAction(new AddPredicateAction(this, (InnerPredicate)node)); }
+
+        else if (node instanceof ObjectifiedPredicate)  { this._actionManager.executeAction(new AddObjectifiedPredicateAction(this, (ObjectifiedPredicate)node)); }
+
+        else if (node instanceof SubsetConstraint)      { this._actionManager.executeAction(new AddConstraintAction(this, (SubsetConstraint)node)); }
+        else if (node instanceof EqualityConstraint)    { this._actionManager.executeAction(new AddConstraintAction(this, (EqualityConstraint)node)); }
+        else if (node instanceof UniquenessConstraint)  { this._actionManager.executeAction(new AddConstraintAction(this, (UniquenessConstraint)node)); }
+        else if (node instanceof ExclusionConstraint)   { this._actionManager.executeAction(new AddConstraintAction(this, (ExclusionConstraint)node)); }
+        else if (node instanceof ExclusiveOrConstraint) { this._actionManager.executeAction(new AddConstraintAction(this, (ExclusiveOrConstraint)node)); }
+        else if (node instanceof InclusiveOrConstraint) { this._actionManager.executeAction(new AddConstraintAction(this, (InclusiveOrConstraint)node)); }
 
         return node;
     }
@@ -116,10 +138,10 @@ public class Diagram {
     }
 
     // ================= SUBTYPES =================
-    private class AddNodeAction extends Action {
-        private final Node _node;
+    private abstract class AddNodeAction<T extends Node> extends Action {
+        private final T _node;
 
-        public AddNodeAction(Diagram diagram, @NotNull Node node) {
+        public AddNodeAction(Diagram diagram, @NotNull T node) {
             super(diagram);
             this._node = node;
         }
@@ -128,6 +150,29 @@ public class Diagram {
         public void _execute() { this._diagram._addElement(this._node); }
         @Override
         public void _undo() { this._diagram._removeElement(this._node); }
+    }
+
+    private class AddEntityTypeAction extends AddNodeAction<EntityType> {
+        public AddEntityTypeAction(Diagram diagram, @NotNull EntityType node) {
+            super(diagram, node);
+            this._emergedLogicErrors.add(new EntityTypeWithNoneRefModeLogicError(node));
+        }
+    }
+
+    private class AddValueTypeAction extends AddNodeAction<ValueType> {
+        public AddValueTypeAction(Diagram diagram, @NotNull ValueType node) { super(diagram, node); }
+    }
+
+    private class AddPredicateAction<G extends Predicate> extends AddNodeAction<G> {
+        public AddPredicateAction(Diagram diagram, @NotNull G node) { super(diagram, node); }
+    }
+
+    private class AddObjectifiedPredicateAction extends AddNodeAction<ObjectifiedPredicate> {
+        public AddObjectifiedPredicateAction(Diagram diagram, @NotNull ObjectifiedPredicate node) { super(diagram, node); }
+    }
+
+    private class AddConstraintAction<G extends Constraint> extends AddNodeAction<G> {
+        public AddConstraintAction(Diagram diagram, @NotNull G node) { super(diagram, node); }
     }
 
     private class RemoveNodeAction extends Action {
@@ -160,14 +205,10 @@ public class Diagram {
         public ConnectAction(@NotNull Diagram diagram, @NotNull Edge<T, G> edge) {
             super(diagram);
             this._edge = edge;
-        }
 
-        @Override
-        public void _execute() {
             // Check if edge connects diagram element with itself
             if (this._edge.beginAnchorPoint().owner() == this._edge.endAnchorPoint().owner()) {
                 this._throwActionError(new DiagramElementSelfConnectedActionError(this._edge.beginAnchorPoint().owner()));
-                return;
             }
 
             // Check if edge connects diagram elements twice
@@ -175,12 +216,11 @@ public class Diagram {
 
             if (!existEdges.isEmpty() && !(existEdges.get(0) instanceof SubtypingRelationEdge && existEdges.get(0).isOppositeTo(this._edge))) {
                 this._throwActionError(new DoubleConnectionActionError(this._edge.beginAnchorPoint().owner(), this._edge.endAnchorPoint().owner(), existEdges.get(0)));
-                return;
             }
-
-            this._diagram._addElement(this._edge);
         }
 
+        @Override
+        public void _execute() { this._diagram._addElement(this._edge); }
         @Override
         public void _undo() { this._diagram._removeElement(this._edge); }
     }
@@ -188,6 +228,7 @@ public class Diagram {
     private class ConnectBySubtypeRelationAction extends ConnectAction {
         public ConnectBySubtypeRelationAction(@NotNull Diagram diagram, @NotNull SubtypingRelationEdge edge) {
             super(diagram, edge);
+            this._postValidators.add(new SubtypingCyclePostValidator(diagram, this, edge.beginAnchorPoint().owner()));
         }
     }
 

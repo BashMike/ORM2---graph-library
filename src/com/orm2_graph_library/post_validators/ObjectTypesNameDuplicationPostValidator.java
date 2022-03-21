@@ -40,16 +40,7 @@ public class ObjectTypesNameDuplicationPostValidator extends PostValidator {
             }
         }
 
-        if (sameNameObjectTypes.size() > 1) {
-            if (sameNameLogicError == null) {
-                this._addLogicErrorToDiagram(new ObjectTypesNameDuplicationLogicError(this._newName, sameNameObjectTypes));
-            }
-            else {
-                sameNameLogicError.update(sameNameObjectTypes);
-            }
-        }
-        else if (sameNameLogicError != null) {
-            this._removeLogicErrorFromDiagram(sameNameLogicError);
-        }
+        if (sameNameLogicError != null)     { this._removeLogicErrorFromDiagram(sameNameLogicError); }
+        if (sameNameObjectTypes.size() > 1) { this._addLogicErrorToDiagram(new ObjectTypesNameDuplicationLogicError(this._newName, sameNameObjectTypes)); }
     }
 }

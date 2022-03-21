@@ -7,6 +7,8 @@ import java.util.ArrayList;
 public abstract class Action {
     // ================ ATTRIBUTES ================
     protected Diagram _diagram;
+    protected boolean _isValid = true;
+    private boolean   _wasValidated = false;
 
     protected ArrayList<PostValidator> _postValidators     = new ArrayList<>();
 
@@ -23,12 +25,12 @@ public abstract class Action {
         this._execute();
         this._diagram._actionManager.startRecordingActions();
 
-        if (this._emergedLogicErrors.isEmpty()) {
+        for (LogicError logicError : this._emergedLogicErrors) { this._diagram._addLogicError(logicError); }
+        for (LogicError logicError : this._solvedLogicErrors)  { this._diagram._removeLogicError(logicError); }
+
+        if (!this._wasValidated) {
             for (PostValidator postValidator : this._postValidators) { postValidator.validate(); }
-        }
-        else {
-            for (LogicError logicError : this._emergedLogicErrors) { this._diagram._addLogicError(logicError); }
-            for (LogicError logicError : this._solvedLogicErrors)  { this._diagram._removeLogicError(logicError); }
+            this._wasValidated = true;
         }
     }
 
@@ -44,8 +46,10 @@ public abstract class Action {
     public abstract void _execute();
     public abstract void _undo();
 
+    protected void _becomeInvalid() { this._isValid = false; }
+
     protected void _throwActionError(@NotNull ActionError actionError) {
-        this._diagram._actionManager._popLastAction();
+        this._becomeInvalid();
         for (ActionErrorListener actionErrorListener : this._diagram._actionErrorListeners) {
             actionErrorListener.handle(actionError);
         }

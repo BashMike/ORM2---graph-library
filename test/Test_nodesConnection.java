@@ -2,6 +2,8 @@ import com.orm2_graph_library.action_errors.DiagramElementSelfConnectedActionErr
 import com.orm2_graph_library.action_errors.DoubleConnectionActionError;
 import com.orm2_graph_library.core.*;
 import com.orm2_graph_library.edges.SubtypingRelationEdge;
+import com.orm2_graph_library.logic_errors.EntityTypeWithNoneRefModeLogicError;
+import com.orm2_graph_library.logic_errors.SubtypingCycleLogicError;
 import com.orm2_graph_library.nodes.common.EntityType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

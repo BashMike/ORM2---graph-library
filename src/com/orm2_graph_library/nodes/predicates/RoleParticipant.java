@@ -1,13 +1,11 @@
 package com.orm2_graph_library.nodes.predicates;
 
-import com.orm2_graph_library.core.Action;
-import com.orm2_graph_library.core.Diagram;
-import com.orm2_graph_library.core.Movable;
-import com.orm2_graph_library.core.Node;
+import com.orm2_graph_library.core.*;
 import com.orm2_graph_library.nodes.common.ObjectType;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
+import java.util.ArrayList;
 
 public abstract class RoleParticipant extends Node implements Movable {
     // ================ OPERATIONS ================
