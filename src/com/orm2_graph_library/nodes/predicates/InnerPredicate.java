@@ -1,9 +1,6 @@
 package com.orm2_graph_library.nodes.predicates;
 
-import com.orm2_graph_library.core.Diagram;
-
 import java.awt.*;
-import java.util.ArrayList;
 
 public class InnerPredicate extends Predicate {
     // ================ ATTRIBUTES ================
@@ -19,14 +16,13 @@ public class InnerPredicate extends Predicate {
     InnerPredicate(StandalonePredicate standalonePredicate) { super(standalonePredicate._roles); }
 
     // ---------------- connection ----------------
-    @Override
-    protected void _initSelf(Diagram owner) {}
+    public ObjectifiedPredicate ownerObjectifiedPredicate() { return this._ownerObjectifiedPredicate; }
 
     // ---------------- attributes ----------------
     @Override
     public Point borderLeftTop() {
-        int x = this._ownerObjectifiedPredicate.borderLeftTop().x + ObjectifiedPredicate.horizontalEmptyGap();
-        int y = this._ownerObjectifiedPredicate.borderLeftTop().y + ObjectifiedPredicate.verticalEmptyGap();
+        int x = this._ownerObjectifiedPredicate.borderLeftTop().x + (this._ownerObjectifiedPredicate.borderWidth() - this.borderWidth()) / 2;
+        int y = this._ownerObjectifiedPredicate.borderLeftTop().y + (this._ownerObjectifiedPredicate.borderHeight() - this.borderHeight()) / 2;
 
         return new Point(x, y);
     }

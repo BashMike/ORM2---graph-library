@@ -155,6 +155,8 @@ public class Test_diagramLogicErrors {
 
         Assertions.assertEquals(entityTypeCycle0, subtypingCycleLogicErrors.get(0).entityTypeCycle());
         Assertions.assertEquals(entityTypeCycle1, subtypingCycleLogicErrors.get(1).entityTypeCycle());
+
+        Assertions.assertEquals(2, diagram.getLogicErrorsFor(entityType0).size());
     }
 
     // TODO - @test :: Setting reference mode and data type for entity type.

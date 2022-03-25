@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.stream.Stream;
 
 public abstract class Edge <B extends DiagramElement, E extends DiagramElement> extends DiagramElement {
     // ================ ATTRIBUTES ================
@@ -18,6 +19,9 @@ public abstract class Edge <B extends DiagramElement, E extends DiagramElement> 
     }
 
     // ---------------- attributes ----------------
+    public B begin() { return this._beginAnchorPoint._owner; }
+    public E end()   { return this._endAnchorPoint._owner; }
+
     public AnchorPoint<B> beginAnchorPoint() { return this._beginAnchorPoint; }
     public AnchorPoint<E> endAnchorPoint()   { return this._endAnchorPoint; }
 
@@ -35,7 +39,9 @@ public abstract class Edge <B extends DiagramElement, E extends DiagramElement> 
     @Override
     public <T extends DiagramElement> ArrayList<T> getIncidentElements(Class<T> elementType) {
         ArrayList<T> result = new ArrayList<>();
-        assert false : "TODO";
+        if (elementType.isAssignableFrom(this.begin().getClass())) { result.add((T)this.begin()); }
+        if (elementType.isAssignableFrom(this.end().getClass()))   { result.add((T)this.end()); }
+
         return result;
     }
 

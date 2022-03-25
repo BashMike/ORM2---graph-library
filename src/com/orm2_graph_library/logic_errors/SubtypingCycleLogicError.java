@@ -9,7 +9,11 @@ import java.util.ArrayList;
 public class SubtypingCycleLogicError extends LogicError {
     private ArrayList<EntityType> _entityTypeCycle = new ArrayList<>();
 
-    public SubtypingCycleLogicError(@NotNull ArrayList<EntityType> entityTypeCycle) { this._entityTypeCycle.addAll(entityTypeCycle); }
+    public SubtypingCycleLogicError(@NotNull ArrayList<EntityType> entityTypeCycle) {
+        super();
+        this._entityTypeCycle.addAll(entityTypeCycle);
+        this._errorParticipants.addAll(this._entityTypeCycle);
+    }
 
     public ArrayList<EntityType> entityTypeCycle() { return this._entityTypeCycle; }
 

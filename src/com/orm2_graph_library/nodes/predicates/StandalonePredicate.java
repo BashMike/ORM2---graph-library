@@ -15,20 +15,16 @@ public class StandalonePredicate extends Predicate implements Movable {
 
     public ObjectifiedPredicate becomeObjectified() { return new ObjectifiedPredicate(new InnerPredicate(this)); }
 
-    // ---------------- connection ----------------
-    @Override
-    protected void _initSelf(Diagram owner) {}
-
     // ---------------- attributes ----------------
     public void moveTo(Point leftTop) {
-        this._owner._actionManager().executeAction(new MoveStandalonePredicateAction(this._owner, this, this._leftTop, leftTop));
+        this._ownerDiagram._actionManager().executeAction(new MoveStandalonePredicateAction(this._ownerDiagram, this, this._leftTop, leftTop));
     }
 
     public void moveBy(int shiftX, int shiftY) {
         Point newLeftTop = new Point(this._leftTop);
         newLeftTop.translate(shiftX, shiftY);
 
-        this._owner._actionManager().executeAction(new MoveStandalonePredicateAction(this._owner, this, this._leftTop, newLeftTop));
+        this._ownerDiagram._actionManager().executeAction(new MoveStandalonePredicateAction(this._ownerDiagram, this, this._leftTop, newLeftTop));
     }
 
     // ================= SUBTYPES =================

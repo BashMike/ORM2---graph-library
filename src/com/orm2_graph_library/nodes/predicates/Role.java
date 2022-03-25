@@ -1,8 +1,13 @@
 package com.orm2_graph_library.nodes.predicates;
 
+import com.orm2_graph_library.anchor_points.AnchorPosition;
+import com.orm2_graph_library.anchor_points.NodeAnchorPoint;
+import com.orm2_graph_library.anchor_points.RoleAnchorPoint;
+import com.orm2_graph_library.core.AnchorPoint;
 import com.orm2_graph_library.core.Diagram;
 import com.orm2_graph_library.core.DiagramElement;
 import com.orm2_graph_library.core.Node;
+import com.orm2_graph_library.nodes.common.EntityType;
 import com.orm2_graph_library.nodes_shapes.RectangleShape;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,22 +19,14 @@ import java.awt.*;
 //      # @idea     :: We can: 1) re-calculate position with parent (current decision); 2) calculate position by parent.
 
 public class Role extends Node {
-    // ================== STATIC ==================
-    // TODO - @add :: Set what orientation is using for given default width and height?
-    static private int _width  = 20;
-    static private int _height = 10;
-
-    static public int width()  { return Role._width; }
-    static public int height() { return Role._height; }
-
-    static public void setWidth(int width)   { Role._width  = width; }
-    static public void setHeight(int height) { Role._height = height; }
-
     // ================ ATTRIBUTES ================
     private DiagramElement.Orientation _orientation;
-    private String    _text; // TODO - @modify :: Change name of role's text.
-    private Predicate _ownerPredicate;
-    private final int _indexInPredicate;
+    private String          _text; // TODO - @modify :: Change name of role's text.
+    private final Predicate _ownerPredicate;
+    private final int       _indexInPredicate;
+
+    protected int _borderWidth  = -1;
+    protected int _borderHeight = -1;
 
     // ================ OPERATIONS ================
     // ----------------- creating -----------------
@@ -48,6 +45,51 @@ public class Role extends Node {
     public String text() { return this._text; }
     public void setText(String text) { this._text = text; }
 
+    public Predicate ownerPredicate() { return this._ownerPredicate; }
+
+    public boolean hasAnchorPoint(AnchorPosition anchorPosition)        {
+        boolean result = false;
+
+        if (this._orientation == DiagramElement.Orientation.HORIZONTAL) {
+            if (this._ownerPredicate.arity() == 1) {
+                result = (anchorPosition == AnchorPosition.LEFT || anchorPosition == AnchorPosition.RIGHT);
+            }
+            else if (this._ownerPredicate.arity() == 2) {
+                if      (this == this._ownerPredicate.getRole(0)) { result = (anchorPosition == AnchorPosition.LEFT); }
+                else if (this == this._ownerPredicate.getRole(1)) { result = (anchorPosition == AnchorPosition.RIGHT); }
+            }
+            else if (this._ownerPredicate.arity() > 2) {
+                if (this == this._ownerPredicate.getRole(0))                                   { result = (anchorPosition == AnchorPosition.LEFT); }
+                else if (this == this._ownerPredicate.getRole(this._ownerPredicate.arity()-1)) { result = (anchorPosition == AnchorPosition.RIGHT); }
+                else                                                                           { result = (anchorPosition == AnchorPosition.UP || anchorPosition == AnchorPosition.DOWN); }
+            }
+        }
+        else if (this._orientation == DiagramElement.Orientation.VERTICAL) {
+            if (this._ownerPredicate.arity() == 1) {
+                result = (anchorPosition == AnchorPosition.UP || anchorPosition == AnchorPosition.DOWN);
+            }
+            else if (this._ownerPredicate.arity() == 2) {
+                if      (this == this._ownerPredicate.getRole(0)) { result = (anchorPosition == AnchorPosition.UP); }
+                else if (this == this._ownerPredicate.getRole(1)) { result = (anchorPosition == AnchorPosition.DOWN); }
+            }
+            else if (this._ownerPredicate.arity() > 2) {
+                if (this == this._ownerPredicate.getRole(0))                                   { result = (anchorPosition == AnchorPosition.UP); }
+                else if (this == this._ownerPredicate.getRole(this._ownerPredicate.arity()-1)) { result = (anchorPosition == AnchorPosition.DOWN); }
+                else                                                                           { result = (anchorPosition == AnchorPosition.LEFT || anchorPosition == AnchorPosition.RIGHT); }
+            }
+        }
+
+        return result;
+    }
+
+    public AnchorPoint<Role> anchorPoint(AnchorPosition anchorPosition) {
+        if (!this.hasAnchorPoint(anchorPosition)) {
+            throw new RuntimeException("ERROR :: Try to get non-existent anchor point for role at given anchor position.");
+        }
+
+        return new RoleAnchorPoint(this, anchorPosition);
+    }
+
     // TODO - @add :: Calculate left top position depending on self placement in the owner predicate.
     @Override
     public Point borderLeftTop() {
@@ -60,9 +102,27 @@ public class Role extends Node {
     }
 
     @Override
-    public int borderWidth() { return (this._orientation == DiagramElement.Orientation.HORIZONTAL ? Role.width() : Role.height()); }
+    public int borderWidth() {
+        if (this._orientation == DiagramElement.Orientation.HORIZONTAL)    { return this._borderWidth; }
+        else if (this._orientation == DiagramElement.Orientation.VERTICAL) { return this._borderHeight; }
+
+        assert false : "ASSERT :: Try to get border width with invalid orientation.";
+        return -1;
+    }
+
     @Override
-    public int borderHeight() { return (this._orientation == DiagramElement.Orientation.HORIZONTAL ? Role.height() : Role.width()); }
+    public int borderHeight() {
+        if (this._orientation == DiagramElement.Orientation.HORIZONTAL)    { return this._borderHeight; }
+        else if (this._orientation == DiagramElement.Orientation.VERTICAL) { return this._borderWidth; }
+
+        assert false : "ASSERT :: Try to get border height with invalid orientation.";
+        return -1;
+    }
+
+    void setBorderSize(int borderWidth, int borderHeight) {
+        this._borderWidth  = borderWidth;
+        this._borderHeight = borderHeight;
+    }
 
     // TODO - @modify :: Width and height depending on orientation.
     void _setOrientation(DiagramElement.Orientation orientation) { this._orientation = orientation; }

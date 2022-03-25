@@ -1,51 +1,123 @@
 package com.orm2_graph_library.nodes.predicates;
 
-import com.orm2_graph_library.core.Action;
-import com.orm2_graph_library.core.Diagram;
-import com.orm2_graph_library.core.DiagramElement;
-import com.orm2_graph_library.core.Node;
+import com.orm2_graph_library.core.*;
 import com.orm2_graph_library.nodes_shapes.RectangleShape;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class Predicate extends Node {
     // ================ ATTRIBUTES ================
-    protected ArrayList<Role>    _roles       = new ArrayList<>();
-    private DiagramElement.Orientation _orientation = DiagramElement.Orientation.HORIZONTAL;
+    protected ArrayList<Role>          _roles          = new ArrayList<>();
+    private DiagramElement.Orientation _orientation    = DiagramElement.Orientation.HORIZONTAL;
+    private Set<RolesSequence>         _rolesSequences = new HashSet<>();
 
     // ================ OPERATIONS ================
     // ----------------- creating -----------------
     public Predicate(int arity) {
-        if (arity <= 0) {
-            throw new RuntimeException("ERROR :: attempt to create predicate with non-positive count of roles.");
-        }
+        if (arity <= 0) { throw new RuntimeException("ERROR :: attempt to create predicate with non-positive count of roles."); }
 
         for (int i=0; i<arity; i++) { this._roles.add(new Role(this, i)); }
 
         this._shape = new RectangleShape();
     }
 
-    Predicate(ArrayList<Role> roles) { this._roles.addAll(roles); }
+    Predicate(ArrayList<Role> roles) {
+        assert (roles.size() <= 0) : "ASSERT :: attempt to create predicate with non-positive count of roles.";
+
+        this._roles.addAll(roles);
+    }
+
+    // ---------------- connection ----------------
+    @Override
+    protected void _initSelf(Diagram owner) {
+        owner._actionManager().stopRecordingActions();
+        for (Role role : this._roles) { owner.addNode(role); }
+        owner._actionManager().startRecordingActions();
+    }
 
     // ---------------- attributes ----------------
-    public ArrayList<Role> roles() { return new ArrayList<>(this._roles); }
+    public Role getRole(int index) { return this._roles.get(index); }
+    public int arity() { return this._roles.size(); }
+
     public DiagramElement.Orientation orientation() { return this._orientation; }
 
-    @Override public int borderWidth()  { return this._roles.get(0).borderWidth()  * (this._orientation == DiagramElement.Orientation.HORIZONTAL ? this._roles.size() : 1); }
-    @Override public int borderHeight() { return this._roles.get(0).borderHeight() * (this._orientation == DiagramElement.Orientation.VERTICAL   ? this._roles.size() : 1); }
+    public RolesSequence rolesSequence(int... rolesIndexes) {
+        ArrayList<Role> roles = new ArrayList<>();
+        for (int rolesIndex : rolesIndexes) { roles.add(this._roles.get(rolesIndex)); }
 
-    // TODO - @modify :: Width and height depending on orientation.
+        if (new HashSet<>(roles).size() != roles.size()) {
+            throw new RuntimeException("ERROR :: Attempt to get roles sequence with duplicated roles in it.");
+        }
+
+        RolesSequence rolesSequence = new RolesSequence(roles);
+        rolesSequence._initSelf(this._ownerDiagram);
+        ArrayList<RolesSequence> rolesSequences = this._rolesSequences.stream()
+                .filter(e -> e.equals(rolesSequence))
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        if (rolesSequences.isEmpty()) {
+            this._rolesSequences.add(rolesSequence);
+            this._ownerDiagram.addRolesSequence(rolesSequence);
+
+            return rolesSequence;
+        }
+        else {
+            return rolesSequences.get(0);
+        }
+    }
+
+    public ArrayList<RolesSequence> allRolesSequences() { return new ArrayList<>(this._rolesSequences); }
+
     public void setOrientation(DiagramElement.Orientation orientation) {
         if (!this._orientation.equals(orientation)) {
-            this._owner._actionManager().executeAction(new ChangePredicateOrientationAction(this._owner, this, this._orientation, orientation));
+            this._ownerDiagram._actionManager().executeAction(new ChangePredicateOrientationAction(this._ownerDiagram, this, this._orientation, orientation));
         }
+    }
+
+    public void setRolesBorderSize(int borderWidth, int borderHeight) {
+        for (Role role : this._roles) {
+            role.setBorderSize(borderWidth, borderHeight);
+        }
+    }
+
+    @Override
+    public int borderWidth() {
+        if (this._orientation == DiagramElement.Orientation.HORIZONTAL)    { return this._roles.get(0).borderWidth() * this._roles.size(); }
+        else if (this._orientation == DiagramElement.Orientation.VERTICAL) { return this._roles.get(0).borderWidth(); }
+
+        assert false : "ASSERT :: Try to get border width with invalid orientation.";
+        return -1;
+    }
+
+    @Override
+    public int borderHeight() {
+        if (this._orientation == DiagramElement.Orientation.HORIZONTAL)    { return this._roles.get(0).borderHeight(); }
+        else if (this._orientation == DiagramElement.Orientation.VERTICAL) { return this._roles.get(0).borderHeight() * this._roles.size(); }
+
+        assert false : "ASSERT :: Try to get border height with invalid orientation.";
+        return -1;
+    }
+
+    // ----------------- contract -----------------
+    @Override
+    public <T extends DiagramElement> ArrayList<T> getIncidentElements(Class<T> elementType) {
+        ArrayList<T> result = super.getIncidentElements(elementType);
+        for (Role role : this._roles) { result.addAll(role.getIncidentElements(elementType)); }
+
+        for (RolesSequence rolesSequence : this._rolesSequences) {
+            result.addAll(rolesSequence.getIncidentElements(elementType));
+        }
+
+        return result;
     }
 
     // ================= SUBTYPES =================
     private class ChangePredicateOrientationAction extends Action {
-        private final Predicate            _node;
+        private final Predicate                  _node;
         private final DiagramElement.Orientation _oldOrientation;
         private final DiagramElement.Orientation _newOrientation;
 

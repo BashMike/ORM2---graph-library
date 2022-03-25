@@ -2,26 +2,24 @@ package com.orm2_graph_library.nodes.common;
 
 import com.orm2_graph_library.core.*;
 import com.orm2_graph_library.core.Action;
+import com.orm2_graph_library.nodes.predicates.ObjectifiedPredicate;
+import com.orm2_graph_library.nodes.predicates.Predicate;
 import com.orm2_graph_library.nodes.predicates.RoleParticipant;
 import com.orm2_graph_library.nodes_shapes.EllipseShape;
 import com.orm2_graph_library.post_validators.ObjectTypesNameDuplicationPostValidator;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
 public abstract class ObjectType extends RoleParticipant {
-    // ================== STATIC ==================
-    static private int _verticalEmptyGap   = 10;
-    static private int _horizontalEmptyGap = 10;
-
-    static public int verticalEmptyGap()   { return ObjectType._verticalEmptyGap; }
-    static public int horizontalEmptyGap() { return ObjectType._horizontalEmptyGap; }
-
-    static public void setVerticalEmptyGap(int verticalEmptyGap)     { ObjectType._verticalEmptyGap   = verticalEmptyGap; }
-    static public void setHorizontalEmptyGap(int horizontalEmptyGap) { ObjectType._horizontalEmptyGap = horizontalEmptyGap; }
-
     // ================ ATTRIBUTES ================
     private String _name           = "";
     private boolean _isPersonal    = false;
     private boolean _isIndependent = false;
+
+    protected int _borderWidth  = -1;
+    protected int _borderHeight = -1;
 
     // ================ OPERATIONS ================
     // ----------------- creating -----------------
@@ -44,20 +42,43 @@ public abstract class ObjectType extends RoleParticipant {
     // ---------------- attributes ----------------
     // * Name
     public String name() { return this._name; }
-    public void setName(String name) { this._owner._actionManager().executeAction(new ObjectTypeNameChangeAction(this._owner, this, this._name, name)); }
+    public void setName(String name) { this._ownerDiagram._actionManager().executeAction(new ObjectTypeNameChangeAction(this._ownerDiagram, this, this._name, name)); }
 
     public abstract String basicName();
 
     // * Signs
     public boolean isPersonal() { return this._isPersonal; }
-    public void setIsPersonal(boolean isPersonal) { this._owner._actionManager().executeAction(new ObjectTypeIsPersonalFlagChangeAction(this._owner, this, this._isPersonal, isPersonal)); }
+    public void setIsPersonal(boolean isPersonal) { this._ownerDiagram._actionManager().executeAction(new ObjectTypeIsPersonalFlagChangeAction(this._ownerDiagram, this, this._isPersonal, isPersonal)); }
 
     public boolean isIndependent() { return this._isIndependent; }
-    public void setIsIndependent(boolean isIndependent) { this._owner._actionManager().executeAction(new ObjectTypeIsIndependentFlagChangeAction(this._owner, this, this._isIndependent, isIndependent)); }
+    public void setIsIndependent(boolean isIndependent) { this._ownerDiagram._actionManager().executeAction(new ObjectTypeIsIndependentFlagChangeAction(this._ownerDiagram, this, this._isIndependent, isIndependent)); }
 
-    // TODO - @check :: Check that getting font size like that is proper.
-    @Override public int borderWidth()  { return ObjectType._horizontalEmptyGap * 2 + 80; }
-    @Override public int borderHeight() { return ObjectType._verticalEmptyGap   * 2 + 30; }
+    public void setBorderSize(int borderWidth, int borderHeight) {
+        this._borderWidth  = borderWidth;
+        this._borderHeight = borderHeight;
+    }
+
+    @Override public int borderWidth()  { return this._borderWidth; }
+    @Override public int borderHeight() { return this._borderHeight; }
+
+    // ----------------- contract -----------------
+    @Override
+    public <T extends DiagramElement> ArrayList<T> getIncidentElements(Class<T> elementType) {
+        ArrayList<T> result = super.getIncidentElements(elementType);
+
+        if (Predicate.class.isAssignableFrom(elementType)) {
+            result.addAll(this._ownerDiagram.getElements(elementType)
+                    .filter(e -> e.isIncidentElement(this))
+                    .collect(Collectors.toCollection(ArrayList::new)));
+        }
+        else if (ObjectifiedPredicate.class.isAssignableFrom(elementType)) {
+            result.addAll(this._ownerDiagram.getElements(elementType)
+                    .filter(e -> e.isIncidentElement(this))
+                    .collect(Collectors.toCollection(ArrayList::new)));
+        }
+
+        return result;
+    }
 
     // ================= SUBTYPES =================
     protected abstract class ObjectTypeAttributeChangeAction extends Action {

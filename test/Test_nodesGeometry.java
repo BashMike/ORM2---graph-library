@@ -173,10 +173,8 @@ public class Test_nodesGeometry {
         predicate.setOrientation(DiagramElement.Orientation.VERTICAL);
 
         // Check result
-        Assertions.assertEquals(Role.width(),  predicate.roles().get(0).borderHeight());
-        Assertions.assertEquals(Role.height(), predicate.roles().get(0).borderWidth());
-        Assertions.assertEquals(predicate.roles().get(0).borderWidth(),      predicate.borderWidth());
-        Assertions.assertEquals(predicate.roles().get(0).borderHeight() * 3, predicate.borderHeight());
+        Assertions.assertEquals(predicate.getRole(0).borderWidth(),      predicate.borderWidth());
+        Assertions.assertEquals(predicate.getRole(0).borderHeight() * 3, predicate.borderHeight());
     }
 
     @Test
@@ -190,10 +188,8 @@ public class Test_nodesGeometry {
         predicate.setOrientation(DiagramElement.Orientation.HORIZONTAL);
 
         // Check result
-        Assertions.assertEquals(Role.width(),  predicate.roles().get(0).borderWidth());
-        Assertions.assertEquals(Role.height(), predicate.roles().get(0).borderHeight());
-        Assertions.assertEquals(predicate.roles().get(0).borderWidth() * 3, predicate.borderWidth());
-        Assertions.assertEquals(predicate.roles().get(0).borderHeight(),    predicate.borderHeight());
+        Assertions.assertEquals(predicate.getRole(0).borderWidth() * 3, predicate.borderWidth());
+        Assertions.assertEquals(predicate.getRole(0).borderHeight(),    predicate.borderHeight());
     }
 
     @Test
@@ -207,10 +203,8 @@ public class Test_nodesGeometry {
         predicate.setOrientation(DiagramElement.Orientation.HORIZONTAL);
 
         // Check result
-        Assertions.assertEquals(Role.width(),  predicate.roles().get(0).borderWidth());
-        Assertions.assertEquals(Role.height(), predicate.roles().get(0).borderHeight());
-        Assertions.assertEquals(predicate.roles().get(0).borderWidth() * 3, predicate.borderWidth());
-        Assertions.assertEquals(predicate.roles().get(0).borderHeight(),    predicate.borderHeight());
+        Assertions.assertEquals(predicate.getRole(0).borderWidth() * 3, predicate.borderWidth());
+        Assertions.assertEquals(predicate.getRole(0).borderHeight(),    predicate.borderHeight());
     }
 
     @Test
@@ -224,10 +218,8 @@ public class Test_nodesGeometry {
         predicate.setOrientation(DiagramElement.Orientation.VERTICAL);
 
         // Check result
-        Assertions.assertEquals(Role.width(),  predicate.roles().get(0).borderHeight());
-        Assertions.assertEquals(Role.height(), predicate.roles().get(0).borderWidth());
-        Assertions.assertEquals(predicate.roles().get(0).borderWidth(),      predicate.borderWidth());
-        Assertions.assertEquals(predicate.roles().get(0).borderHeight() * 3, predicate.borderHeight());
+        Assertions.assertEquals(predicate.getRole(0).borderWidth(),      predicate.borderWidth());
+        Assertions.assertEquals(predicate.getRole(0).borderHeight() * 3, predicate.borderHeight());
     }
 
     @Test
@@ -246,10 +238,8 @@ public class Test_nodesGeometry {
         predicate.setOrientation(DiagramElement.Orientation.HORIZONTAL);
 
         // Check result
-        Assertions.assertEquals(Role.width(),  predicate.roles().get(0).borderWidth());
-        Assertions.assertEquals(Role.height(), predicate.roles().get(0).borderHeight());
-        Assertions.assertEquals(predicate.roles().get(0).borderWidth() * 3, predicate.borderWidth());
-        Assertions.assertEquals(predicate.roles().get(0).borderHeight(),    predicate.borderHeight());
+        Assertions.assertEquals(predicate.getRole(0).borderWidth() * 3, predicate.borderWidth());
+        Assertions.assertEquals(predicate.getRole(0).borderHeight(),    predicate.borderHeight());
     }
 
     // =========== OBJECTIFIED PREDICATES ===========

@@ -1,11 +1,14 @@
 package com.orm2_graph_library.core;
 
+import com.orm2_graph_library.edges.SubtypingRelationEdge;
 import com.orm2_graph_library.nodes.predicates.Predicate;
+import com.orm2_graph_library.nodes.predicates.RolesSequence;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 // TODO - @add :: Add storage of all sizes and distances.
 // TODO - @add :: Add SHAPE class (GEOMETRY class has information about size, position and type of diagram element's figure).
@@ -43,19 +46,17 @@ public abstract class Node extends DiagramElement {
         ArrayList<T> result = new ArrayList<>();
 
         if (Edge.class.isAssignableFrom(elementType)) {
-            for (Edge edge : this._owner.getElements(Edge.class).collect(Collectors.toCollection(ArrayList::new))) {
-                if (elementType.isAssignableFrom(edge.getClass()) && (edge.beginAnchorPoint().owner() == this || edge.endAnchorPoint().owner() == this)) {
-                    result.add((T)edge);
-                }
-            }
+            result = this._ownerDiagram.getElements(elementType)
+                    .filter(e -> ((Edge)e).begin() == this || ((Edge)e).end() == this)
+                    .collect(Collectors.toCollection(ArrayList::new));
         }
         else if (Node.class.isAssignableFrom(elementType)) {
-            for (Edge edge : this._owner.getElements(Edge.class).collect(Collectors.toCollection(ArrayList::new))) {
+            for (Edge edge : this._ownerDiagram.getElements(Edge.class).collect(Collectors.toCollection(ArrayList::new))) {
                 if (edge.beginAnchorPoint().owner() == this && elementType.isAssignableFrom(edge.endAnchorPoint().owner().getClass())) {
-                    result.add((T)edge.endAnchorPoint().owner());
+                    result.add((T)edge.end());
                 }
                 if (edge.endAnchorPoint().owner() == this && elementType.isAssignableFrom(edge.beginAnchorPoint().getClass())) {
-                    result.add((T)edge.beginAnchorPoint().owner());
+                    result.add((T)edge.begin());
                 }
             }
         }

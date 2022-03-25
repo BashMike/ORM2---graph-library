@@ -48,26 +48,28 @@ public class Diagram {
     // ---------------- attributes ----------------
     public ArrayList<LogicError> logicErrors() { return new ArrayList<>(this._logicErrors); }
 
+    public ArrayList<LogicError> getLogicErrorsFor(DiagramElement diagramElement) {
+        ArrayList<LogicError> result = new ArrayList<>();
+        for (LogicError logicError : this._logicErrors) {
+            if (logicError.isErrorParticipant(diagramElement)) { result.add(logicError); }
+        }
+
+        return result;
+    }
+
     void _addLogicError(@NotNull LogicError logicError)    { this._logicErrors.add(logicError); }
     void _removeLogicError(@NotNull LogicError logicError) { this._logicErrors.remove(logicError); }
 
     public void addActionErrorListener(ActionErrorListener actionErrorListener) { this._actionErrorListeners.add(actionErrorListener); }
 
     // ----------------- contract -----------------
-    /*
-    public EntityType               addNode(EntityType node)           {            return node; }
-    public ValueType                addNode(ValueType node)            { this._actionManager.executeAction(new AddValueTypeAction(this, node));            return node; }
-    public <T extends Predicate> T  addNode(T node)                    { this._actionManager.executeAction(new AddPredicateAction(this, node));            return node; }
-    public ObjectifiedPredicate     addNode(ObjectifiedPredicate node) { this._actionManager.executeAction(new AddObjectifiedPredicateAction(this, node)); return node; }
-    public <T extends Constraint> T addNode(T node)                    { this._actionManager.executeAction(new AddConstraintAction(this, node));           return node; }
-    */
-
     public <T extends Node> T addNode(T node) {
         if      (node instanceof EntityType)            { this._actionManager.executeAction(new AddEntityTypeAction(this, (EntityType)node)); }
         else if (node instanceof ValueType)             { this._actionManager.executeAction(new AddValueTypeAction (this, (ValueType)node)); }
 
         else if (node instanceof StandalonePredicate)   { this._actionManager.executeAction(new AddPredicateAction(this, (StandalonePredicate)node)); }
         else if (node instanceof InnerPredicate)        { this._actionManager.executeAction(new AddPredicateAction(this, (InnerPredicate)node)); }
+        else if (node instanceof Role)                  { this._actionManager.executeAction(new AddRoleAction     (this, (Role)node)); }
 
         else if (node instanceof ObjectifiedPredicate)  { this._actionManager.executeAction(new AddObjectifiedPredicateAction(this, (ObjectifiedPredicate)node)); }
 
@@ -114,6 +116,8 @@ public class Diagram {
     public <T extends DiagramElement> Stream<T> getElements(Class<T> elementType) {
         return (Stream<T>)this._innerElements.stream().filter(elem -> elementType.isAssignableFrom(elem.getClass()));
     }
+
+    public void addRolesSequence(RolesSequence rolesSequence) { this._addElement(rolesSequence); }
 
     // Undo & redo state
     public boolean canUndoState() { return this._actionManager.canUndo(); }
@@ -165,6 +169,10 @@ public class Diagram {
 
     private class AddPredicateAction<G extends Predicate> extends AddNodeAction<G> {
         public AddPredicateAction(Diagram diagram, @NotNull G node) { super(diagram, node); }
+    }
+
+    private class AddRoleAction<G extends Role> extends AddNodeAction<G> {
+        public AddRoleAction(Diagram diagram, @NotNull G node) { super(diagram, node); }
     }
 
     private class AddObjectifiedPredicateAction extends AddNodeAction<ObjectifiedPredicate> {

@@ -11,10 +11,10 @@ public class ActionManager {
 
     // ================ OPERATIONS ================
     // ----------------- contract -----------------
-    public boolean canUndo() { return (this._currActionIndex >=  0 && this._currActionIndex < this._actions.size()  ); }
-    public boolean canRedo() { return (this._currActionIndex >= -1 && this._currActionIndex < this._actions.size()-1); }
+    boolean canUndo() { return (this._currActionIndex >=  0 && this._currActionIndex < this._actions.size()  ); }
+    boolean canRedo() { return (this._currActionIndex >= -1 && this._currActionIndex < this._actions.size()-1); }
 
-    public void undo() {
+    void undo() {
         if (!this.canUndo()) {
             throw new RuntimeException("ERROR: No action to which undo operation can be performed.");
         }
@@ -23,7 +23,7 @@ public class ActionManager {
         this._currActionIndex--;
     }
 
-    public void redo() {
+    void redo() {
         if (!this.canRedo()) {
             throw new RuntimeException("ERROR: No action to which redo operation can be performed.");
         }

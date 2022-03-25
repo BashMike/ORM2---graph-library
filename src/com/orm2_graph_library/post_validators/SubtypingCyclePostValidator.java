@@ -33,14 +33,12 @@ public class SubtypingCyclePostValidator extends PostValidator {
                     subtypingCycles.add(path);
                 }
                 else {
-                    this._diagram.getElements(SubtypingRelationEdge.class)
-                            .filter(e -> e.beginAnchorPoint().owner() == path.get(path.size()-1))
-                            .forEach(e -> {
-                                ArrayList<EntityType> newPath = new ArrayList<>(path);
-                                newPath.add(e.endAnchorPoint().owner());
+                    for (EntityType entityType : path.get(path.size()-1).getIncidentElements(EntityType.class)) {
+                        ArrayList<EntityType> newPath = new ArrayList<>(path);
+                        newPath.add(entityType);
 
-                                newWave.add(newPath);
-                            });
+                        newWave.add(newPath);
+                    }
                 }
             }
 

@@ -250,21 +250,18 @@ class Test_nodesLifeCycle {
         diagram.addNode(predicate);
 
         // Check result
-        Assertions.assertEquals(3, predicate.roles().size());
+        Assertions.assertEquals(3, predicate.arity());
 
-        Assertions.assertEquals(Role.width(),  predicate.roles().get(0).borderWidth());
-        Assertions.assertEquals(Role.height(), predicate.roles().get(0).borderHeight());
+        Assertions.assertEquals(predicate.getRole(0).borderHeight(), predicate.getRole(1).borderHeight());
+        Assertions.assertEquals(predicate.getRole(0).borderWidth(),  predicate.getRole(1).borderWidth());
+        Assertions.assertEquals(predicate.getRole(0).borderHeight(), predicate.getRole(1).borderHeight());
+        Assertions.assertEquals(predicate.getRole(0).borderWidth(),  predicate.getRole(2).borderWidth());
+        Assertions.assertEquals(predicate.getRole(0).borderHeight(), predicate.getRole(2).borderHeight());
+        Assertions.assertEquals(predicate.getRole(1).borderWidth(),  predicate.getRole(2).borderWidth());
+        Assertions.assertEquals(predicate.getRole(1).borderHeight(), predicate.getRole(2).borderHeight());
 
-        Assertions.assertEquals(predicate.roles().get(0).borderHeight(), predicate.roles().get(1).borderHeight());
-        Assertions.assertEquals(predicate.roles().get(0).borderWidth(),  predicate.roles().get(1).borderWidth());
-        Assertions.assertEquals(predicate.roles().get(0).borderHeight(), predicate.roles().get(1).borderHeight());
-        Assertions.assertEquals(predicate.roles().get(0).borderWidth(),  predicate.roles().get(2).borderWidth());
-        Assertions.assertEquals(predicate.roles().get(0).borderHeight(), predicate.roles().get(2).borderHeight());
-        Assertions.assertEquals(predicate.roles().get(1).borderWidth(),  predicate.roles().get(2).borderWidth());
-        Assertions.assertEquals(predicate.roles().get(1).borderHeight(), predicate.roles().get(2).borderHeight());
-
-        Assertions.assertEquals(predicate.roles().get(0).borderWidth() * 3, predicate.borderWidth());
-        Assertions.assertEquals(predicate.roles().get(0).borderHeight(),    predicate.borderHeight());
+        Assertions.assertEquals(predicate.getRole(0).borderWidth() * 3, predicate.borderWidth());
+        Assertions.assertEquals(predicate.getRole(0).borderHeight(),    predicate.borderHeight());
     }
 
     // =========== OBJECTIFIED PREDICATES ===========
@@ -278,24 +275,18 @@ class Test_nodesLifeCycle {
         objectifiedPredicate.innerPredicate().setOrientation(DiagramElement.Orientation.HORIZONTAL);
 
         // Check result
-        Assertions.assertEquals(3, objectifiedPredicate.innerPredicate().roles().size());
+        Assertions.assertEquals(3, objectifiedPredicate.innerPredicate().arity());
 
-        Assertions.assertEquals(Role.width(),  objectifiedPredicate.innerPredicate().roles().get(0).borderWidth());
-        Assertions.assertEquals(Role.height(), objectifiedPredicate.innerPredicate().roles().get(0).borderHeight());
+        Assertions.assertEquals(objectifiedPredicate.innerPredicate().getRole(0).borderHeight(), objectifiedPredicate.innerPredicate().getRole(1).borderHeight());
+        Assertions.assertEquals(objectifiedPredicate.innerPredicate().getRole(0).borderWidth(),  objectifiedPredicate.innerPredicate().getRole(1).borderWidth());
+        Assertions.assertEquals(objectifiedPredicate.innerPredicate().getRole(0).borderHeight(), objectifiedPredicate.innerPredicate().getRole(1).borderHeight());
+        Assertions.assertEquals(objectifiedPredicate.innerPredicate().getRole(0).borderWidth(),  objectifiedPredicate.innerPredicate().getRole(2).borderWidth());
+        Assertions.assertEquals(objectifiedPredicate.innerPredicate().getRole(0).borderHeight(), objectifiedPredicate.innerPredicate().getRole(2).borderHeight());
+        Assertions.assertEquals(objectifiedPredicate.innerPredicate().getRole(1).borderWidth(),  objectifiedPredicate.innerPredicate().getRole(2).borderWidth());
+        Assertions.assertEquals(objectifiedPredicate.innerPredicate().getRole(1).borderHeight(), objectifiedPredicate.innerPredicate().getRole(2).borderHeight());
 
-        Assertions.assertEquals(objectifiedPredicate.innerPredicate().roles().get(0).borderHeight(), objectifiedPredicate.innerPredicate().roles().get(1).borderHeight());
-        Assertions.assertEquals(objectifiedPredicate.innerPredicate().roles().get(0).borderWidth(),  objectifiedPredicate.innerPredicate().roles().get(1).borderWidth());
-        Assertions.assertEquals(objectifiedPredicate.innerPredicate().roles().get(0).borderHeight(), objectifiedPredicate.innerPredicate().roles().get(1).borderHeight());
-        Assertions.assertEquals(objectifiedPredicate.innerPredicate().roles().get(0).borderWidth(),  objectifiedPredicate.innerPredicate().roles().get(2).borderWidth());
-        Assertions.assertEquals(objectifiedPredicate.innerPredicate().roles().get(0).borderHeight(), objectifiedPredicate.innerPredicate().roles().get(2).borderHeight());
-        Assertions.assertEquals(objectifiedPredicate.innerPredicate().roles().get(1).borderWidth(),  objectifiedPredicate.innerPredicate().roles().get(2).borderWidth());
-        Assertions.assertEquals(objectifiedPredicate.innerPredicate().roles().get(1).borderHeight(), objectifiedPredicate.innerPredicate().roles().get(2).borderHeight());
-
-        Assertions.assertEquals(objectifiedPredicate.innerPredicate().roles().get(0).borderWidth() * 3, objectifiedPredicate.innerPredicate().borderWidth());
-        Assertions.assertEquals(objectifiedPredicate.innerPredicate().roles().get(0).borderHeight(),    objectifiedPredicate.innerPredicate().borderHeight());
-
-        Assertions.assertEquals(objectifiedPredicate.innerPredicate().borderWidth()  + ObjectifiedPredicate.horizontalEmptyGap() * 2, objectifiedPredicate.borderWidth());
-        Assertions.assertEquals(objectifiedPredicate.innerPredicate().borderHeight() + ObjectifiedPredicate.horizontalEmptyGap() * 2, objectifiedPredicate.borderHeight());
+        Assertions.assertEquals(objectifiedPredicate.innerPredicate().getRole(0).borderWidth() * 3, objectifiedPredicate.innerPredicate().borderWidth());
+        Assertions.assertEquals(objectifiedPredicate.innerPredicate().getRole(0).borderHeight(),    objectifiedPredicate.innerPredicate().borderHeight());
     }
 
     // ================= CONSTRAINTS ================
@@ -308,7 +299,5 @@ class Test_nodesLifeCycle {
 
         // Check result
         Assertions.assertTrue(constraint.isOwner(diagram));
-        Assertions.assertEquals(Constraint.size(), constraint.borderWidth());
-        Assertions.assertEquals(Constraint.size(), constraint.borderHeight());
     }
 }

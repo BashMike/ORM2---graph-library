@@ -13,8 +13,12 @@ public class ObjectTypesNameDuplicationLogicError extends LogicError {
     // ================ OPERATIONS ================
     // ----------------- creating -----------------
     public ObjectTypesNameDuplicationLogicError(String name, ArrayList<ObjectType> objectTypes) {
+        super();
+
         this._name = name;
         this._objectTypes.addAll(objectTypes);
+
+        this._errorParticipants.addAll(this._objectTypes);
     }
 
     // ---------------- attributes ----------------

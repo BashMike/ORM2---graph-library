@@ -12,7 +12,7 @@ public abstract class RoleParticipant extends Node implements Movable {
     // ---------------- attributes ----------------
     @Override
     public void moveTo(Point leftTop) {
-        this._owner._actionManager().executeAction(new MoveRoleParticipantAction(this._owner, this, this._leftTop, leftTop));
+        this._ownerDiagram._actionManager().executeAction(new MoveRoleParticipantAction(this._ownerDiagram, this, this._leftTop, leftTop));
     }
 
     @Override
@@ -20,7 +20,7 @@ public abstract class RoleParticipant extends Node implements Movable {
         Point newLeftTop = new Point(this._leftTop);
         newLeftTop.translate(shiftX, shiftY);
 
-        this._owner._actionManager().executeAction(new MoveRoleParticipantAction(this._owner, this, this._leftTop, newLeftTop));
+        this._ownerDiagram._actionManager().executeAction(new MoveRoleParticipantAction(this._ownerDiagram, this, this._leftTop, newLeftTop));
     }
 
     // ================= SUBTYPES =================

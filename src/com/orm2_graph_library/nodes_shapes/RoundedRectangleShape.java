@@ -7,10 +7,14 @@ import java.awt.*;
 import java.util.ArrayList;
 
 public class RoundedRectangleShape extends Shape {
+    final private int _borderRoundingRadius;
+
+    public RoundedRectangleShape(int borderRoundingRadius) { this._borderRoundingRadius = borderRoundingRadius; }
+
     @Override
     protected GeometryApproximation _geometryApproximation(Point borderLeftTop, int borderWidth, int borderHeight) {
         int arcPointsNum = 5;
-        int radius       = 15;
+        int radius       = this._borderRoundingRadius;
         ArrayList<Point> points = new ArrayList<>();
 
         if (radius != 0) {

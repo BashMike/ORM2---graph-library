@@ -7,7 +7,9 @@ public class EntityTypeWithNoneRefModeLogicError extends LogicError {
     private final EntityType _entityType;
 
     public EntityTypeWithNoneRefModeLogicError(EntityType entityType) {
+        super();
         this._entityType = entityType;
+        this._errorParticipants.add(this._entityType);
     }
 
     public EntityType entityType() { return this._entityType; }

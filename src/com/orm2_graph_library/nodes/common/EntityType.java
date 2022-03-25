@@ -62,17 +62,13 @@ public class EntityType extends ObjectType {
     @Override
     public String basicName() { return "Entity Type"; }
 
-    public AnchorPoint<EntityType> centerAnchorPoint()            { return new NodeAnchorPoint<>(this, AnchorPosition.CENTER); }
-    public AnchorPoint<EntityType> upAnchorPoint()                { return new NodeAnchorPoint<>(this, AnchorPosition.UP); }
-    public AnchorPoint<EntityType> downAnchorPoint()              { return new NodeAnchorPoint<>(this, AnchorPosition.DOWN); }
-    public AnchorPoint<EntityType> rightAnchorPoint()             { return new NodeAnchorPoint<>(this, AnchorPosition.RIGHT); }
-    public AnchorPoint<EntityType> leftAnchorPoint()              { return new NodeAnchorPoint<>(this, AnchorPosition.LEFT); }
+    public AnchorPoint<EntityType> centerAnchorPoint() { return new NodeAnchorPoint<>(this, AnchorPosition.CENTER); }
 
     public RefMode refMode() { return this._refMode; }
-    public void setRefMode(RefMode refMode) { this._owner._actionManager().executeAction(new EntityTypeRefModeChangeAction(this._owner, this, this._refMode, refMode)); }
+    public void setRefMode(RefMode refMode) { this._ownerDiagram._actionManager().executeAction(new EntityTypeRefModeChangeAction(this._ownerDiagram, this, this._refMode, refMode)); }
 
     public DataType dataType() { return this._dataType; }
-    public void setDataType(DataType dataType) { this._owner._actionManager().executeAction(new EntityTypeDataTypeChangeAction(this._owner, this, this._dataType, dataType)); }
+    public void setDataType(DataType dataType) { this._ownerDiagram._actionManager().executeAction(new EntityTypeDataTypeChangeAction(this._ownerDiagram, this, this._dataType, dataType)); }
 
     // ================= SUBTYPES =================
     // TODO - @add :: Validation on setting reference mode and data type for it.
