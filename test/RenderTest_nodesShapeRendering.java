@@ -8,7 +8,6 @@ import com.orm2_graph_library.nodes.constraints.Constraint;
 import com.orm2_graph_library.nodes.constraints.SubsetConstraint;
 import com.orm2_graph_library.nodes.predicates.ObjectifiedPredicate;
 import com.orm2_graph_library.nodes.predicates.Predicate;
-import com.orm2_graph_library.nodes.predicates.StandalonePredicate;
 
 import javax.swing.*;
 import java.awt.*;
@@ -52,9 +51,9 @@ public class RenderTest_nodesShapeRendering extends JFrame {
         Diagram diagram = new Diagram();
 
         // Create nodes
-        StandalonePredicate sp0 = diagram.addNode(new StandalonePredicate(4));
-        StandalonePredicate sp1 = diagram.addNode(new StandalonePredicate(3));
-        ObjectifiedPredicate op0 = diagram.addNode(new ObjectifiedPredicate(10));
+        Predicate sp0 = diagram.addNode(new Predicate(4));
+        Predicate sp1 = diagram.addNode(new Predicate(3));
+        ObjectifiedPredicate op0 = diagram.addNode(new ObjectifiedPredicate(sp1));
 
         EntityType e0 = diagram.addNode(new EntityType());
         EntityType e1 = diagram.addNode(new EntityType());

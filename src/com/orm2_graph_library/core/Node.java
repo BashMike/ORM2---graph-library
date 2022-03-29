@@ -1,5 +1,7 @@
 package com.orm2_graph_library.core;
 
+import com.orm2_graph_library.anchor_points.AnchorPosition;
+import com.orm2_graph_library.anchor_points.NodeAnchorPoint;
 import com.orm2_graph_library.edges.SubtypingRelationEdge;
 import com.orm2_graph_library.nodes.predicates.Predicate;
 import com.orm2_graph_library.nodes.predicates.RolesSequence;
@@ -7,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -21,10 +24,6 @@ public abstract class Node extends DiagramElement {
     // ================ OPERATIONS ================
     // ----------------- creating -----------------
     public Node() {}
-
-    // ---------------- connection ----------------
-    @Override
-    void setOwner(Diagram owner) { super.setOwner(owner); }
 
     // ---------------- attributes ----------------
     public Point borderLeftTop()     { return new Point(this._leftTop.x, this._leftTop.y); }

@@ -26,4 +26,7 @@ public abstract class LogicError extends Error {
 
         return isSameType && areSameErrorParticipants;
     }
+
+    @Override
+    public int hashCode() { return this._errorParticipants.size(); }
 }

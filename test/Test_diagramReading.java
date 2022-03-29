@@ -24,9 +24,9 @@ public class Test_diagramReading {
     void objectTypesWithConstrainedPredicates() {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
-        StandalonePredicate sp0 = diagram.addNode(new StandalonePredicate(3));
-        StandalonePredicate sp1 = diagram.addNode(new StandalonePredicate(3));
-        StandalonePredicate sp2 = diagram.addNode(new StandalonePredicate(3));
+        Predicate sp0 = diagram.addNode(new Predicate(3));
+        Predicate sp1 = diagram.addNode(new Predicate(3));
+        Predicate sp2 = diagram.addNode(new Predicate(3));
 
         EntityType et0 = diagram.addNode(new EntityType());
         EntityType et1 = diagram.addNode(new EntityType());
@@ -69,9 +69,9 @@ public class Test_diagramReading {
     void rolesSequencesWithSeveralConstrainsOnIt() {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
-        StandalonePredicate sp0 = diagram.addNode(new StandalonePredicate(4));
-        StandalonePredicate sp1 = diagram.addNode(new StandalonePredicate(2));
-        StandalonePredicate sp2 = diagram.addNode(new StandalonePredicate(3));
+        Predicate sp0 = diagram.addNode(new Predicate(4));
+        Predicate sp1 = diagram.addNode(new Predicate(2));
+        Predicate sp2 = diagram.addNode(new Predicate(3));
 
         Constraint c0 = new SubsetConstraint();
         Constraint c1 = new UniquenessConstraint();
@@ -105,10 +105,10 @@ public class Test_diagramReading {
     void binPredicate_entityTypeAndEntityType() {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
-        StandalonePredicate standalonePredicate0 = diagram.addNode(new StandalonePredicate(2));
-        StandalonePredicate standalonePredicate1 = diagram.addNode(new StandalonePredicate(3));
-        StandalonePredicate standalonePredicate2 = diagram.addNode(new StandalonePredicate(2));
-        StandalonePredicate standalonePredicate3 = diagram.addNode(new StandalonePredicate(2));
+        Predicate standalonePredicate0 = diagram.addNode(new Predicate(2));
+        Predicate standalonePredicate1 = diagram.addNode(new Predicate(3));
+        Predicate standalonePredicate2 = diagram.addNode(new Predicate(2));
+        Predicate standalonePredicate3 = diagram.addNode(new Predicate(2));
 
         EntityType entityType0 = diagram.addNode(new EntityType());
         EntityType entityType1 = diagram.addNode(new EntityType());
@@ -148,10 +148,10 @@ public class Test_diagramReading {
     void binPredicate_entityTypeAndValueType() {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
-        StandalonePredicate standalonePredicate0 = diagram.addNode(new StandalonePredicate(2));
-        StandalonePredicate standalonePredicate1 = diagram.addNode(new StandalonePredicate(3));
-        StandalonePredicate standalonePredicate2 = diagram.addNode(new StandalonePredicate(2));
-        StandalonePredicate standalonePredicate3 = diagram.addNode(new StandalonePredicate(2));
+        Predicate standalonePredicate0 = diagram.addNode(new Predicate(2));
+        Predicate standalonePredicate1 = diagram.addNode(new Predicate(3));
+        Predicate standalonePredicate2 = diagram.addNode(new Predicate(2));
+        Predicate standalonePredicate3 = diagram.addNode(new Predicate(2));
 
         EntityType entityType0 = diagram.addNode(new EntityType());
         EntityType entityType1 = diagram.addNode(new EntityType());
@@ -192,9 +192,9 @@ public class Test_diagramReading {
     void predicate_constraintedWithOtherPredicate() {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
-        StandalonePredicate sp0 = diagram.addNode(new StandalonePredicate(3));
-        StandalonePredicate sp1 = diagram.addNode(new StandalonePredicate(3));
-        StandalonePredicate sp2 = diagram.addNode(new StandalonePredicate(3));
+        Predicate sp0 = diagram.addNode(new Predicate(3));
+        Predicate sp1 = diagram.addNode(new Predicate(3));
+        Predicate sp2 = diagram.addNode(new Predicate(3));
 
         EntityType et0 = diagram.addNode(new EntityType());
         EntityType et1 = diagram.addNode(new EntityType());
@@ -236,9 +236,9 @@ public class Test_diagramReading {
     void predicate_constraintedWithObjectifiedPredicate() {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
-        StandalonePredicate sp0 = diagram.addNode(new StandalonePredicate(3));
-        StandalonePredicate sp2 = diagram.addNode(new StandalonePredicate(3));
-        ObjectifiedPredicate op0 = diagram.addNode(new ObjectifiedPredicate(3));
+        Predicate p0 = diagram.addNode(new Predicate(3));
+        Predicate p1 = diagram.addNode(new Predicate(3));
+        ObjectifiedPredicate op0 = diagram.addNode(new ObjectifiedPredicate(p1));
 
         EntityType et0 = diagram.addNode(new EntityType());
         EntityType et1 = diagram.addNode(new EntityType());
@@ -247,19 +247,19 @@ public class Test_diagramReading {
 
         SubsetConstraint c0 = diagram.addNode(new SubsetConstraint());
 
-        diagram.connectByRoleRelation(sp0.getRole(0).anchorPoint(AnchorPosition.LEFT),  et0.centerAnchorPoint());
-        diagram.connectByRoleRelation(sp2.getRole(1).anchorPoint(AnchorPosition.UP),    vt0.centerAnchorPoint());
-        diagram.connectByRoleRelation(sp0.getRole(2).anchorPoint(AnchorPosition.RIGHT), et1.centerAnchorPoint());
+        diagram.connectByRoleRelation(p0.getRole(0).anchorPoint(AnchorPosition.LEFT),  et0.centerAnchorPoint());
+        diagram.connectByRoleRelation(p1.getRole(1).anchorPoint(AnchorPosition.UP),    vt0.centerAnchorPoint());
+        diagram.connectByRoleRelation(p0.getRole(2).anchorPoint(AnchorPosition.RIGHT), et1.centerAnchorPoint());
 
         diagram.connectByRoleRelation(op0.innerPredicate().getRole(0).anchorPoint(AnchorPosition.LEFT),  et0.centerAnchorPoint());
         diagram.connectByRoleRelation(op0.innerPredicate().getRole(1).anchorPoint(AnchorPosition.DOWN),  et1.centerAnchorPoint());
         diagram.connectByRoleRelation(op0.innerPredicate().getRole(2).anchorPoint(AnchorPosition.RIGHT), vt0.centerAnchorPoint());
 
-        diagram.connectByRoleRelation(sp2.getRole(0).anchorPoint(AnchorPosition.LEFT),  et1.centerAnchorPoint());
-        diagram.connectByRoleRelation(sp2.getRole(1).anchorPoint(AnchorPosition.UP),    vt0.centerAnchorPoint());
-        diagram.connectByRoleRelation(sp2.getRole(2).anchorPoint(AnchorPosition.RIGHT), vt1.centerAnchorPoint());
+        diagram.connectByRoleRelation(p1.getRole(0).anchorPoint(AnchorPosition.LEFT),  et1.centerAnchorPoint());
+        diagram.connectByRoleRelation(p1.getRole(1).anchorPoint(AnchorPosition.UP),    vt0.centerAnchorPoint());
+        diagram.connectByRoleRelation(p1.getRole(2).anchorPoint(AnchorPosition.RIGHT), vt1.centerAnchorPoint());
 
-        diagram.connectByRoleConstraintRelation(sp0.rolesSequence(0, 1), c0.centerAnchorPoint());
+        diagram.connectByRoleConstraintRelation(p0.rolesSequence(0, 1), c0.centerAnchorPoint());
         diagram.connectByRoleConstraintRelation(op0.innerPredicate().rolesSequence(0, 2), c0.centerAnchorPoint());
 
         Set<Predicate> real_predicates = diagram.getElements(Predicate.class)
@@ -271,8 +271,27 @@ public class Test_diagramReading {
 
         // Check result
         Set<Predicate> exp_predicates = new HashSet<>();
-        exp_predicates.add(sp0);
+        exp_predicates.add(p0);
 
         Assertions.assertEquals(exp_predicates, real_predicates);
+    }
+
+    @Test
+    void rolesSequence_cashingGottenRolesSequence() {
+        // Prepare data and start testing
+        Diagram diagram = new Diagram();
+        Predicate p = diagram.addNode(new Predicate(3));
+
+        // Check result
+        Set<Predicate> exp_predicates = new HashSet<>();
+        exp_predicates.add(p);
+
+        Assertions.assertEquals(p.rolesSequence(0), p.rolesSequence(0));
+        Assertions.assertEquals(p.rolesSequence(1), p.rolesSequence(1));
+        Assertions.assertEquals(p.rolesSequence(2), p.rolesSequence(2));
+        Assertions.assertEquals(p.rolesSequence(0, 1), p.rolesSequence(0, 1));
+        Assertions.assertEquals(p.rolesSequence(0, 2), p.rolesSequence(0, 2));
+        Assertions.assertEquals(p.rolesSequence(1, 2), p.rolesSequence(1, 2));
+        Assertions.assertEquals(p.rolesSequence(0, 1, 2), p.rolesSequence(0, 1, 2));
     }
 }

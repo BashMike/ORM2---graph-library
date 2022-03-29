@@ -1,160 +1,132 @@
 import com.orm2_graph_library.core.Diagram;
 import com.orm2_graph_library.core.DiagramElement;
+import com.orm2_graph_library.core.LogicError;
+import com.orm2_graph_library.edges.RoleConstraintRelationEdge;
+import com.orm2_graph_library.edges.RoleRelationEdge;
+import com.orm2_graph_library.edges.SubtypingConstraintRelationEdge;
+import com.orm2_graph_library.edges.SubtypingRelationEdge;
 import com.orm2_graph_library.nodes.common.EntityType;
-import com.orm2_graph_library.nodes.common.ObjectType;
+import com.orm2_graph_library.nodes.common.ValueType;
 import com.orm2_graph_library.nodes.constraints.Constraint;
 import com.orm2_graph_library.nodes.constraints.SubsetConstraint;
 import com.orm2_graph_library.nodes.predicates.ObjectifiedPredicate;
 import com.orm2_graph_library.nodes.predicates.Predicate;
 import com.orm2_graph_library.nodes.predicates.Role;
-import com.orm2_graph_library.nodes.predicates.StandalonePredicate;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import utils.Test_globalTest;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
-class Test_nodesLifeCycle {
-    // ================ ENTITY TYPES ================
+class Test_nodesLifeCycle extends Test_globalTest {
+    // ==================== TEST ====================
+    // ---------------- ENTITY TYPES ----------------
     @Test
-    void entityType_creating() {
+    void entityType_adding() {
         // Prepare data and start testing
-        Diagram diagram = new Diagram();
-        ArrayList<EntityType> createdEntityTypes = new ArrayList<>();
-        ArrayList<EntityType> gottenEntityTypes;
-
-        for (int i=0; i<5; i++) { createdEntityTypes.add(diagram.addNode(new EntityType())); }
-        gottenEntityTypes = diagram.getElements(EntityType.class).collect(Collectors.toCollection(ArrayList::new));
+        for (int i=0; i<5; i++) { test_addDiagramElement(this._diagram.addNode(new EntityType())); }
 
         // Check result
-        Assertions.assertEquals(gottenEntityTypes, createdEntityTypes);
-        Assertions.assertTrue(diagram.getElements(DiagramElement.class).allMatch(DiagramElement::hasOwner));
-
-        Set<String> names     = new HashSet<>();
-        Set<String> exp_names = new HashSet<>();
-
-        diagram.getElements(ObjectType.class).forEach(e -> names.add(e.name()));
-        for (int i=0; i<5; i++) { exp_names.add("Entity Type " + (i+1)); }
-
-        Assertions.assertEquals(names, exp_names);
+        Assertions.assertTrue(this._diagram.getElements(DiagramElement.class).allMatch(e -> e instanceof EntityType));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 1")));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 2")));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 3")));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 4")));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 5")));
     }
 
     @Test
-    void undoAddingEntityTypes() {
+    void entityType_undoAdding() {
         // Prepare data and start testing
-        Diagram diagram = new Diagram();
-        ArrayList<EntityType> createdEntityTypes = new ArrayList<>();
+        test_addDiagramElement(this._diagram.addNode(new EntityType()));
+        test_addDiagramElement(this._diagram.addNode(new EntityType()));
+        this._diagram.addNode(new EntityType());
+        this._diagram.addNode(new EntityType());
+        this._diagram.addNode(new EntityType());
 
-        for (int i=0; i<5; i++) {
-            createdEntityTypes.add(diagram.addNode(new EntityType()));
+        for (int i=0; i<3; i++) { this._diagram.undoState(); }
+
+        // Check result
+        Assertions.assertTrue(this._diagram.canRedoState());
+        Assertions.assertTrue(this._diagram.getElements(DiagramElement.class).allMatch(e -> e instanceof EntityType));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 1")));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 2")));
+    }
+
+    @Test
+    void entityType_redoAdding() {
+        // Prepare data and start testing
+        for (int i=0; i<5; i++) { test_addDiagramElement(this._diagram.addNode(new EntityType())); }
+
+        for (int i=0; i<3; i++) { this._diagram.undoState(); }
+        for (int i=0; i<3; i++) { this._diagram.redoState(); }
+
+        // Check result
+        Assertions.assertFalse(this._diagram.canRedoState());
+        Assertions.assertTrue(this._diagram.getElements(DiagramElement.class).allMatch(e -> e instanceof EntityType));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 1")));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 2")));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 3")));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 4")));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 5")));
+    }
+
+    @Test
+    void entityType_addingAfterUndo() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new EntityType()));
+        test_addDiagramElement(this._diagram.addNode(new EntityType()));
+        this._diagram.addNode(new EntityType());
+        this._diagram.addNode(new EntityType());
+        this._diagram.addNode(new EntityType());
+
+        for (int i=0; i<3; i++) { this._diagram.undoState(); }
+
+        test_addDiagramElement(this._diagram.addNode(new EntityType()));
+        test_addDiagramElement(this._diagram.addNode(new EntityType()));
+
+        // Check result
+        Assertions.assertFalse(this._diagram.canRedoState());
+        Assertions.assertTrue(this._diagram.getElements(DiagramElement.class).allMatch(e -> e instanceof EntityType));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 1")));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 2")));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 3")));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 4")));
+    }
+
+    @Test
+    void entityType_removing() {
+        // Prepare data and start testing
+        for (int i=0; i<5; i++) { test_addDiagramElement(this._diagram.addNode(new EntityType())); }
+
+        this._diagram.removeNode(test_entityTypes.get(2));
+        this._diagram.removeNode(test_entityTypes.get(0));
+        test_removeDiagramElement(test_entityTypes.get(2));
+        test_removeDiagramElement(test_entityTypes.get(0));
+
+        // Check result
+        Assertions.assertTrue(this._diagram.getElements(DiagramElement.class).allMatch(e -> e instanceof EntityType));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 2")));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 4")));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 5")));
+    }
+
+    @Test
+    void entityType_undoRemoving() {
+        // Prepare data and start testing
+        for (int i=0; i<5; i++) { test_addDiagramElement(this._diagram.addNode(new EntityType())); }
+
+        for (int i=0; i<3; i++) {
+            this._diagram.removeNode(test_entityTypes.get(i));
         }
 
-        diagram.undoState();
-        diagram.undoState();
-        diagram.undoState();
-
-        createdEntityTypes = new ArrayList<>(createdEntityTypes.subList(0, 2));
-        ArrayList<EntityType> gottenEntityTypes = diagram.getElements(EntityType.class).collect(Collectors.toCollection(ArrayList::new));
+        for (int i=0; i<3; i++) { this._diagram.undoState(); }
 
         // Check result
-        Assertions.assertEquals(gottenEntityTypes, createdEntityTypes);
-        Assertions.assertTrue(diagram.getElements(DiagramElement.class).allMatch(DiagramElement::hasOwner));
-        Assertions.assertTrue(diagram.canRedoState());
-    }
-
-    @Test
-    void redoAddingEntityTypes() {
-        // Prepare data and start testing
-        Diagram diagram = new Diagram();
-        ArrayList<EntityType> createdEntityTypes = new ArrayList<>();
-
-        for (int i=0; i<5; i++) { createdEntityTypes.add(diagram.addNode(new EntityType())); }
-
-        diagram.undoState();
-        diagram.undoState();
-        diagram.undoState();
-        diagram.redoState();
-        diagram.redoState();
-        diagram.redoState();
-
-        ArrayList<EntityType> gottenEntityTypes = diagram.getElements(EntityType.class).collect(Collectors.toCollection(ArrayList::new));
-
-        // Check result
-        Assertions.assertEquals(gottenEntityTypes, createdEntityTypes);
-        Assertions.assertTrue(diagram.getElements(DiagramElement.class).allMatch(DiagramElement::hasOwner));
-        Assertions.assertFalse(diagram.canRedoState());
-    }
-
-    @Test
-    void addEntityTypesAfterUndo() {
-        // Prepare data and start testing
-        Diagram diagram = new Diagram();
-        ArrayList<EntityType> createdEntityTypes = new ArrayList<>();
-
-        for (int i=0; i<5; i++) {
-            createdEntityTypes.add(diagram.addNode(new EntityType()));
-        }
-
-        diagram.undoState();
-        diagram.undoState();
-        diagram.undoState();
-
-        createdEntityTypes = new ArrayList<>(createdEntityTypes.subList(0, 2));
-        createdEntityTypes.add(diagram.addNode(new EntityType()));
-
-        ArrayList<EntityType> gottenEntityTypes = diagram.getElements(EntityType.class).collect(Collectors.toCollection(ArrayList::new));
-
-        // Check result
-        Assertions.assertEquals(gottenEntityTypes, createdEntityTypes);
-        Assertions.assertTrue(diagram.getElements(DiagramElement.class).allMatch(DiagramElement::hasOwner));
-        Assertions.assertFalse(diagram.canRedoState());
-    }
-
-    @Test
-    void removeEntityType() {
-        // Prepare data and start testing
-        Diagram diagram = new Diagram();
-        ArrayList<EntityType> createdEntityTypes = new ArrayList<>();
-
-        for (int i=0; i<5; i++) { createdEntityTypes.add(diagram.addNode(new EntityType())); }
-
-        EntityType entityType = diagram.getElements(EntityType.class).findFirst().get();
-        createdEntityTypes.remove(entityType);
-        diagram.removeNode(entityType);
-
-        createdEntityTypes = new ArrayList<>(createdEntityTypes.subList(0, 4));
-        ArrayList<EntityType> gottenEntityTypes = diagram.getElements(EntityType.class).collect(Collectors.toCollection(ArrayList::new));
-
-        // Check result
-        Assertions.assertEquals(gottenEntityTypes, createdEntityTypes);
-        Assertions.assertTrue(diagram.getElements(DiagramElement.class).allMatch(DiagramElement::hasOwner));
-    }
-
-    @Test
-    void undoRemovingEntityTypes() {
-        // Prepare data and start testing
-        Diagram diagram = new Diagram();
-        ArrayList<EntityType> createdEntityTypes = new ArrayList<>();
-        ArrayList<EntityType> gottenEntityTypes;
-
-        for (int i=0; i<5; i++) { createdEntityTypes.add(diagram.addNode(new EntityType())); }
-
-        diagram.removeNode(diagram.getElements(EntityType.class).findFirst().get());
-        diagram.removeNode(diagram.getElements(EntityType.class).findFirst().get());
-        diagram.removeNode(diagram.getElements(EntityType.class).findFirst().get());
-
-        diagram.undoState();
-        diagram.undoState();
-        diagram.undoState();
-
-        gottenEntityTypes = diagram.getElements(EntityType.class).collect(Collectors.toCollection(ArrayList::new));
-
-        // Check result
-        Assertions.assertEquals(new HashSet<>(gottenEntityTypes), new HashSet<>(createdEntityTypes));
-        Assertions.assertTrue(diagram.getElements(DiagramElement.class).allMatch(DiagramElement::hasOwner));
-        Assertions.assertTrue(diagram.canRedoState());
+        Assertions.assertTrue(this._diagram.canRedoState());
     }
 
     @Test
@@ -181,7 +153,7 @@ class Test_nodesLifeCycle {
 
         // Check result
         Assertions.assertEquals(gottenEntityTypes, createdEntityTypes);
-        Assertions.assertTrue(diagram.getElements(DiagramElement.class).allMatch(DiagramElement::hasOwner));
+        Assertions.assertTrue(diagram.getElements(DiagramElement.class).allMatch(DiagramElement::hasOwnerDiagram));
         Assertions.assertFalse(diagram.canRedoState());
     }
 
@@ -209,7 +181,7 @@ class Test_nodesLifeCycle {
 
         // Check result
         Assertions.assertEquals(new HashSet<>(gottenEntityTypes), new HashSet<>(createdEntityTypes));
-        Assertions.assertTrue(diagram.getElements(DiagramElement.class).allMatch(DiagramElement::hasOwner));
+        Assertions.assertTrue(diagram.getElements(DiagramElement.class).allMatch(DiagramElement::hasOwnerDiagram));
         Assertions.assertFalse(diagram.canRedoState());
     }
 
@@ -237,7 +209,7 @@ class Test_nodesLifeCycle {
 
         // Check result
         Assertions.assertEquals(gottenEntityTypes, createdEntityTypes);
-        Assertions.assertTrue(diagram.getElements(DiagramElement.class).allMatch(DiagramElement::hasOwner));
+        Assertions.assertTrue(diagram.getElements(DiagramElement.class).allMatch(DiagramElement::hasOwnerDiagram));
         Assertions.assertFalse(diagram.canRedoState());
     }
 
@@ -246,7 +218,7 @@ class Test_nodesLifeCycle {
     void predicate_creating() {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
-        Predicate predicate = new StandalonePredicate(3);
+        Predicate predicate = new Predicate(3);
         diagram.addNode(predicate);
 
         // Check result
@@ -269,8 +241,7 @@ class Test_nodesLifeCycle {
     void objectifiedPredicate_creating() {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
-        ObjectifiedPredicate objectifiedPredicate = new ObjectifiedPredicate(3);
-        diagram.addNode(objectifiedPredicate);
+        ObjectifiedPredicate objectifiedPredicate = diagram.addNode(new ObjectifiedPredicate(new Predicate(3)));
 
         objectifiedPredicate.innerPredicate().setOrientation(DiagramElement.Orientation.HORIZONTAL);
 
@@ -298,6 +269,6 @@ class Test_nodesLifeCycle {
         diagram.addNode(constraint);
 
         // Check result
-        Assertions.assertTrue(constraint.isOwner(diagram));
+        Assertions.assertTrue(constraint.isOwnerDiagram(diagram));
     }
 }

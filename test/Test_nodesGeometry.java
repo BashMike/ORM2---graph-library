@@ -2,8 +2,6 @@ import com.orm2_graph_library.core.Diagram;
 import com.orm2_graph_library.core.DiagramElement;
 import com.orm2_graph_library.nodes.common.EntityType;
 import com.orm2_graph_library.nodes.predicates.Predicate;
-import com.orm2_graph_library.nodes.predicates.Role;
-import com.orm2_graph_library.nodes.predicates.StandalonePredicate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -167,7 +165,7 @@ public class Test_nodesGeometry {
     void predicate_changeOrientationToVertical() {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
-        Predicate predicate = new StandalonePredicate(3);
+        Predicate predicate = new Predicate(3);
         diagram.addNode(predicate);
 
         predicate.setOrientation(DiagramElement.Orientation.VERTICAL);
@@ -181,7 +179,7 @@ public class Test_nodesGeometry {
     void predicate_changeOrientationBackToHorizontal() {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
-        Predicate predicate = new StandalonePredicate(3);
+        Predicate predicate = new Predicate(3);
         diagram.addNode(predicate);
 
         predicate.setOrientation(DiagramElement.Orientation.VERTICAL);
@@ -196,7 +194,7 @@ public class Test_nodesGeometry {
     void predicate_changeOrientationToHorizontalTwice() {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
-        Predicate predicate = new StandalonePredicate(3);
+        Predicate predicate = new Predicate(3);
         diagram.addNode(predicate);
 
         predicate.setOrientation(DiagramElement.Orientation.HORIZONTAL);
@@ -211,7 +209,7 @@ public class Test_nodesGeometry {
     void predicate_changeOrientationToVerticalTwice() {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
-        Predicate predicate = new StandalonePredicate(3);
+        Predicate predicate = new Predicate(3);
         diagram.addNode(predicate);
 
         predicate.setOrientation(DiagramElement.Orientation.VERTICAL);
@@ -226,7 +224,7 @@ public class Test_nodesGeometry {
     void predicate_complexChangingOrientation() {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
-        Predicate predicate = new StandalonePredicate(3);
+        Predicate predicate = new Predicate(3);
         diagram.addNode(predicate);
 
         predicate.setOrientation(DiagramElement.Orientation.VERTICAL);

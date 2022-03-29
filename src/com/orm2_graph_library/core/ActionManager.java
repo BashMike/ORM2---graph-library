@@ -50,6 +50,6 @@ public class ActionManager {
         }
     }
 
-    public void startRecordingActions() { this._recordActions = true; }
-    public void stopRecordingActions()  { this._recordActions = false; }
+    void startRecordingActions() { this._recordActions = true; }
+    void stopRecordingActions()  { this._recordActions = false; }
 }

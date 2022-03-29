@@ -1,5 +1,7 @@
 package com.orm2_graph_library.core;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.stream.Stream;
 
@@ -13,17 +15,21 @@ public abstract class DiagramElement {
 
     // ================ OPERATIONS ================
     // ---------------- connection ----------------
-    public boolean hasOwner() { return (this._ownerDiagram != null); }
-    public boolean isOwner(Diagram diagram) { return (this._ownerDiagram != null && this._ownerDiagram == diagram); }
+    public boolean hasOwnerDiagram() { return (this._ownerDiagram != null); }
+    public boolean isOwnerDiagram(Diagram diagram) { return (this._ownerDiagram != null && this._ownerDiagram == diagram); }
+    @NotNull public Diagram ownerDiagram() { return this._ownerDiagram; }
 
-    void setOwner(Diagram owner) {
-        this._ownerDiagram = owner;
+    void setOwnerDiagram(Diagram ownerDiagram) {
+        this._ownerDiagram = ownerDiagram;
         this._initSelf(this._ownerDiagram);
     }
 
-    void unsetOwner() { this._ownerDiagram = null; }
+    void unsetOwnerDiagram() { this._ownerDiagram = null; }
 
     abstract protected void _initSelf(Diagram owner);
+
+    protected void _stopDiagramRecordingActions()  { this._ownerDiagram._actionManager.stopRecordingActions(); }
+    protected void _startDiagramRecordingActions() { this._ownerDiagram._actionManager.startRecordingActions(); }
 
     // ---------------- attributes ----------------
     abstract public GeometryApproximation geometryApproximation();

@@ -4,6 +4,7 @@ import com.orm2_graph_library.core.LogicError;
 import com.orm2_graph_library.nodes.common.ObjectType;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class ObjectTypesNameDuplicationLogicError extends LogicError {
     // ================ ATTRIBUTES ================
@@ -25,7 +26,6 @@ public class ObjectTypesNameDuplicationLogicError extends LogicError {
     public String name() { return this._name; }
 
     public ArrayList<ObjectType> objectTypes() { return new ArrayList<>(this._objectTypes); }
-    public void update(ArrayList<ObjectType> newObjectTypes) { this._objectTypes.clear(); this._objectTypes.addAll(newObjectTypes); }
 
     // ----------------- contract -----------------
     public String description() {
@@ -34,4 +34,19 @@ public class ObjectTypesNameDuplicationLogicError extends LogicError {
 
         return result;
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if (super.equals(other)) {
+            boolean areSameNames = this._name.equals(((ObjectTypesNameDuplicationLogicError)other)._name);
+            boolean areSameObjectTypes = new HashSet<>(this._objectTypes).equals(new HashSet<>(((ObjectTypesNameDuplicationLogicError)other)._objectTypes));
+
+            return areSameNames && areSameObjectTypes;
+        }
+
+        return false;
+    }
+
+    @Override
+    public int hashCode() { return this._name.length() * this._objectTypes.size(); }
 }

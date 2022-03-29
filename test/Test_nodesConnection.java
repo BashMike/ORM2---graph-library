@@ -30,9 +30,9 @@ class Test_nodesConnection {
         ArrayList<EntityType> createdEntityTypes = new ArrayList<>();
 
         for (int i=0; i<5; i++) { createdEntityTypes.add(diagram.addNode(new EntityType())); }
-        diagram.connectBySubtypingRelation(createdEntityTypes.get(0).centerAnchorPoint(), createdEntityTypes.get(1).centerAnchorPoint());
-        diagram.connectBySubtypingRelation(createdEntityTypes.get(0).centerAnchorPoint(), createdEntityTypes.get(2).centerAnchorPoint());
-        diagram.connectBySubtypingRelation(createdEntityTypes.get(1).centerAnchorPoint(), createdEntityTypes.get(3).centerAnchorPoint());
+        SubtypingRelationEdge sre01 = diagram.connectBySubtypingRelation(createdEntityTypes.get(0).centerAnchorPoint(), createdEntityTypes.get(1).centerAnchorPoint());
+        SubtypingRelationEdge sre02 = diagram.connectBySubtypingRelation(createdEntityTypes.get(0).centerAnchorPoint(), createdEntityTypes.get(2).centerAnchorPoint());
+        SubtypingRelationEdge sre13 = diagram.connectBySubtypingRelation(createdEntityTypes.get(1).centerAnchorPoint(), createdEntityTypes.get(3).centerAnchorPoint());
 
         ArrayList<EntityType> gottenEntityTypes = diagram.getElements(EntityType.class).collect(Collectors.toCollection(ArrayList::new));
 
@@ -41,11 +41,29 @@ class Test_nodesConnection {
         Assertions.assertEquals(3, diagram.getElements(SubtypingRelationEdge.class).count());
 
         Assertions.assertTrue(diagram.getElements(SubtypingRelationEdge.class).anyMatch (e -> e.beginAnchorPoint().owner() == createdEntityTypes.get(0) && e.endAnchorPoint().owner() == createdEntityTypes.get(1)));
-        Assertions.assertNotNull(diagram.getElements(SubtypingRelationEdge.class).filter(e -> e.beginAnchorPoint().owner() == createdEntityTypes.get(0) && e.endAnchorPoint().owner() == createdEntityTypes.get(1)).findFirst().get());
         Assertions.assertTrue(diagram.getElements(SubtypingRelationEdge.class).anyMatch (e -> e.beginAnchorPoint().owner() == createdEntityTypes.get(0) && e.endAnchorPoint().owner() == createdEntityTypes.get(2)));
-        Assertions.assertNotNull(diagram.getElements(SubtypingRelationEdge.class).filter(e -> e.beginAnchorPoint().owner() == createdEntityTypes.get(0) && e.endAnchorPoint().owner() == createdEntityTypes.get(2)).findFirst().get());
         Assertions.assertTrue(diagram.getElements(SubtypingRelationEdge.class).anyMatch (e -> e.beginAnchorPoint().owner() == createdEntityTypes.get(1) && e.endAnchorPoint().owner() == createdEntityTypes.get(3)));
-        Assertions.assertNotNull(diagram.getElements(SubtypingRelationEdge.class).filter(e -> e.beginAnchorPoint().owner() == createdEntityTypes.get(1) && e.endAnchorPoint().owner() == createdEntityTypes.get(3)).findFirst().get());
+        Assertions.assertEquals(sre01, diagram.getElements(SubtypingRelationEdge.class).filter(e -> e.beginAnchorPoint().owner() == createdEntityTypes.get(0) && e.endAnchorPoint().owner() == createdEntityTypes.get(1)).findFirst().get());
+        Assertions.assertEquals(sre02, diagram.getElements(SubtypingRelationEdge.class).filter(e -> e.beginAnchorPoint().owner() == createdEntityTypes.get(0) && e.endAnchorPoint().owner() == createdEntityTypes.get(2)).findFirst().get());
+        Assertions.assertEquals(sre13, diagram.getElements(SubtypingRelationEdge.class).filter(e -> e.beginAnchorPoint().owner() == createdEntityTypes.get(1) && e.endAnchorPoint().owner() == createdEntityTypes.get(3)).findFirst().get());
+
+        Assertions.assertTrue(diagram.hasConnectBySubtypingRelation(createdEntityTypes.get(0), createdEntityTypes.get(1)));
+        Assertions.assertTrue(diagram.hasConnectBySubtypingRelation(createdEntityTypes.get(0), createdEntityTypes.get(2)));
+        Assertions.assertTrue(diagram.hasConnectBySubtypingRelation(createdEntityTypes.get(1), createdEntityTypes.get(3)));
+        Assertions.assertEquals(sre01, diagram.getConnectBySubtypingRelation(createdEntityTypes.get(0), createdEntityTypes.get(1)));
+        Assertions.assertEquals(sre02, diagram.getConnectBySubtypingRelation(createdEntityTypes.get(0), createdEntityTypes.get(2)));
+        Assertions.assertEquals(sre13, diagram.getConnectBySubtypingRelation(createdEntityTypes.get(1), createdEntityTypes.get(3)));
+
+        for (int i=0; i<5; i++) {
+            for (int j=0; j<5; j++) {
+                if (!(i == 0 && j == 1 ||
+                      i == 0 && j == 2 ||
+                      i == 1 && j == 3))
+                {
+                    Assertions.assertFalse(diagram.hasConnectBySubtypingRelation(createdEntityTypes.get(i), createdEntityTypes.get(j)));
+                }
+            }
+        }
     }
 
     @Test
@@ -68,6 +86,12 @@ class Test_nodesConnection {
         // Check result
         Assertions.assertEquals(gottenEntityTypes, createdEntityTypes);
         Assertions.assertEquals(0, diagram.getElements(SubtypingRelationEdge.class).count());
+
+        for (int i=0; i<5; i++) {
+            for (int j=0; j<5; j++) {
+                Assertions.assertFalse(diagram.hasConnectBySubtypingRelation(createdEntityTypes.get(i), createdEntityTypes.get(j)));
+            }
+        }
     }
 
     @Test

@@ -6,40 +6,36 @@ import com.orm2_graph_library.core.AnchorPoint;
 import com.orm2_graph_library.core.Diagram;
 import com.orm2_graph_library.core.DiagramElement;
 import com.orm2_graph_library.nodes_shapes.RoundedRectangleShape;
+import org.jetbrains.annotations.NotNull;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class ObjectifiedPredicate extends RoleParticipant {
     // ================ ATTRIBUTES ================
-    private final InnerPredicate _innerPredicate;
+    final private Predicate _innerPredicate;
     private int _horizontalGapDistance;
     private int _verticalGapDistance;
     private int _borderRoundingDegree;
 
     // ================ OPERATIONS ================
     // ----------------- creating -----------------
-    public ObjectifiedPredicate(int arity) {
-        this._innerPredicate = new InnerPredicate(this, arity);
-        this._shape = new RoundedRectangleShape(0);
-    }
-
-    ObjectifiedPredicate(InnerPredicate innerPredicate) { this._innerPredicate = innerPredicate; }
-
-    public StandalonePredicate becomeStandalone() {
-        return new StandalonePredicate(this._innerPredicate);
+    public ObjectifiedPredicate(Predicate innerPredicate) {
+        this._innerPredicate = innerPredicate;
+        this._innerPredicate.setOwnerObjectifiedPredicate(this);
     }
 
     // ---------------- connection ----------------
     @Override
     protected void _initSelf(Diagram owner) {
-        this._ownerDiagram._actionManager().stopRecordingActions();
+        this._stopDiagramRecordingActions();
         owner.addNode(this._innerPredicate);
-        this._ownerDiagram._actionManager().startRecordingActions();
+        this._startDiagramRecordingActions();
     }
 
     // ---------------- attributes ----------------
-    public InnerPredicate innerPredicate() { return this._innerPredicate; }
+    public Predicate innerPredicate() { return this._innerPredicate; }
 
     public AnchorPoint<ObjectifiedPredicate> upAnchorPoint()    { return new NodeAnchorPoint<>(this, AnchorPosition.UP); }
     public AnchorPoint<ObjectifiedPredicate> downAnchorPoint()  { return new NodeAnchorPoint<>(this, AnchorPosition.DOWN); }
@@ -51,8 +47,17 @@ public class ObjectifiedPredicate extends RoleParticipant {
         this._verticalGapDistance   = verticalGapDistance;
     }
 
+    @NotNull
     public void setBorderRoundingDegree(int borderRoundingDegree) {
         this._shape = new RoundedRectangleShape(borderRoundingDegree);
+    }
+
+    @Override
+    public Point borderLeftTop() {
+        int x = this._innerPredicate.borderLeftTop().x - this._horizontalGapDistance;
+        int y = this._innerPredicate.borderLeftTop().y - this._verticalGapDistance;
+
+        return new Point(x, y);
     }
 
     @Override

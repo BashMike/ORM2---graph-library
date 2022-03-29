@@ -46,16 +46,8 @@ public class Diagram {
 
     // ================ OPERATIONS ================
     // ---------------- attributes ----------------
-    public ArrayList<LogicError> logicErrors() { return new ArrayList<>(this._logicErrors); }
-
-    public ArrayList<LogicError> getLogicErrorsFor(DiagramElement diagramElement) {
-        ArrayList<LogicError> result = new ArrayList<>();
-        for (LogicError logicError : this._logicErrors) {
-            if (logicError.isErrorParticipant(diagramElement)) { result.add(logicError); }
-        }
-
-        return result;
-    }
+    public Stream<LogicError> logicErrors() { return this._logicErrors.stream(); }
+    public Stream<LogicError> getLogicErrorsFor(DiagramElement diagramElement) { return this._logicErrors.stream().filter(e -> e.isErrorParticipant(diagramElement)); }
 
     void _addLogicError(@NotNull LogicError logicError)    { this._logicErrors.add(logicError); }
     void _removeLogicError(@NotNull LogicError logicError) { this._logicErrors.remove(logicError); }
@@ -67,8 +59,7 @@ public class Diagram {
         if      (node instanceof EntityType)            { this._actionManager.executeAction(new AddEntityTypeAction(this, (EntityType)node)); }
         else if (node instanceof ValueType)             { this._actionManager.executeAction(new AddValueTypeAction (this, (ValueType)node)); }
 
-        else if (node instanceof StandalonePredicate)   { this._actionManager.executeAction(new AddPredicateAction(this, (StandalonePredicate)node)); }
-        else if (node instanceof InnerPredicate)        { this._actionManager.executeAction(new AddPredicateAction(this, (InnerPredicate)node)); }
+        else if (node instanceof Predicate)             { this._actionManager.executeAction(new AddPredicateAction(this, (Predicate)node)); }
         else if (node instanceof Role)                  { this._actionManager.executeAction(new AddRoleAction     (this, (Role)node)); }
 
         else if (node instanceof ObjectifiedPredicate)  { this._actionManager.executeAction(new AddObjectifiedPredicateAction(this, (ObjectifiedPredicate)node)); }
@@ -85,59 +76,95 @@ public class Diagram {
 
     public void removeNode(Node node) { this._actionManager.executeAction(new RemoveNodeAction(this, node)); }
 
-    public <T extends EntityType, G extends EntityType> SubtypingRelationEdge connectBySubtypingRelation(AnchorPoint<T> begin, AnchorPoint<G> end) {
-        SubtypingRelationEdge edge = new SubtypingRelationEdge((AnchorPoint<EntityType>)begin, (AnchorPoint<EntityType>)end);
+    public <T extends EntityType, G extends EntityType> SubtypingRelationEdge connectBySubtypingRelation(AnchorPoint<T> beginEntityTypeAnchorPoint, AnchorPoint<G> endEntityTypeAnchorPoint) {
+        SubtypingRelationEdge edge = new SubtypingRelationEdge((AnchorPoint<EntityType>)beginEntityTypeAnchorPoint, (AnchorPoint<EntityType>)endEntityTypeAnchorPoint);
         this._actionManager.executeAction(new ConnectBySubtypeRelationAction(this, edge));
 
         return edge;
     }
 
-    public <T extends Role, G extends RoleParticipant> RoleRelationEdge connectByRoleRelation(AnchorPoint<T> begin, AnchorPoint<G> end) {
-        RoleRelationEdge edge = new RoleRelationEdge((AnchorPoint<Role>)begin, (AnchorPoint<RoleParticipant>)end);
+    public <T extends Role, G extends RoleParticipant> RoleRelationEdge connectByRoleRelation(AnchorPoint<T> roleAnchorPoint, AnchorPoint<G> roleParticipantAnchorPoint) {
+        RoleRelationEdge edge = new RoleRelationEdge((AnchorPoint<Role>)roleAnchorPoint, (AnchorPoint<RoleParticipant>)roleParticipantAnchorPoint);
         this._actionManager.executeAction(new ConnectByRoleRelationAction(this, edge));
 
         return edge;
     }
 
-    public <T extends Constraint> RoleConstraintRelationEdge connectByRoleConstraintRelation(RolesSequence begin, AnchorPoint<T> end) {
-        RoleConstraintRelationEdge edge = new RoleConstraintRelationEdge(begin.anchorPoint(), (AnchorPoint<Constraint>)end);
+    public <T extends Constraint> RoleConstraintRelationEdge connectByRoleConstraintRelation(RolesSequence rolesSequence, AnchorPoint<T> constraintAnchorPoint) {
+        RoleConstraintRelationEdge edge = new RoleConstraintRelationEdge(rolesSequence.anchorPoint(), (AnchorPoint<Constraint>)constraintAnchorPoint);
         this._actionManager.executeAction(new ConnectByRoleConstraintRelationAction(this, edge));
 
         return edge;
     }
 
-    public <T extends SubtypingRelationEdge, G extends Constraint> SubtypingConstraintRelationEdge connectBySubtypingConstraintRelation(AnchorPoint<T> begin, AnchorPoint<G> end) {
-        SubtypingConstraintRelationEdge edge = new SubtypingConstraintRelationEdge((AnchorPoint<SubtypingRelationEdge>)begin, (AnchorPoint<Constraint>)end);
+    public <T extends SubtypingRelationEdge, G extends Constraint> SubtypingConstraintRelationEdge connectBySubtypingConstraintRelation(AnchorPoint<T> subtypingRelationEdgeAnchorPoint, AnchorPoint<G> constraintAnchorPoint) {
+        SubtypingConstraintRelationEdge edge = new SubtypingConstraintRelationEdge((AnchorPoint<SubtypingRelationEdge>)subtypingRelationEdgeAnchorPoint, (AnchorPoint<Constraint>)constraintAnchorPoint);
         this._actionManager.executeAction(new ConnectBySubtypingConstraintRelationAction(this, edge));
 
         return edge;
     }
 
-    public <T extends DiagramElement> Stream<T> getElements(Class<T> elementType) {
-        return (Stream<T>)this._innerElements.stream().filter(elem -> elementType.isAssignableFrom(elem.getClass()));
+    public <T extends DiagramElement> Stream<T> getElements(Class<T> elementType) { return (Stream<T>)this._innerElements.stream().filter(elem -> elementType.isAssignableFrom(elem.getClass())); }
+
+    public <T extends EntityType, G extends EntityType> SubtypingRelationEdge getConnectBySubtypingRelation(T begin, G end) {
+        Stream<SubtypingRelationEdge> edgesStream = this.getElements(SubtypingRelationEdge.class).filter(e -> e.begin() == begin && e.end() == end);
+
+        ArrayList<SubtypingRelationEdge> edges = edgesStream.collect(Collectors.toCollection(ArrayList::new));
+        if (!edges.isEmpty()) { return edges.get(0); }
+        else                  { throw new RuntimeException("ERROR :: Try to get non-existent subtyping relation edge between given diagram elements."); }
     }
+
+    public <T extends Role, G extends RoleParticipant> RoleRelationEdge getConnectByRoleRelation(T begin, G end) {
+        Stream<RoleRelationEdge> edgesStream = this.getElements(RoleRelationEdge.class).filter(e -> e.begin() == begin && e.end() == end);
+
+        ArrayList<RoleRelationEdge> edges = edgesStream.collect(Collectors.toCollection(ArrayList::new));
+        if (!edges.isEmpty()) { return edges.get(0); }
+        else                  { throw new RuntimeException("ERROR :: Try to get non-existent subtyping relation edge between given diagram elements."); }
+    }
+
+    public <T extends Constraint> RoleConstraintRelationEdge getConnectByRoleConstraintRelation(RolesSequence begin, T end) {
+        Stream<RoleConstraintRelationEdge> edgesStream = this.getElements(RoleConstraintRelationEdge.class).filter(e -> e.begin() == begin && e.end() == end);
+
+        ArrayList<RoleConstraintRelationEdge> edges = edgesStream.collect(Collectors.toCollection(ArrayList::new));
+        if (!edges.isEmpty()) { return edges.get(0); }
+        else                  { throw new RuntimeException("ERROR :: Try to get non-existent subtyping relation edge between given diagram elements."); }
+    }
+
+    public <T extends SubtypingRelationEdge, G extends Constraint> SubtypingConstraintRelationEdge getConnectBySubtypingConstraintRelation(T begin, G end) {
+        Stream<SubtypingConstraintRelationEdge> edgesStream = this.getElements(SubtypingConstraintRelationEdge.class).filter(e -> e.begin() == begin && e.end() == end);
+
+        ArrayList<SubtypingConstraintRelationEdge> edges = edgesStream.collect(Collectors.toCollection(ArrayList::new));
+        if (!edges.isEmpty()) { return edges.get(0); }
+        else                  { throw new RuntimeException("ERROR :: Try to get non-existent subtyping relation edge between given diagram elements."); }
+    }
+
+    public <T extends EntityType, G extends EntityType>            boolean hasConnectBySubtypingRelation           (T             begin, G end) { return this.getElements(SubtypingRelationEdge.class)           .anyMatch(e -> e.begin() == begin && e.end() == end); }
+    public <T extends Role, G extends RoleParticipant>             boolean hasConnectByRoleRelation                (T             begin, G end) { return this.getElements(RoleRelationEdge.class)                .anyMatch(e -> e.begin() == begin && e.end() == end); }
+    public <T extends Constraint>                                  boolean hasConnectByRoleConstraintRelation      (RolesSequence begin, T end) { return this.getElements(RoleConstraintRelationEdge.class)      .anyMatch(e -> e.begin() == begin && e.end() == end); }
+    public <T extends SubtypingRelationEdge, G extends Constraint> boolean hasConnectBySubtypingConstraintRelation (T             begin, G end) { return this.getElements(SubtypingConstraintRelationEdge.class) .anyMatch(e -> e.begin() == begin && e.end() == end); }
+    public <T extends DiagramElement, G extends DiagramElement>    boolean hasConnectByAnyRelation                 (T             begin, G end) { return this.getElements(Edge.class)                            .anyMatch(e -> e.begin() == begin && e.end() == end); }
 
     public void addRolesSequence(RolesSequence rolesSequence) { this._addElement(rolesSequence); }
 
     // Undo & redo state
     public boolean canUndoState() { return this._actionManager.canUndo(); }
-    public void undoState()       { this._actionManager.undo(); }
+    public void    undoState()    { this._actionManager.undo(); }
     public boolean canRedoState() { return this._actionManager.canRedo(); }
-    public void redoState()       { this._actionManager.redo(); }
+    public void    redoState()    { this._actionManager.redo(); }
 
     // TODO - @structure :: Add non-public connection to the action manager (object type uses it to disable recording action of setting its name).
     public ActionManager _actionManager() { return this._actionManager; }
 
     // -------------- sub-operations --------------
     private <T extends DiagramElement> T _addElement(T element) {
-        element.setOwner(this);
+        element.setOwnerDiagram(this);
         this._innerElements.add(element);
 
         return element;
     }
 
     private void _removeElement(DiagramElement element) {
-        element.unsetOwner();
+        element.unsetOwnerDiagram();
         this._innerElements.remove(element);
     }
 

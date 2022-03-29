@@ -18,4 +18,7 @@ public class EntityTypeWithNoneRefModeLogicError extends LogicError {
     public String description() {
         return "Entity type \"" + this._entityType.name() + "\" with NONE reference mode set.";
     }
+
+    @Override
+    public int hashCode() { return this._entityType.name().length(); }
 }
