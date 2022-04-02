@@ -168,11 +168,24 @@ public class Diagram {
         else                  { throw new RuntimeException("ERROR :: Try to get non-existent subtyping relation edge between given diagram elements."); }
     }
 
+    public <T extends Edge> T getConnectByRelation(DiagramElement begin, DiagramElement end, Class<T> edgeType) {
+        Stream<T> edgesStream;
+
+        if (edgeType == SubtypingRelationEdge.class) { edgesStream = this.getElements(edgeType).filter(e -> e.begin() == begin && e.end() == end); }
+        else                                         { edgesStream = this.getElements(edgeType).filter(e -> e.begin() == begin && e.end() == end || e.begin() == end && e.end() == begin); }
+
+        ArrayList<T> edges = edgesStream.collect(Collectors.toCollection(ArrayList::new));
+        if (!edges.isEmpty()) { return edges.get(0); }
+        else                  { throw new RuntimeException("ERROR :: Try to get non-existent relation edge between given diagram elements (" + edgeType + ")."); }
+    }
+
     public <T extends EntityType, G extends EntityType>            boolean hasConnectBySubtypingRelation           (T             begin, G end) { return this.getElements(SubtypingRelationEdge.class)           .anyMatch(e -> e.begin() == begin && e.end() == end); }
     public <T extends Role, G extends RoleParticipant>             boolean hasConnectByRoleRelation                (T             begin, G end) { return this.getElements(RoleRelationEdge.class)                .anyMatch(e -> e.begin() == begin && e.end() == end); }
     public <T extends Constraint>                                  boolean hasConnectByRoleConstraintRelation      (RolesSequence begin, T end) { return this.getElements(RoleConstraintRelationEdge.class)      .anyMatch(e -> e.begin() == begin && e.end() == end); }
     public <T extends SubtypingRelationEdge, G extends Constraint> boolean hasConnectBySubtypingConstraintRelation (T             begin, G end) { return this.getElements(SubtypingConstraintRelationEdge.class) .anyMatch(e -> e.begin() == begin && e.end() == end); }
     public <T extends DiagramElement, G extends DiagramElement>    boolean hasConnectByAnyRelation                 (T             begin, G end) { return this.getElements(Edge.class)                            .anyMatch(e -> e.begin() == begin && e.end() == end); }
+
+    public boolean hasConnectByRelation(DiagramElement begin, DiagramElement end, Class<? extends Edge> edgeType) { return this.getElements(edgeType).anyMatch(e -> e.begin() == begin && e.end() == end); }
 
     public void addRolesSequence(RolesSequence rolesSequence) { this._addElement(rolesSequence); }
 
