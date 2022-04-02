@@ -41,7 +41,7 @@ public class Role extends Node {
     // ----------------- attributes -----------------
     public String text() { return this._text; }
     public void setText(String text) {
-        this._text = text;
+        this._ownerDiagramActionManager().executeAction(new SetRoleTextAction(this._ownerDiagram, this, this._text, text));
     }
 
     public Predicate ownerPredicate() { return this._ownerPredicate; }
