@@ -2,10 +2,13 @@ package com.orm2_graph_library.nodes.predicates;
 
 import com.orm2_graph_library.anchor_points.AnchorPosition;
 import com.orm2_graph_library.anchor_points.NodeAnchorPoint;
+import com.orm2_graph_library.core.Action;
 import com.orm2_graph_library.core.AnchorPoint;
 import com.orm2_graph_library.core.Diagram;
 import com.orm2_graph_library.core.DiagramElement;
+import com.orm2_graph_library.nodes.common.ObjectType;
 import com.orm2_graph_library.nodes_shapes.RoundedRectangleShape;
+import com.orm2_graph_library.post_validators.ObjectTypesNameDuplicationPostValidator;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -19,7 +22,8 @@ public class ObjectifiedPredicate extends RoleParticipant {
     final private Predicate _innerPredicate;
     private int _horizontalGapDistance;
     private int _verticalGapDistance;
-    private int _borderRoundingDegree;
+
+    private String _name;
 
     // ================ OPERATIONS ================
     // ----------------- creating -----------------
@@ -30,10 +34,25 @@ public class ObjectifiedPredicate extends RoleParticipant {
 
     // ---------------- connection ----------------
     @Override
-    protected void _initSelf() {}
+    protected void _initSelf() {
+        boolean isVacantNameFound = false;
+        int index;
+        for (index=1; index<Integer.MAX_VALUE && !isVacantNameFound; index++) {
+            String name = this.basicName() + " " + index;
+            isVacantNameFound = this._ownerDiagram.getElements(ObjectifiedPredicate.class).noneMatch(e -> e._name.equals(name));
+        }
+
+        assert isVacantNameFound : "ERROR :: Failed to find proper index for object type.";
+        this._name = this.basicName() + " " + (index-1);
+    }
 
     // ---------------- attributes ----------------
     public Predicate innerPredicate() { return this._innerPredicate; }
+
+    public String name() { return this._name; }
+    public void setName(String name) { this._ownerDiagramActionManager().executeAction(new ObjectifiedPredicateNameChangeAction(this._ownerDiagram, this, this._name, name)); }
+
+    public String basicName() { return "Objectified predicate"; }
 
     public AnchorPoint<ObjectifiedPredicate> upAnchorPoint()    { return new NodeAnchorPoint<>(this, AnchorPosition.UP); }
     public AnchorPoint<ObjectifiedPredicate> downAnchorPoint()  { return new NodeAnchorPoint<>(this, AnchorPosition.DOWN); }
@@ -45,7 +64,6 @@ public class ObjectifiedPredicate extends RoleParticipant {
         this._verticalGapDistance   = verticalGapDistance;
     }
 
-    @NotNull
     public void setBorderRoundingDegree(int borderRoundingDegree) {
         this._shape = new RoundedRectangleShape(borderRoundingDegree);
     }
@@ -92,5 +110,28 @@ public class ObjectifiedPredicate extends RoleParticipant {
         result.addAll(this._innerPredicate.getIncidentElements(elementType));
 
         return result;
+    }
+
+    // ================= SUBTYPES =================
+    private class ObjectifiedPredicateNameChangeAction extends Action {
+        final private ObjectifiedPredicate _node;
+        final private String               _oldName;
+        final private String               _newName;
+
+        public ObjectifiedPredicateNameChangeAction(@NotNull Diagram diagram, @NotNull ObjectifiedPredicate node, @NotNull String oldName, @NotNull String newName) {
+            super(diagram);
+
+            this._node    = node;
+            this._oldName = oldName;
+            this._newName = newName;
+
+            // TODO - @check :: Objectified predicate and object type have same names.
+            // this._postValidators.add(new ObjectTypesNameDuplicationPostValidator(diagram, this, node, oldName, newName));
+        }
+
+        @Override
+        public void _execute() { this._node._name = this._newName; }
+        @Override
+        public void _undo() { this._node._name = this._oldName; }
     }
 }

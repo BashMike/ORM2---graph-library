@@ -82,9 +82,9 @@ public abstract class ObjectType extends RoleParticipant {
 
     // ================= SUBTYPES =================
     protected abstract class ObjectTypeAttributeChangeAction extends Action {
-        protected final ObjectType _node;
-        protected final Object     _oldAttributeValue;
-        protected final Object     _newAttributeValue;
+        final protected ObjectType _node;
+        final protected Object     _oldAttributeValue;
+        final protected Object     _newAttributeValue;
 
         public ObjectTypeAttributeChangeAction(@NotNull Diagram diagram, @NotNull ObjectType node, @NotNull Object oldAttributeValue, @NotNull Object newAttributeValue) {
             super(diagram);

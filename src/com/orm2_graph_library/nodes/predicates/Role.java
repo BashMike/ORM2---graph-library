@@ -41,7 +41,7 @@ public class Role extends Node {
     // ----------------- attributes -----------------
     public String text() { return this._text; }
     public void setText(String text) {
-        this._ownerDiagramActionManager().executeAction(new SetRoleTextAction(this._ownerDiagram, this, this._text, text));
+        this._ownerDiagramActionManager().executeAction(new RoleTextChangeAction(this._ownerDiagram, this, this._text, text));
     }
 
     public Predicate ownerPredicate() { return this._ownerPredicate; }
@@ -129,12 +129,12 @@ public class Role extends Node {
     void _moveBy(int shiftX, int shiftY) { this._leftTop.translate(shiftX, shiftY); }
 
     // ================= SUBTYPES =================
-    class SetRoleTextAction extends Action {
+    class RoleTextChangeAction extends Action {
         final private Role   _role;
         final private String _oldText;
         final private String _newText;
 
-        public SetRoleTextAction(Diagram diagram, Role role, String oldText, String newText) {
+        public RoleTextChangeAction(Diagram diagram, Role role, String oldText, String newText) {
             super(diagram);
 
             this._role    = role;
