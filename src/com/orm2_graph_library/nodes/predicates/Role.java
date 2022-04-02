@@ -17,7 +17,6 @@ import java.awt.*;
 
 public class Role extends Node {
     // ================ ATTRIBUTES ================
-    private DiagramElement.Orientation _orientation;
     private String          _text; // TODO - @modify :: Change name of role's text.
     private final Predicate _ownerPredicate;
     private final int       _indexInPredicate;
@@ -29,7 +28,6 @@ public class Role extends Node {
     // ----------------- creating -----------------
     Role(@NotNull Predicate predicate, int indexInPredicate) {
         this._ownerPredicate   = predicate;
-        this._orientation      = predicate.orientation();
         this._indexInPredicate = indexInPredicate;
 
         this._shape = new RectangleShape();
@@ -38,18 +36,19 @@ public class Role extends Node {
     @Override
     protected void _initSelf() {}
 
-    // ----------------- attributes -----------------
-    public String text() { return this._text; }
-    public void setText(String text) {
-        this._ownerDiagramActionManager().executeAction(new RoleTextChangeAction(this._ownerDiagram, this, this._text, text));
-    }
-
+    // ----------------- connection -----------------
     public Predicate ownerPredicate() { return this._ownerPredicate; }
 
+    // ----------------- attributes -----------------
+    // * Text
+    public String text() { return this._text; }
+    public void setText(String text) { this._ownerDiagramActionManager().executeAction(new RoleTextChangeAction(this._ownerDiagram, this, this._text, text)); }
+
+    // * Anchor points
     public boolean hasAnchorPoint(AnchorPosition anchorPosition)        {
         boolean result = false;
 
-        if (this._orientation == DiagramElement.Orientation.HORIZONTAL) {
+        if (this._ownerPredicate.orientation() == DiagramElement.Orientation.HORIZONTAL) {
             if (this._ownerPredicate.arity() == 1) {
                 result = (anchorPosition == AnchorPosition.LEFT || anchorPosition == AnchorPosition.RIGHT);
             }
@@ -63,7 +62,7 @@ public class Role extends Node {
                 else                                                                           { result = (anchorPosition == AnchorPosition.UP || anchorPosition == AnchorPosition.DOWN); }
             }
         }
-        else if (this._orientation == DiagramElement.Orientation.VERTICAL) {
+        else if (this._ownerPredicate.orientation() == DiagramElement.Orientation.VERTICAL) {
             if (this._ownerPredicate.arity() == 1) {
                 result = (anchorPosition == AnchorPosition.UP || anchorPosition == AnchorPosition.DOWN);
             }
@@ -89,6 +88,15 @@ public class Role extends Node {
         return new RoleAnchorPoint(this, anchorPosition);
     }
 
+    // * Geometry
+    void setBorderSize(int borderWidth, int borderHeight) {
+        this._borderWidth  = borderWidth;
+        this._borderHeight = borderHeight;
+    }
+
+    void _moveTo(Point leftTop)          { this._leftTop.move(leftTop.x, leftTop.y); }
+    void _moveBy(int shiftX, int shiftY) { this._leftTop.translate(shiftX, shiftY); }
+
     @Override
     public Point borderLeftTop() {
         Point result = this._ownerPredicate.borderLeftTop();
@@ -101,8 +109,8 @@ public class Role extends Node {
 
     @Override
     public int borderWidth() {
-        if (this._orientation == DiagramElement.Orientation.HORIZONTAL)    { return this._borderWidth; }
-        else if (this._orientation == DiagramElement.Orientation.VERTICAL) { return this._borderHeight; }
+        if (this._ownerPredicate.orientation() == DiagramElement.Orientation.HORIZONTAL)    { return this._borderWidth; }
+        else if (this._ownerPredicate.orientation() == DiagramElement.Orientation.VERTICAL) { return this._borderHeight; }
 
         assert false : "ASSERT :: Try to get border width with invalid orientation.";
         return -1;
@@ -110,23 +118,12 @@ public class Role extends Node {
 
     @Override
     public int borderHeight() {
-        if (this._orientation == DiagramElement.Orientation.HORIZONTAL)    { return this._borderHeight; }
-        else if (this._orientation == DiagramElement.Orientation.VERTICAL) { return this._borderWidth; }
+        if (this._ownerPredicate.orientation() == DiagramElement.Orientation.HORIZONTAL)    { return this._borderHeight; }
+        else if (this._ownerPredicate.orientation() == DiagramElement.Orientation.VERTICAL) { return this._borderWidth; }
 
         assert false : "ASSERT :: Try to get border height with invalid orientation.";
         return -1;
     }
-
-    void setBorderSize(int borderWidth, int borderHeight) {
-        this._borderWidth  = borderWidth;
-        this._borderHeight = borderHeight;
-    }
-
-    // TODO - @modify :: Width and height depending on orientation.
-    void _setOrientation(DiagramElement.Orientation orientation) { this._orientation = orientation; }
-
-    void _moveTo(Point leftTop)          { this._leftTop.move(leftTop.x, leftTop.y); }
-    void _moveBy(int shiftX, int shiftY) { this._leftTop.translate(shiftX, shiftY); }
 
     // ================= SUBTYPES =================
     class RoleTextChangeAction extends Action {

@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-public abstract class ObjectType extends RoleParticipant {
+abstract public class ObjectType extends RoleParticipant {
     // ================ ATTRIBUTES ================
     private String _name           = "";
     private boolean _isPersonal    = false;
@@ -42,9 +42,9 @@ public abstract class ObjectType extends RoleParticipant {
     // ---------------- attributes ----------------
     // * Name
     public String name() { return this._name; }
-    public void setName(String name) { this._ownerDiagramActionManager().executeAction(new ObjectTypeNameChangeAction(this._ownerDiagram, this, this._name, name)); }
+    abstract public String basicName();
 
-    public abstract String basicName();
+    public void setName(String name) { this._ownerDiagramActionManager().executeAction(new ObjectTypeNameChangeAction(this._ownerDiagram, this, this._name, name)); }
 
     // * Signs
     public boolean isPersonal() { return this._isPersonal; }
@@ -53,6 +53,7 @@ public abstract class ObjectType extends RoleParticipant {
     public boolean isIndependent() { return this._isIndependent; }
     public void setIsIndependent(boolean isIndependent) { this._ownerDiagramActionManager().executeAction(new ObjectTypeIsIndependentFlagChangeAction(this._ownerDiagram, this, this._isIndependent, isIndependent)); }
 
+    // * Geometry
     public void setBorderSize(int borderWidth, int borderHeight) {
         this._borderWidth  = borderWidth;
         this._borderHeight = borderHeight;

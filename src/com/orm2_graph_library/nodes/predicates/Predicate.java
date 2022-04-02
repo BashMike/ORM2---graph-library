@@ -40,21 +40,15 @@ public class Predicate extends Node implements Movable {
     @NotNull public ObjectifiedPredicate ownerObjectifiedPredicate() { return this._ownerObjectifiedPredicate; }
     public boolean hasOwnerObjectifiedPredicate() { return (this._ownerObjectifiedPredicate != null); }
 
-    void setOwnerObjectifiedPredicate(@NotNull ObjectifiedPredicate objectifiedPredicate) {
-        this._ownerObjectifiedPredicate = objectifiedPredicate;
-    }
-
-    void unsetOwnerObjectifiedPredicate() {
-        this._ownerObjectifiedPredicate = null;
-    }
+    void setOwnerObjectifiedPredicate(@NotNull ObjectifiedPredicate objectifiedPredicate) { this._ownerObjectifiedPredicate = objectifiedPredicate; }
+    void unsetOwnerObjectifiedPredicate()                                                 { this._ownerObjectifiedPredicate = null; }
 
     // ---------------- attributes ----------------
+    // * Roles
     public Role getRole(int index) { return this._roles.get(index); }
     public Stream<Role> roles() { return this._roles.stream(); }
 
     public int arity() { return this._roles.size(); }
-
-    public DiagramElement.Orientation orientation() { return this._orientation; }
 
     public RolesSequence rolesSequence(int... rolesIndexes) {
         ArrayList<Role> roles = new ArrayList<>();
@@ -83,16 +77,8 @@ public class Predicate extends Node implements Movable {
 
     public ArrayList<RolesSequence> allRolesSequences() { return new ArrayList<>(this._rolesSequences); }
 
-    public void moveTo(Point leftTop) {
-        this._ownerDiagramActionManager().executeAction(new MovePredicateAction(this._ownerDiagram, this, this._leftTop, leftTop));
-    }
-
-    public void moveBy(int shiftX, int shiftY) {
-        Point newLeftTop = new Point(this._leftTop);
-        newLeftTop.translate(shiftX, shiftY);
-
-        this._ownerDiagramActionManager().executeAction(new MovePredicateAction(this._ownerDiagram, this, this._leftTop, newLeftTop));
-    }
+    // * Geometry
+    public DiagramElement.Orientation orientation() { return this._orientation; }
 
     public void setOrientation(DiagramElement.Orientation orientation) {
         if (!this._orientation.equals(orientation)) {
@@ -102,6 +88,16 @@ public class Predicate extends Node implements Movable {
 
     public void setRolesBorderSize(int borderWidth, int borderHeight) {
         for (Role role : this._roles) { role.setBorderSize(borderWidth, borderHeight); }
+    }
+    public void moveTo(Point leftTop) {
+        this._ownerDiagramActionManager().executeAction(new MovePredicateAction(this._ownerDiagram, this, this._leftTop, leftTop));
+    }
+
+    public void moveBy(int shiftX, int shiftY) {
+        Point newLeftTop = new Point(this._leftTop);
+        newLeftTop.translate(shiftX, shiftY);
+
+        this._ownerDiagramActionManager().executeAction(new MovePredicateAction(this._ownerDiagram, this, this._leftTop, newLeftTop));
     }
 
     @Override
@@ -156,8 +152,6 @@ public class Predicate extends Node implements Movable {
             this._node._orientation = orientation;
 
             for (int i=0; i<this._node._roles.size(); i++) {
-                this._node._roles.get(i)._setOrientation(orientation);
-
                 if (orientation == DiagramElement.Orientation.VERTICAL) {
                     int roleHeight = this._node._roles.get(i).borderHeight();
                     this._node._roles.get(i)._moveTo(new Point(this._node._leftTop.x, this._node._leftTop.y + i*roleHeight));

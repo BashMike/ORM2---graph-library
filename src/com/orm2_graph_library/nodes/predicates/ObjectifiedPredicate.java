@@ -46,19 +46,22 @@ public class ObjectifiedPredicate extends RoleParticipant {
         this._name = this.basicName() + " " + (index-1);
     }
 
-    // ---------------- attributes ----------------
     public Predicate innerPredicate() { return this._innerPredicate; }
 
+    // ---------------- attributes ----------------
+    // * Name
     public String name() { return this._name; }
-    public void setName(String name) { this._ownerDiagramActionManager().executeAction(new ObjectifiedPredicateNameChangeAction(this._ownerDiagram, this, this._name, name)); }
-
     public String basicName() { return "Objectified predicate"; }
 
+    public void setName(String name) { this._ownerDiagramActionManager().executeAction(new ObjectifiedPredicateNameChangeAction(this._ownerDiagram, this, this._name, name)); }
+
+    // * Anchor points
     public AnchorPoint<ObjectifiedPredicate> upAnchorPoint()    { return new NodeAnchorPoint<>(this, AnchorPosition.UP); }
     public AnchorPoint<ObjectifiedPredicate> downAnchorPoint()  { return new NodeAnchorPoint<>(this, AnchorPosition.DOWN); }
     public AnchorPoint<ObjectifiedPredicate> rightAnchorPoint() { return new NodeAnchorPoint<>(this, AnchorPosition.RIGHT); }
     public AnchorPoint<ObjectifiedPredicate> leftAnchorPoint()  { return new NodeAnchorPoint<>(this, AnchorPosition.LEFT); }
 
+    // * Geometry
     public void setGapsDistances(int horizontalGapDistance, int verticalGapDistance) {
         this._horizontalGapDistance = horizontalGapDistance;
         this._verticalGapDistance   = verticalGapDistance;
@@ -101,7 +104,6 @@ public class ObjectifiedPredicate extends RoleParticipant {
         assert false : "ASSERT :: Try to get border height with invalid orientation of inner predicate.";
         return -1;
     }
-
 
     // ----------------- contract -----------------
     @Override
