@@ -11,11 +11,11 @@ import java.util.stream.Stream;
 
 public class Predicate extends Node implements Movable {
     // ================ ATTRIBUTES ================
-    private ObjectifiedPredicate       _ownerObjectifiedPredicate;
+    private ObjectifiedPredicate       _ownerObjectifiedPredicate = null;
 
-    private final ArrayList<Role>      _roles          = new ArrayList<>();
-    private DiagramElement.Orientation _orientation    = DiagramElement.Orientation.HORIZONTAL;
-    private Set<RolesSequence>         _rolesSequences = new HashSet<>();
+    final private ArrayList<Role>      _roles                     = new ArrayList<>();
+    private DiagramElement.Orientation _orientation               = DiagramElement.Orientation.HORIZONTAL;
+    final private Set<RolesSequence>   _rolesSequences            = new HashSet<>();
 
     // ================ OPERATIONS ================
     // ----------------- creating -----------------
@@ -35,11 +35,10 @@ public class Predicate extends Node implements Movable {
 
     // ---------------- connection ----------------
     @Override
-    protected void _initSelf(Diagram owner) {
-        this._stopDiagramRecordingActions();
-        for (Role role : this._roles) { owner.addNode(role); }
-        this._startDiagramRecordingActions();
-    }
+    protected void _initSelf() {}
+
+    @NotNull public ObjectifiedPredicate ownerObjectifiedPredicate() { return this._ownerObjectifiedPredicate; }
+    public boolean hasOwnerObjectifiedPredicate() { return (this._ownerObjectifiedPredicate != null); }
 
     void setOwnerObjectifiedPredicate(@NotNull ObjectifiedPredicate objectifiedPredicate) {
         this._ownerObjectifiedPredicate = objectifiedPredicate;
@@ -51,6 +50,8 @@ public class Predicate extends Node implements Movable {
 
     // ---------------- attributes ----------------
     public Role getRole(int index) { return this._roles.get(index); }
+    public Stream<Role> roles() { return this._roles.stream(); }
+
     public int arity() { return this._roles.size(); }
 
     public DiagramElement.Orientation orientation() { return this._orientation; }
@@ -64,7 +65,7 @@ public class Predicate extends Node implements Movable {
         }
 
         RolesSequence rolesSequence = new RolesSequence(roles);
-        rolesSequence._initSelf(this._ownerDiagram);
+        rolesSequence._initSelf();
         ArrayList<RolesSequence> rolesSequences = this._rolesSequences.stream()
                 .filter(e -> e.equals(rolesSequence))
                 .collect(Collectors.toCollection(ArrayList::new));
@@ -83,19 +84,19 @@ public class Predicate extends Node implements Movable {
     public ArrayList<RolesSequence> allRolesSequences() { return new ArrayList<>(this._rolesSequences); }
 
     public void moveTo(Point leftTop) {
-        this._ownerDiagram._actionManager().executeAction(new MovePredicateAction(this._ownerDiagram, this, this._leftTop, leftTop));
+        this._ownerDiagramActionManager().executeAction(new MovePredicateAction(this._ownerDiagram, this, this._leftTop, leftTop));
     }
 
     public void moveBy(int shiftX, int shiftY) {
         Point newLeftTop = new Point(this._leftTop);
         newLeftTop.translate(shiftX, shiftY);
 
-        this._ownerDiagram._actionManager().executeAction(new MovePredicateAction(this._ownerDiagram, this, this._leftTop, newLeftTop));
+        this._ownerDiagramActionManager().executeAction(new MovePredicateAction(this._ownerDiagram, this, this._leftTop, newLeftTop));
     }
 
     public void setOrientation(DiagramElement.Orientation orientation) {
         if (!this._orientation.equals(orientation)) {
-            this._ownerDiagram._actionManager().executeAction(new ChangePredicateOrientationAction(this._ownerDiagram, this, this._orientation, orientation));
+            this._ownerDiagramActionManager().executeAction(new ChangePredicateOrientationAction(this._ownerDiagram, this, this._orientation, orientation));
         }
     }
 

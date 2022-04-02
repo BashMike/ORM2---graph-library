@@ -5,7 +5,6 @@ import com.orm2_graph_library.anchor_points.NodeAnchorPoint;
 import com.orm2_graph_library.core.*;
 import com.orm2_graph_library.nodes.predicates.ObjectifiedPredicate;
 import com.orm2_graph_library.nodes.predicates.Predicate;
-import com.orm2_graph_library.nodes.predicates.RolesSequence;
 import com.orm2_graph_library.nodes_shapes.EllipseShape;
 
 import java.awt.*;
@@ -23,7 +22,7 @@ public abstract class Constraint extends Node implements Movable {
 
     // ---------------- connection ----------------
     @Override
-    protected void _initSelf(Diagram owner) {}
+    protected void _initSelf() {}
 
     // ---------------- attributes ----------------
     public AnchorPoint<Constraint> centerAnchorPoint() { return new NodeAnchorPoint<>(this, AnchorPosition.CENTER); }

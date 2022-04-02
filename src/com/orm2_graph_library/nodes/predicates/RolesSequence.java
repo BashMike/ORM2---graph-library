@@ -33,7 +33,7 @@ public class RolesSequence extends DiagramElement {
     }
 
     @Override
-    protected void _initSelf(Diagram owner) {}
+    protected void _initSelf() {}
 
     // ---------------- connection ----------------
     public Predicate ownerPredicate() { return this._roles.get(0).ownerPredicate(); }

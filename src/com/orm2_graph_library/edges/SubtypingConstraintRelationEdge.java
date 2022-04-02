@@ -9,5 +9,5 @@ public class SubtypingConstraintRelationEdge extends Edge<SubtypingRelationEdge,
     public SubtypingConstraintRelationEdge(AnchorPoint<SubtypingRelationEdge> beginAnchorPoint, AnchorPoint<Constraint> endAnchorPoint) { super(beginAnchorPoint, endAnchorPoint); }
 
     @Override
-    protected void _initSelf(Diagram owner) {}
+    protected void _initSelf() {}
 }

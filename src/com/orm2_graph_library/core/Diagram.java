@@ -30,6 +30,19 @@ import java.util.stream.Stream;
 // TODO - @now :: Getting geometry approximation.
 // TODO - @now :: Edge hierarchy.
 
+// @info :: Any method which introduces saved action produces only and only one saved action.
+
+/*
+    @info :: Levels of validation:
+
+    1 pre-validation (at compile time);
+    2 in-time validation (at runtime):
+        1.1 Runtime Exceptions;
+        1.2 Without notification;
+        1.3 With notification.
+    3 post-validation (after executing the actions; using validators).
+ */
+
 public class Diagram {
     // ================== STATIC ==================
     static private Font _font = new Font(Font.MONOSPACED, Font.PLAIN, 14);
@@ -58,10 +71,7 @@ public class Diagram {
     public <T extends Node> T addNode(T node) {
         if      (node instanceof EntityType)            { this._actionManager.executeAction(new AddEntityTypeAction(this, (EntityType)node)); }
         else if (node instanceof ValueType)             { this._actionManager.executeAction(new AddValueTypeAction (this, (ValueType)node)); }
-
         else if (node instanceof Predicate)             { this._actionManager.executeAction(new AddPredicateAction(this, (Predicate)node)); }
-        else if (node instanceof Role)                  { this._actionManager.executeAction(new AddRoleAction     (this, (Role)node)); }
-
         else if (node instanceof ObjectifiedPredicate)  { this._actionManager.executeAction(new AddObjectifiedPredicateAction(this, (ObjectifiedPredicate)node)); }
 
         else if (node instanceof SubsetConstraint)      { this._actionManager.executeAction(new AddConstraintAction(this, (SubsetConstraint)node)); }
@@ -71,10 +81,30 @@ public class Diagram {
         else if (node instanceof ExclusiveOrConstraint) { this._actionManager.executeAction(new AddConstraintAction(this, (ExclusiveOrConstraint)node)); }
         else if (node instanceof InclusiveOrConstraint) { this._actionManager.executeAction(new AddConstraintAction(this, (InclusiveOrConstraint)node)); }
 
+        else {
+            throw new RuntimeException("ERROR :: Try to add incompatible type of node (" + node.getClass().descriptorString() + ").");
+        }
+
         return node;
     }
 
-    public void removeNode(Node node) { this._actionManager.executeAction(new RemoveNodeAction(this, node)); }
+    public void removeNode(Node node) {
+        if      (node instanceof EntityType)            { this._actionManager.executeAction(new RemoveEntityTypeAction(this, (EntityType)node)); }
+        else if (node instanceof ValueType)             { this._actionManager.executeAction(new RemoveValueTypeAction (this, (ValueType)node)); }
+        else if (node instanceof Predicate)             { this._actionManager.executeAction(new RemovePredicateAction(this, (Predicate)node)); }
+        else if (node instanceof ObjectifiedPredicate)  { this._actionManager.executeAction(new RemoveObjectifiedPredicateAction(this, (ObjectifiedPredicate)node)); }
+
+        else if (node instanceof SubsetConstraint)      { this._actionManager.executeAction(new RemoveConstraintAction(this, (SubsetConstraint)node)); }
+        else if (node instanceof EqualityConstraint)    { this._actionManager.executeAction(new RemoveConstraintAction(this, (EqualityConstraint)node)); }
+        else if (node instanceof UniquenessConstraint)  { this._actionManager.executeAction(new RemoveConstraintAction(this, (UniquenessConstraint)node)); }
+        else if (node instanceof ExclusionConstraint)   { this._actionManager.executeAction(new RemoveConstraintAction(this, (ExclusionConstraint)node)); }
+        else if (node instanceof ExclusiveOrConstraint) { this._actionManager.executeAction(new RemoveConstraintAction(this, (ExclusiveOrConstraint)node)); }
+        else if (node instanceof InclusiveOrConstraint) { this._actionManager.executeAction(new RemoveConstraintAction(this, (InclusiveOrConstraint)node)); }
+
+        else {
+            throw new RuntimeException("ERROR :: Try to remove incompatible type of node (" + node.getClass().descriptorString() + ").");
+        }
+    }
 
     public <T extends EntityType, G extends EntityType> SubtypingRelationEdge connectBySubtypingRelation(AnchorPoint<T> beginEntityTypeAnchorPoint, AnchorPoint<G> endEntityTypeAnchorPoint) {
         SubtypingRelationEdge edge = new SubtypingRelationEdge((AnchorPoint<EntityType>)beginEntityTypeAnchorPoint, (AnchorPoint<EntityType>)endEntityTypeAnchorPoint);
@@ -152,9 +182,6 @@ public class Diagram {
     public boolean canRedoState() { return this._actionManager.canRedo(); }
     public void    redoState()    { this._actionManager.redo(); }
 
-    // TODO - @structure :: Add non-public connection to the action manager (object type uses it to disable recording action of setting its name).
-    public ActionManager _actionManager() { return this._actionManager; }
-
     // -------------- sub-operations --------------
     private <T extends DiagramElement> T _addElement(T element) {
         element.setOwnerDiagram(this);
@@ -170,7 +197,7 @@ public class Diagram {
 
     // ================= SUBTYPES =================
     private abstract class AddNodeAction<T extends Node> extends Action {
-        private final T _node;
+        protected final T _node;
 
         public AddNodeAction(Diagram diagram, @NotNull T node) {
             super(diagram);
@@ -196,25 +223,47 @@ public class Diagram {
 
     private class AddPredicateAction<G extends Predicate> extends AddNodeAction<G> {
         public AddPredicateAction(Diagram diagram, @NotNull G node) { super(diagram, node); }
-    }
 
-    private class AddRoleAction<G extends Role> extends AddNodeAction<G> {
-        public AddRoleAction(Diagram diagram, @NotNull G node) { super(diagram, node); }
+        @Override
+        public void _execute() {
+            super._execute();
+            this._node.roles().forEach(Diagram.this::_addElement);
+        }
+
+        @Override
+        public void _undo() {
+            super._undo();
+            this._node.roles().forEach(Diagram.this::_removeElement);
+        }
     }
 
     private class AddObjectifiedPredicateAction extends AddNodeAction<ObjectifiedPredicate> {
         public AddObjectifiedPredicateAction(Diagram diagram, @NotNull ObjectifiedPredicate node) { super(diagram, node); }
+
+        @Override
+        public void _execute() {
+            super._execute();
+            _addElement(this._node.innerPredicate());
+            this._node.innerPredicate().roles().forEach(Diagram.this::_addElement);
+        }
+
+        @Override
+        public void _undo() {
+            super._undo();
+            _removeElement(this._node.innerPredicate());
+            this._node.innerPredicate().roles().forEach(Diagram.this::_removeElement);
+        }
     }
 
     private class AddConstraintAction<G extends Constraint> extends AddNodeAction<G> {
         public AddConstraintAction(Diagram diagram, @NotNull G node) { super(diagram, node); }
     }
 
-    private class RemoveNodeAction extends Action {
-        private final Node            _node;
-        private final ArrayList<Edge> _incidentEdges;
+    private abstract class RemoveNodeAction<T extends Node> extends Action {
+        protected final T               _node;
+        protected final ArrayList<Edge> _incidentEdges;
 
-        public RemoveNodeAction(Diagram diagram, @NotNull Node node) {
+        public RemoveNodeAction(Diagram diagram, @NotNull T node) {
             super(diagram);
 
             this._node          = node;
@@ -232,6 +281,58 @@ public class Diagram {
             this._diagram._addElement(this._node);
             for (var edge : this._incidentEdges) { this._diagram._addElement(edge); }
         }
+    }
+
+    private class RemoveEntityTypeAction extends RemoveNodeAction<EntityType> {
+        public RemoveEntityTypeAction(Diagram diagram, @NotNull EntityType node) { super(diagram, node); }
+    }
+
+    private class RemoveValueTypeAction extends RemoveNodeAction<ValueType> {
+        public RemoveValueTypeAction(Diagram diagram, @NotNull ValueType node) { super(diagram, node); }
+    }
+
+    private class RemovePredicateAction extends RemoveNodeAction<Predicate> {
+        public RemovePredicateAction(Diagram diagram, @NotNull Predicate node) {
+            super(diagram, node);
+
+            if (node.hasOwnerObjectifiedPredicate() && node.ownerObjectifiedPredicate().hasOwnerDiagram()) {
+                throw new RuntimeException("ERROR :: Try to remove predicate which has non-removed owner on the diagram.");
+            }
+        }
+
+        @Override
+        public void _execute() {
+            super._execute();
+            this._node.roles().forEach(Diagram.this::_removeElement);
+        }
+
+        @Override
+        public void _undo() {
+            super._undo();
+            this._node.roles().forEach(Diagram.this::_addElement);
+        }
+    }
+
+    private class RemoveObjectifiedPredicateAction extends RemoveNodeAction<ObjectifiedPredicate> {
+        public RemoveObjectifiedPredicateAction(Diagram diagram, @NotNull ObjectifiedPredicate node) { super(diagram, node); }
+
+        @Override
+        public void _execute() {
+            super._execute();
+            _removeElement(this._node.innerPredicate());
+            this._node.innerPredicate().roles().forEach(Diagram.this::_removeElement);
+        }
+
+        @Override
+        public void _undo() {
+            super._undo();
+            _addElement(this._node.innerPredicate());
+            this._node.innerPredicate().roles().forEach(Diagram.this::_addElement);
+        }
+    }
+
+    private class RemoveConstraintAction<G extends Constraint> extends RemoveNodeAction<G> {
+        public RemoveConstraintAction(Diagram diagram, @NotNull G node) { super(diagram, node); }
     }
 
     private abstract class ConnectAction<T extends DiagramElement, G extends DiagramElement> extends Action {

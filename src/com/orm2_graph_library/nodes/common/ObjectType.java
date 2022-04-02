@@ -27,12 +27,12 @@ public abstract class ObjectType extends RoleParticipant {
 
     // ---------------- connection ----------------
     @Override
-    protected void _initSelf(Diagram owner) {
+    protected void _initSelf() {
         boolean isVacantNameFound = false;
         int index;
         for (index=1; index<Integer.MAX_VALUE && !isVacantNameFound; index++) {
             String name = this.basicName() + " " + index;
-            isVacantNameFound = owner.getElements(ObjectType.class).noneMatch(e -> e._name.equals(name));
+            isVacantNameFound = this._ownerDiagram.getElements(ObjectType.class).noneMatch(e -> e._name.equals(name));
         }
 
         assert isVacantNameFound : "ERROR :: Failed to find proper index for object type.";
@@ -42,16 +42,16 @@ public abstract class ObjectType extends RoleParticipant {
     // ---------------- attributes ----------------
     // * Name
     public String name() { return this._name; }
-    public void setName(String name) { this._ownerDiagram._actionManager().executeAction(new ObjectTypeNameChangeAction(this._ownerDiagram, this, this._name, name)); }
+    public void setName(String name) { this._ownerDiagramActionManager().executeAction(new ObjectTypeNameChangeAction(this._ownerDiagram, this, this._name, name)); }
 
     public abstract String basicName();
 
     // * Signs
     public boolean isPersonal() { return this._isPersonal; }
-    public void setIsPersonal(boolean isPersonal) { this._ownerDiagram._actionManager().executeAction(new ObjectTypeIsPersonalFlagChangeAction(this._ownerDiagram, this, this._isPersonal, isPersonal)); }
+    public void setIsPersonal(boolean isPersonal) { this._ownerDiagramActionManager().executeAction(new ObjectTypeIsPersonalFlagChangeAction(this._ownerDiagram, this, this._isPersonal, isPersonal)); }
 
     public boolean isIndependent() { return this._isIndependent; }
-    public void setIsIndependent(boolean isIndependent) { this._ownerDiagram._actionManager().executeAction(new ObjectTypeIsIndependentFlagChangeAction(this._ownerDiagram, this, this._isIndependent, isIndependent)); }
+    public void setIsIndependent(boolean isIndependent) { this._ownerDiagramActionManager().executeAction(new ObjectTypeIsIndependentFlagChangeAction(this._ownerDiagram, this, this._isIndependent, isIndependent)); }
 
     public void setBorderSize(int borderWidth, int borderHeight) {
         this._borderWidth  = borderWidth;

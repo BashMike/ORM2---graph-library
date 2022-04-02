@@ -12,6 +12,8 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+// TODO - @add :: Return to standalone predicate.
+
 public class ObjectifiedPredicate extends RoleParticipant {
     // ================ ATTRIBUTES ================
     final private Predicate _innerPredicate;
@@ -28,11 +30,7 @@ public class ObjectifiedPredicate extends RoleParticipant {
 
     // ---------------- connection ----------------
     @Override
-    protected void _initSelf(Diagram owner) {
-        this._stopDiagramRecordingActions();
-        owner.addNode(this._innerPredicate);
-        this._startDiagramRecordingActions();
-    }
+    protected void _initSelf() {}
 
     // ---------------- attributes ----------------
     public Predicate innerPredicate() { return this._innerPredicate; }

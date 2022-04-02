@@ -87,6 +87,20 @@ public class Test_globalTest {
         else if (diagramElement instanceof RoleConstraintRelationEdge)      { test_roleConstraintRelationEdges.remove((RoleConstraintRelationEdge)diagramElement); }
     }
 
+    protected void test_removeAllDiagramElements() {
+        test_entityTypes.clear();
+        test_valueTypes.clear();
+        test_predicates.clear();
+        test_roles.clear();
+        test_objectifiedPredicates.clear();
+        test_constraints.clear();
+
+        test_subtypingRelationEdges.clear();
+        test_roleRelationEdges.clear();
+        test_subtypingConstraintRelationEdges.clear();
+        test_roleConstraintRelationEdges.clear();
+    }
+
     @BeforeEach
     protected void beginTest_global() {
         this._diagram = new Diagram();
@@ -121,6 +135,7 @@ public class Test_globalTest {
         allDiagramElements.addAll(test_entityTypes);
         allDiagramElements.addAll(test_valueTypes);
         allDiagramElements.addAll(test_predicates);
+        allDiagramElements.addAll(test_roles);
         allDiagramElements.addAll(test_objectifiedPredicates);
         allDiagramElements.addAll(test_constraints);
 

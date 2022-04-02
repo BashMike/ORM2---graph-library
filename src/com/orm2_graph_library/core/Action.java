@@ -20,7 +20,7 @@ public abstract class Action {
     public Action(@NotNull Diagram diagram) { this._diagram = diagram; }
 
     // ----------------- contract -----------------
-    public final void execute() {
+    final public void execute() {
         this._diagram._actionManager.stopRecordingActions();
         this._execute();
         this._diagram._actionManager.startRecordingActions();
@@ -34,7 +34,7 @@ public abstract class Action {
         }
     }
 
-    public final void undo() {
+    final public void undo() {
         this._diagram._actionManager.stopRecordingActions();
         this._undo();
         this._diagram._actionManager.startRecordingActions();
@@ -43,8 +43,8 @@ public abstract class Action {
         for (LogicError logicError : this._solvedLogicErrors)  { this._diagram._addLogicError(logicError); }
     }
 
-    public abstract void _execute();
-    public abstract void _undo();
+    abstract protected void _execute();
+    abstract protected void _undo();
 
     protected void _becomeInvalid() { this._isValid = false; }
 

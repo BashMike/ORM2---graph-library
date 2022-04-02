@@ -13,5 +13,5 @@ public class RoleRelationEdge extends Edge<Role, RoleParticipant> {
 
     // ---------------- connection ----------------
     @Override
-    protected void _initSelf(Diagram owner) {}
+    protected void _initSelf() {}
 }

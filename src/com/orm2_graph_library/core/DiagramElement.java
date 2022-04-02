@@ -3,7 +3,6 @@ package com.orm2_graph_library.core;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.stream.Stream;
 
 public abstract class DiagramElement {
     // ================== STATIC ==================
@@ -18,16 +17,18 @@ public abstract class DiagramElement {
     public boolean hasOwnerDiagram() { return (this._ownerDiagram != null); }
     public boolean isOwnerDiagram(Diagram diagram) { return (this._ownerDiagram != null && this._ownerDiagram == diagram); }
     @NotNull public Diagram ownerDiagram() { return this._ownerDiagram; }
+    @NotNull protected ActionManager _ownerDiagramActionManager() { return this._ownerDiagram._actionManager; }
 
     void setOwnerDiagram(Diagram ownerDiagram) {
         this._ownerDiagram = ownerDiagram;
-        this._initSelf(this._ownerDiagram);
+        this._initSelf();
     }
 
     void unsetOwnerDiagram() { this._ownerDiagram = null; }
 
-    abstract protected void _initSelf(Diagram owner);
+    abstract protected void _initSelf();
 
+    // TODO :: @check - Not stopping recording actions.
     protected void _stopDiagramRecordingActions()  { this._ownerDiagram._actionManager.stopRecordingActions(); }
     protected void _startDiagramRecordingActions() { this._ownerDiagram._actionManager.startRecordingActions(); }
 

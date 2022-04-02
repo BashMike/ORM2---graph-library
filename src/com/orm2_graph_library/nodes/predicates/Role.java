@@ -3,10 +3,7 @@ package com.orm2_graph_library.nodes.predicates;
 import com.orm2_graph_library.anchor_points.AnchorPosition;
 import com.orm2_graph_library.anchor_points.NodeAnchorPoint;
 import com.orm2_graph_library.anchor_points.RoleAnchorPoint;
-import com.orm2_graph_library.core.AnchorPoint;
-import com.orm2_graph_library.core.Diagram;
-import com.orm2_graph_library.core.DiagramElement;
-import com.orm2_graph_library.core.Node;
+import com.orm2_graph_library.core.*;
 import com.orm2_graph_library.nodes.common.EntityType;
 import com.orm2_graph_library.nodes_shapes.RectangleShape;
 import org.jetbrains.annotations.NotNull;
@@ -39,11 +36,13 @@ public class Role extends Node {
     }
 
     @Override
-    protected void _initSelf(Diagram owner) {}
+    protected void _initSelf() {}
 
     // ----------------- attributes -----------------
     public String text() { return this._text; }
-    public void setText(String text) { this._text = text; }
+    public void setText(String text) {
+        this._text = text;
+    }
 
     public Predicate ownerPredicate() { return this._ownerPredicate; }
 
@@ -90,7 +89,6 @@ public class Role extends Node {
         return new RoleAnchorPoint(this, anchorPosition);
     }
 
-    // TODO - @add :: Calculate left top position depending on self placement in the owner predicate.
     @Override
     public Point borderLeftTop() {
         Point result = this._ownerPredicate.borderLeftTop();
@@ -129,4 +127,22 @@ public class Role extends Node {
 
     void _moveTo(Point leftTop)          { this._leftTop.move(leftTop.x, leftTop.y); }
     void _moveBy(int shiftX, int shiftY) { this._leftTop.translate(shiftX, shiftY); }
+
+    // ================= SUBTYPES =================
+    class SetRoleTextAction extends Action {
+        final private Role   _role;
+        final private String _oldText;
+        final private String _newText;
+
+        public SetRoleTextAction(Diagram diagram, Role role, String oldText, String newText) {
+            super(diagram);
+
+            this._role    = role;
+            this._oldText = oldText;
+            this._newText = newText;
+        }
+
+        @Override protected void _execute() { this._role._text = this._newText; }
+        @Override protected void _undo()    { this._role._text = this._oldText; }
+    }
 }

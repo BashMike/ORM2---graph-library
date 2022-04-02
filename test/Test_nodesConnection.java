@@ -22,9 +22,9 @@ class Test_nodesConnection {
     }
 
     // ==================== TEST ====================
-    // ---------------- ENTITY TYPES ----------------
+    // ------------- SUBTYPING RELATION -------------
     @Test
-    void entityType_connect() {
+    void subtypingRelation_connect() {
         // Prepare data and start testing
         Diagram diagram = new Diagram();
         ArrayList<EntityType> createdEntityTypes = new ArrayList<>();

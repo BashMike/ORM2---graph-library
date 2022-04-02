@@ -1,4 +1,4 @@
 package com.orm2_graph_library.nodes.constraints;
 
-public class SubsetConstraint extends Constraint implements RoleConstraint {
+public class SubsetConstraint extends Constraint {
 }
