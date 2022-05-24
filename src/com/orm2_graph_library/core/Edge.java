@@ -3,15 +3,14 @@ package com.orm2_graph_library.core;
 import com.orm2_graph_library.utils.Point2D;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.stream.Stream;
 
 public abstract class Edge <B extends DiagramElement, E extends DiagramElement> extends DiagramElement {
     // ================ ATTRIBUTES ================
     // Does we need to calculate
-    final protected AnchorPoint<B> _beginAnchorPoint;
-    final protected AnchorPoint<E> _endAnchorPoint;
+    protected AnchorPoint<B> _beginAnchorPoint;
+    protected AnchorPoint<E> _endAnchorPoint;
 
     // ================ OPERATIONS ================
     // ----------------- creating -----------------
@@ -26,6 +25,9 @@ public abstract class Edge <B extends DiagramElement, E extends DiagramElement> 
 
     public AnchorPoint<B> beginAnchorPoint() { return this._beginAnchorPoint; }
     public AnchorPoint<E> endAnchorPoint()   { return this._endAnchorPoint; }
+
+    void _setBeginAnchorPoint(@NotNull AnchorPoint<B> beginAnchorPoint) { this._beginAnchorPoint = beginAnchorPoint; }
+    void _setEndAnchorPoint(@NotNull AnchorPoint<E> endAnchorPoint)     { this._endAnchorPoint = endAnchorPoint; }
 
     // TODO - @add :: Getting starting and ending points depending on attachment points of begin and end elements.
     @Override

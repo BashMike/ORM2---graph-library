@@ -4,12 +4,15 @@ import com.orm2_graph_library.anchor_points.AnchorPosition;
 import com.orm2_graph_library.anchor_points.NodeAnchorPoint;
 import com.orm2_graph_library.anchor_points.RoleAnchorPoint;
 import com.orm2_graph_library.core.*;
+import com.orm2_graph_library.logic_errors.RoleHasNoTextSetLogicError;
 import com.orm2_graph_library.nodes.common.EntityType;
 import com.orm2_graph_library.nodes_shapes.RectangleShape;
 import com.orm2_graph_library.utils.Point2D;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 // TODO - @modify   :: Should ROLE calculate its geometry position with geometry of its parent?
@@ -19,7 +22,7 @@ import java.util.stream.Stream;
 
 public class Role extends Node {
     // ================ ATTRIBUTES ================
-    private String          _text = null;
+    private String          _text = "";
     private final Predicate _ownerPredicate;
     private final int       _indexInPredicate;
 
@@ -44,7 +47,7 @@ public class Role extends Node {
     // ----------------- attributes -----------------
     // * Personal
     public String text() {
-        if (this._text != null) {
+        if (!this._text.equals("")) {
             return this._text;
         }
         else {
@@ -52,7 +55,7 @@ public class Role extends Node {
         }
     }
 
-    public boolean hasText() { return (this._text != null); }
+    public boolean hasText() { return !this._text.equals(""); }
 
     public void setText(String text) { this._ownerDiagramActionManager().executeAction(new RoleTextChangeAction(this._ownerDiagram, this, this._text, text)); }
 
@@ -153,13 +156,20 @@ public class Role extends Node {
     public class RoleTextChangeAction extends Diagram.DiagramElementAttributeChangeAction {
         private RoleTextChangeAction(Diagram diagram, Role role, String oldText, String newText) {
             super(diagram, role, oldText, newText);
+
+            if (oldText.equals("") && !newText.equals("")) {
+                this._solvedLogicErrors.addAll(role.getLogicErrors(RoleHasNoTextSetLogicError.class).collect(Collectors.toCollection(ArrayList::new)));
+            }
+            else if (!oldText.equals("") && newText.equals("")) {
+                this._emergedLogicErrors.add(new RoleHasNoTextSetLogicError(role));
+            }
         }
 
         public Role role() { return (Role)this._diagramElement; }
         public String newText() { return (String)this._newAttributeValue; }
         public String oldText() { return (String)this._oldAttributeValue; }
 
-        @Override protected void _execute() { ((Role)this._diagramElement)._text = (String)this._newAttributeValue; }
+        @Override protected void _execute() {((Role)this._diagramElement)._text = (String)this._newAttributeValue; }
         @Override protected void _undo()    { ((Role)this._diagramElement)._text = (String)this._oldAttributeValue; }
     }
 }

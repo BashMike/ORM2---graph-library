@@ -1,12 +1,14 @@
 import com.orm2_graph_library.core.AnchorPoint;
 import com.orm2_graph_library.core.Diagram;
 import com.orm2_graph_library.core.DiagramElement;
+import com.orm2_graph_library.core.LogicError;
 import com.orm2_graph_library.edges.RoleConstraintRelationEdge;
 import com.orm2_graph_library.edges.RoleRelationEdge;
 import com.orm2_graph_library.edges.SubtypingConstraintRelationEdge;
 import com.orm2_graph_library.edges.SubtypingRelationEdge;
 import com.orm2_graph_library.logic_errors.ConstraintHasNotEnoughConnectsLogicError;
 import com.orm2_graph_library.logic_errors.EntityTypeWithNoneRefModeLogicError;
+import com.orm2_graph_library.logic_errors.RoleHasNoTextSetLogicError;
 import com.orm2_graph_library.nodes.common.EntityType;
 import com.orm2_graph_library.nodes.common.ValueType;
 import com.orm2_graph_library.nodes.constraints.Constraint;
@@ -348,6 +350,15 @@ public class Test_nodesGeometry extends Test_globalTest {
         test_anchorPoints(test_predicates.get(0).getRole(1), new HashSet<>(List.of(new Point2D(test_predicates.get(0).borderLeftTop().x() + Test_globalTest._roleSize.width * 3/2, test_predicates.get(0).borderLeftTop().y() + 0),
                 new Point2D(test_predicates.get(0).borderLeftTop().x() + Test_globalTest._roleSize.width * 3/2, test_predicates.get(0).borderLeftTop().y() + Test_globalTest._roleSize.height))));
         test_anchorPoints(test_predicates.get(0).getRole(2), new HashSet<>(List.of(new Point2D(test_predicates.get(0).borderLeftTop().x() + Test_globalTest._roleSize.width * 3, test_predicates.get(0).borderLeftTop().y() + Test_globalTest._roleSize.height/2))));
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
     @Test
@@ -367,6 +378,15 @@ public class Test_nodesGeometry extends Test_globalTest {
         test_anchorPoints(test_predicates.get(0).getRole(1), new HashSet<>(List.of(new Point2D(test_predicates.get(0).borderLeftTop().x() + 0, test_predicates.get(0).borderLeftTop().y() + Test_globalTest._roleSize.width * 3/2),
                 new Point2D(test_predicates.get(0).borderLeftTop().x() + Test_globalTest._roleSize.height, test_predicates.get(0).borderLeftTop().y() + Test_globalTest._roleSize.width * 3/2))));
         test_anchorPoints(test_predicates.get(0).getRole(2), new HashSet<>(List.of(new Point2D(test_predicates.get(0).borderLeftTop().x() + Test_globalTest._roleSize.height/2, test_predicates.get(0).borderLeftTop().y() + Test_globalTest._roleSize.width * 3))));
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
     @Test
@@ -388,6 +408,15 @@ public class Test_nodesGeometry extends Test_globalTest {
         test_anchorPoints(test_predicates.get(0).getRole(1), new HashSet<>(List.of(new Point2D(test_predicates.get(0).borderLeftTop().x() + Test_globalTest._roleSize.width * 3/2, test_predicates.get(0).borderLeftTop().y() + 0),
                 new Point2D(test_predicates.get(0).borderLeftTop().x() + Test_globalTest._roleSize.width * 3/2, test_predicates.get(0).borderLeftTop().y() + Test_globalTest._roleSize.height))));
         test_anchorPoints(test_predicates.get(0).getRole(2), new HashSet<>(List.of(new Point2D(test_predicates.get(0).borderLeftTop().x() + Test_globalTest._roleSize.width * 3, test_predicates.get(0).borderLeftTop().y() + Test_globalTest._roleSize.height/2))));
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
     @Test
@@ -409,6 +438,15 @@ public class Test_nodesGeometry extends Test_globalTest {
         test_anchorPoints(test_predicates.get(0).getRole(1), new HashSet<>(List.of(new Point2D(test_predicates.get(0).borderLeftTop().x() + Test_globalTest._roleSize.width * 3/2, test_predicates.get(0).borderLeftTop().y() + 0),
                 new Point2D(test_predicates.get(0).borderLeftTop().x() + Test_globalTest._roleSize.width * 3/2, test_predicates.get(0).borderLeftTop().y() + Test_globalTest._roleSize.height))));
         test_anchorPoints(test_predicates.get(0).getRole(2), new HashSet<>(List.of(new Point2D(test_predicates.get(0).borderLeftTop().x() + Test_globalTest._roleSize.width * 3, test_predicates.get(0).borderLeftTop().y() + Test_globalTest._roleSize.height/2))));
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
     @Test
@@ -430,6 +468,15 @@ public class Test_nodesGeometry extends Test_globalTest {
         test_anchorPoints(test_predicates.get(0).getRole(1), new HashSet<>(List.of(new Point2D(test_predicates.get(0).borderLeftTop().x() + 0, test_predicates.get(0).borderLeftTop().y() + Test_globalTest._roleSize.width * 3/2),
                 new Point2D(test_predicates.get(0).borderLeftTop().x() + Test_globalTest._roleSize.height, test_predicates.get(0).borderLeftTop().y() + Test_globalTest._roleSize.width * 3/2))));
         test_anchorPoints(test_predicates.get(0).getRole(2), new HashSet<>(List.of(new Point2D(test_predicates.get(0).borderLeftTop().x() + Test_globalTest._roleSize.height/2, test_predicates.get(0).borderLeftTop().y() + Test_globalTest._roleSize.width * 3))));
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
     @Test
@@ -457,6 +504,15 @@ public class Test_nodesGeometry extends Test_globalTest {
         test_anchorPoints(test_predicates.get(0).getRole(1), new HashSet<>(List.of(new Point2D(test_predicates.get(0).borderLeftTop().x() + Test_globalTest._roleSize.width * 3/2, test_predicates.get(0).borderLeftTop().y() + 0),
                 new Point2D(test_predicates.get(0).borderLeftTop().x() + Test_globalTest._roleSize.width * 3/2, test_predicates.get(0).borderLeftTop().y() + Test_globalTest._roleSize.height))));
         test_anchorPoints(test_predicates.get(0).getRole(2), new HashSet<>(List.of(new Point2D(test_predicates.get(0).borderLeftTop().x() + Test_globalTest._roleSize.width * 3, test_predicates.get(0).borderLeftTop().y() + Test_globalTest._roleSize.height/2))));
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
     // ----------- OBJECTIFIED PREDICATES -----------

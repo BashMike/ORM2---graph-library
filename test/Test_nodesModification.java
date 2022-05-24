@@ -2,10 +2,12 @@ import com.orm2_graph_library.core.Diagram;
 import com.orm2_graph_library.core.DiagramElement;
 import com.orm2_graph_library.core.LogicError;
 import com.orm2_graph_library.logic_errors.EntityTypeWithNoneRefModeLogicError;
+import com.orm2_graph_library.logic_errors.RoleHasNoTextSetLogicError;
 import com.orm2_graph_library.nodes.common.EntityType;
 import com.orm2_graph_library.nodes.common.ref_modes.NoneRefMode;
 import com.orm2_graph_library.nodes.predicates.ObjectifiedPredicate;
 import com.orm2_graph_library.nodes.predicates.Predicate;
+import com.orm2_graph_library.nodes.predicates.Role;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import utils.Test_globalTest;
@@ -14,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Test_nodesModification extends Test_globalTest {
     // ==================== TEST ====================
@@ -204,6 +207,15 @@ public class Test_nodesModification extends Test_globalTest {
             Assertions.assertTrue(test_predicates.get(0).isRolesSequenceUnique(indexes));
             Assertions.assertTrue(test_predicates.get(0).isRolesSequenceUnique(test_predicates.get(0).rolesSequence(indexes)));
         }
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
     @Test
@@ -236,6 +248,15 @@ public class Test_nodesModification extends Test_globalTest {
             Assertions.assertFalse(test_predicates.get(0).isRolesSequenceUnique(indexes));
             Assertions.assertFalse(test_predicates.get(0).isRolesSequenceUnique(test_predicates.get(0).rolesSequence(indexes)));
         }
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
     @Test
@@ -262,6 +283,15 @@ public class Test_nodesModification extends Test_globalTest {
         for (int[] indexes : uniqueRolesSequencesIndexes) {
             Assertions.assertFalse(test_predicates.get(0).isRolesSequenceUnique(indexes));
             Assertions.assertFalse(test_predicates.get(0).isRolesSequenceUnique(test_predicates.get(0).rolesSequence(indexes)));
+        }
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
         }
     }
 
@@ -291,9 +321,17 @@ public class Test_nodesModification extends Test_globalTest {
             Assertions.assertTrue(test_predicates.get(0).isRolesSequenceUnique(indexes));
             Assertions.assertTrue(test_predicates.get(0).isRolesSequenceUnique(test_predicates.get(0).rolesSequence(indexes)));
         }
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
-    /*
     @Test
     void predicate_redoMakingRolesSequencesUnique() {
         // Prepare data and start testing
@@ -320,8 +358,168 @@ public class Test_nodesModification extends Test_globalTest {
             Assertions.assertTrue(test_predicates.get(0).isRolesSequenceUnique(indexes));
             Assertions.assertTrue(test_predicates.get(0).isRolesSequenceUnique(test_predicates.get(0).rolesSequence(indexes)));
         }
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
-    
+
+    @Test
+    void predicate_setAllRolesText() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+        test_predicates.get(0).getRole(0).setText("has");
+        test_predicates.get(0).getRole(1).setText("do");
+        test_predicates.get(0).getRole(2).setText("is");
+        test_predicates.get(0).getRole(3).setText("made of");
+    }
+
+    @Test
+    void predicate_undoSetAllRolesText() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+        test_predicates.get(0).getRole(0).setText("has");
+        test_predicates.get(0).getRole(1).setText("do");
+        test_predicates.get(0).getRole(2).setText("is");
+        test_predicates.get(0).getRole(3).setText("made of");
+
+        for (int i=0; i<4; i++) { this._diagram.undoState(); }
+
+        // Check result
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
+    }
+
+    @Test
+    void predicate_redoSetAllRolesText() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+        test_predicates.get(0).getRole(0).setText("has");
+        test_predicates.get(0).getRole(1).setText("do");
+        test_predicates.get(0).getRole(2).setText("is");
+        test_predicates.get(0).getRole(3).setText("made of");
+
+        for (int i=0; i<4; i++) { this._diagram.undoState(); }
+        for (int i=0; i<4; i++) { this._diagram.redoState(); }
+    }
+
+    @Test
+    void predicate_setRolesTextAfterUndoSettingAllRolesText() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+        test_predicates.get(0).getRole(0).setText("has");
+        test_predicates.get(0).getRole(1).setText("do");
+        test_predicates.get(0).getRole(2).setText("is");
+        test_predicates.get(0).getRole(3).setText("made of");
+
+        this._diagram.undoState();
+        this._diagram.undoState();
+
+        test_predicates.get(0).getRole(2).setText("builds");
+        test_predicates.get(0).getRole(3).setText("makes");
+    }
+
+    @Test
+    void predicate_setSomeRolesText() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+        test_predicates.get(0).getRole(0).setText("has");
+        test_predicates.get(0).getRole(2).setText("do");
+
+        // Check result
+        LogicError logicError;
+
+        logicError = new RoleHasNoTextSetLogicError(test_predicates.get(0).getRole(1));
+        test_predicatesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(1).ownerPredicate(), k -> new HashSet<>()).add(logicError);
+        test_rolesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(1), k -> new HashSet<>()).add(logicError);
+
+        logicError = new RoleHasNoTextSetLogicError(test_predicates.get(0).getRole(3));
+        test_predicatesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(3).ownerPredicate(), k -> new HashSet<>()).add(logicError);
+        test_rolesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(3), k -> new HashSet<>()).add(logicError);
+    }
+
+    @Test
+    void predicate_undoSetSomeRolesText() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+        test_predicates.get(0).getRole(0).setText("has");
+        test_predicates.get(0).getRole(2).setText("is");
+
+        this._diagram.undoState();
+        this._diagram.undoState();
+
+        // Check result
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
+    }
+
+    @Test
+    void predicate_redoSetSomeRolesText() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+        test_predicates.get(0).getRole(0).setText("has");
+        test_predicates.get(0).getRole(2).setText("do");
+
+        this._diagram.undoState();
+        this._diagram.undoState();
+        this._diagram.redoState();
+        this._diagram.redoState();
+
+        // Check result
+        LogicError logicError;
+
+        logicError = new RoleHasNoTextSetLogicError(test_predicates.get(0).getRole(1));
+        test_predicatesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(1).ownerPredicate(), k -> new HashSet<>()).add(logicError);
+        test_rolesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(1), k -> new HashSet<>()).add(logicError);
+
+        logicError = new RoleHasNoTextSetLogicError(test_predicates.get(0).getRole(3));
+        test_predicatesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(3).ownerPredicate(), k -> new HashSet<>()).add(logicError);
+        test_rolesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(3), k -> new HashSet<>()).add(logicError);
+    }
+
+    @Test
+    void predicate_setRolesTextAfterUndoSettingSomeRolesText() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+        test_predicates.get(0).getRole(0).setText("has");
+        test_predicates.get(0).getRole(2).setText("is");
+
+        this._diagram.undoState();
+        this._diagram.undoState();
+
+        test_predicates.get(0).getRole(1).setText("has");
+        test_predicates.get(0).getRole(3).setText("is");
+
+        // Check result
+        LogicError logicError;
+
+        logicError = new RoleHasNoTextSetLogicError(test_predicates.get(0).getRole(0));
+        test_predicatesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(0).ownerPredicate(), k -> new HashSet<>()).add(logicError);
+        test_rolesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(0), k -> new HashSet<>()).add(logicError);
+
+        logicError = new RoleHasNoTextSetLogicError(test_predicates.get(0).getRole(2));
+        test_predicatesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(2).ownerPredicate(), k -> new HashSet<>()).add(logicError);
+        test_rolesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(2), k -> new HashSet<>()).add(logicError);
+    }
+
+    /*
     @Test
     void predicate_makeRolesSequencesUnique() {
         // Prepare data and start testing
@@ -473,6 +671,15 @@ public class Test_nodesModification extends Test_globalTest {
         // Check result
         Assertions.assertTrue(test_predicates.get(0).hasOwnerObjectifiedPredicate());
         Assertions.assertEquals(test_objectifiedPredicates.get(0), test_predicates.get(0).ownerObjectifiedPredicate());
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
     @Test
@@ -485,6 +692,15 @@ public class Test_nodesModification extends Test_globalTest {
 
         // Check result
         Assertions.assertFalse(test_predicates.get(0).hasOwnerObjectifiedPredicate());
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
     @Test
@@ -499,6 +715,15 @@ public class Test_nodesModification extends Test_globalTest {
         // Check result
         Assertions.assertTrue(test_predicates.get(0).hasOwnerObjectifiedPredicate());
         Assertions.assertEquals(test_objectifiedPredicates.get(0), test_predicates.get(0).ownerObjectifiedPredicate());
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
     @Test
@@ -509,6 +734,15 @@ public class Test_nodesModification extends Test_globalTest {
 
         // Check result
         Assertions.assertThrows(RuntimeException.class, () -> this._diagram.addNode(new ObjectifiedPredicate(test_predicates.get(0))));
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
     @Test
@@ -537,6 +771,15 @@ public class Test_nodesModification extends Test_globalTest {
         Assertions.assertTrue(test_predicates.get(0).hasOwnerObjectifiedPredicate());
         Assertions.assertEquals(test_objectifiedPredicates.get(0), test_predicates.get(0).ownerObjectifiedPredicate());
         Assertions.assertEquals(test_predicates.get(0), test_objectifiedPredicates.get(0).innerPredicate());
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
     @Test
@@ -565,6 +808,15 @@ public class Test_nodesModification extends Test_globalTest {
         // Check result
         Assertions.assertFalse(test_predicates.get(0).hasOwnerObjectifiedPredicate());
         Assertions.assertTrue(this._diagram.hasOnlyElements(Predicate.class));
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
     @Test
@@ -581,6 +833,15 @@ public class Test_nodesModification extends Test_globalTest {
         Assertions.assertTrue(test_predicates.get(0).hasOwnerObjectifiedPredicate());
         Assertions.assertEquals(test_objectifiedPredicates.get(0), test_predicates.get(0).ownerObjectifiedPredicate());
         Assertions.assertEquals(test_predicates.get(0), test_objectifiedPredicates.get(0).innerPredicate());
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
     @Test
@@ -597,6 +858,15 @@ public class Test_nodesModification extends Test_globalTest {
         // Check result
         Assertions.assertFalse(test_predicates.get(0).hasOwnerObjectifiedPredicate());
         Assertions.assertTrue(this._diagram.hasOnlyElements(Predicate.class));
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
     @Test
@@ -624,6 +894,15 @@ public class Test_nodesModification extends Test_globalTest {
 
         // Check result
         Assertions.assertEquals("Hello", test_objectifiedPredicates.get(0).name());
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
     @Test
@@ -636,6 +915,15 @@ public class Test_nodesModification extends Test_globalTest {
 
         // Check result
         Assertions.assertEquals(test_objectifiedPredicates.get(0).basicName() + " " + 1, test_objectifiedPredicates.get(0).name());
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
     @Test
@@ -646,6 +934,15 @@ public class Test_nodesModification extends Test_globalTest {
 
         // Check result
         Assertions.assertEquals("Hello", test_objectifiedPredicates.get(0).name());
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
     @Test
@@ -658,6 +955,15 @@ public class Test_nodesModification extends Test_globalTest {
 
         // Check result
         Assertions.assertEquals(test_objectifiedPredicates.get(0).basicName() + " " + 1, test_objectifiedPredicates.get(0).name());
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
     // * IsIndependent flag
@@ -669,6 +975,15 @@ public class Test_nodesModification extends Test_globalTest {
 
         // Check result
         Assertions.assertTrue(test_objectifiedPredicates.get(0).isIndependent());
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
     @Test
@@ -681,6 +996,15 @@ public class Test_nodesModification extends Test_globalTest {
 
         // Check result
         Assertions.assertFalse(test_objectifiedPredicates.get(0).isIndependent());
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
     @Test
@@ -691,6 +1015,15 @@ public class Test_nodesModification extends Test_globalTest {
 
         // Check result
         Assertions.assertTrue(test_objectifiedPredicates.get(0).isIndependent());
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 
     @Test
@@ -703,5 +1036,14 @@ public class Test_nodesModification extends Test_globalTest {
 
         // Check result
         Assertions.assertFalse(test_objectifiedPredicates.get(0).isIndependent());
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
     }
 }

@@ -3,6 +3,7 @@ import com.orm2_graph_library.core.Diagram;
 import com.orm2_graph_library.core.DiagramElement;
 import com.orm2_graph_library.core.Edge;
 import com.orm2_graph_library.core.Node;
+import com.orm2_graph_library.edges.SubtypingRelationEdge;
 import com.orm2_graph_library.nodes.common.EntityType;
 import com.orm2_graph_library.nodes.common.ObjectType;
 import com.orm2_graph_library.nodes.constraints.Constraint;
@@ -91,6 +92,7 @@ public class RenderTest_nodesShapeRendering extends JFrame implements MouseListe
 
         EntityType e0 = diagram.addNode(new EntityType());
         EntityType e1 = diagram.addNode(new EntityType());
+        EntityType e2 = diagram.addNode(new EntityType());
 
         Constraint c0 = diagram.addNode(new SubsetConstraint());
 
@@ -103,6 +105,7 @@ public class RenderTest_nodesShapeRendering extends JFrame implements MouseListe
 
         e0.moveTo(new Point2D(350, 150));
         e1.moveTo(new Point2D(450, 250));
+        e2.moveTo(new Point2D(200, 320));
 
         c0.moveTo(new Point2D(80, 80));
 
@@ -110,10 +113,12 @@ public class RenderTest_nodesShapeRendering extends JFrame implements MouseListe
         op0.innerPredicate().setOrientation(DiagramElement.Orientation.VERTICAL);
 
         // Connect nodes
-        diagram.connectBySubtypingRelation(e0.centerAnchorPoint(), e1.centerAnchorPoint());
+        SubtypingRelationEdge se0 = diagram.connectBySubtypingRelation(e0.centerAnchorPoint(), e1.centerAnchorPoint());
         diagram.connectByRoleConstraintRelation(c0.centerAnchorPoint(), sp0.rolesSequence(0, 3));
         diagram.connectByRoleRelation(sp0.getRole(2).anchorPoint(AnchorPosition.LEFT),  op0.rightAnchorPoint());
         // diagram.connectByRoleRelation(sp1.getRole(2).anchorPoint(AnchorPosition.DOWN), op0.leftAnchorPoint());
+
+        diagram.reconnectBySubtypingRelation(e2.centerAnchorPoint(), se0);
 
         // Modify diagram elements
         c0.moveBy(300, 100);

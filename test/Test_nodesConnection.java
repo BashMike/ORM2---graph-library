@@ -1195,16 +1195,20 @@ class Test_nodesConnection extends Test_globalTest {
         test_constraintsLogicErrors.put(test_constraints.get(1), new HashSet<>(List.of(new ConstraintHasNotEnoughConnectsLogicError(test_constraints.get(1), test_constraints.get(1).getIncidentElements(Edge.class).collect(Collectors.toCollection(ArrayList::new))))));
     }
 
-    /*
     // ---------------- RECONNECTION ----------------
     // * Subtyping relation
     @Test
-    void subtypingRelation_connect() {
+    void subtypingRelation_reconnect() {
         // Prepare data and start testing
         for (int i=0; i<5; i++) { test_addDiagramElement(this._diagram.addNode(new EntityType())); }
-        test_addDiagramElement(this._diagram.connectBySubtypingRelation(test_entityTypes.get(0).centerAnchorPoint(), test_entityTypes.get(1).centerAnchorPoint()));
-        test_addDiagramElement(this._diagram.connectBySubtypingRelation(test_entityTypes.get(0).centerAnchorPoint(), test_entityTypes.get(2).centerAnchorPoint()));
-        test_addDiagramElement(this._diagram.connectBySubtypingRelation(test_entityTypes.get(1).centerAnchorPoint(), test_entityTypes.get(3).centerAnchorPoint()));
+        SubtypingRelationEdge edge0 = this._diagram.connectBySubtypingRelation(test_entityTypes.get(0).centerAnchorPoint(), test_entityTypes.get(1).centerAnchorPoint());
+        SubtypingRelationEdge edge1 = this._diagram.connectBySubtypingRelation(test_entityTypes.get(0).centerAnchorPoint(), test_entityTypes.get(2).centerAnchorPoint());
+        SubtypingRelationEdge edge2 = this._diagram.connectBySubtypingRelation(test_entityTypes.get(1).centerAnchorPoint(), test_entityTypes.get(3).centerAnchorPoint());
+
+        this._diagram.reconnectBySubtypingRelation(edge0, test_entityTypes.get(4).centerAnchorPoint());
+        test_addDiagramElement(this._diagram.reconnectBySubtypingRelation(edge1, test_entityTypes.get(1).centerAnchorPoint()));
+        test_addDiagramElement(this._diagram.reconnectBySubtypingRelation(test_entityTypes.get(2).centerAnchorPoint(), edge2));
+        test_addDiagramElement(this._diagram.reconnectBySubtypingRelation(test_entityTypes.get(3).centerAnchorPoint(), edge0));
 
         // Check result
         for (EntityType entityType : test_entityTypes) { test_entityTypesLogicErrors.put(entityType, new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(entityType)))); }
@@ -1214,11 +1218,16 @@ class Test_nodesConnection extends Test_globalTest {
     void subtypingRelation_undoReconnect() {
         // Prepare data and start testing
         for (int i=0; i<5; i++) { test_addDiagramElement(this._diagram.addNode(new EntityType())); }
-        this._diagram.connectBySubtypingRelation(test_entityTypes.get(0).centerAnchorPoint(), test_entityTypes.get(1).centerAnchorPoint());
-        this._diagram.connectBySubtypingRelation(test_entityTypes.get(0).centerAnchorPoint(), test_entityTypes.get(2).centerAnchorPoint());
-        this._diagram.connectBySubtypingRelation(test_entityTypes.get(1).centerAnchorPoint(), test_entityTypes.get(3).centerAnchorPoint());
+        test_addDiagramElement(this._diagram.connectBySubtypingRelation(test_entityTypes.get(0).centerAnchorPoint(), test_entityTypes.get(1).centerAnchorPoint()));
+        test_addDiagramElement(this._diagram.connectBySubtypingRelation(test_entityTypes.get(0).centerAnchorPoint(), test_entityTypes.get(2).centerAnchorPoint()));
+        test_addDiagramElement(this._diagram.connectBySubtypingRelation(test_entityTypes.get(1).centerAnchorPoint(), test_entityTypes.get(3).centerAnchorPoint()));
 
-        for (int i=0; i<3; i++) { this._diagram.undoState(); }
+        this._diagram.reconnectBySubtypingRelation(test_subtypingRelationEdges.get(0), test_entityTypes.get(4).centerAnchorPoint());
+        this._diagram.reconnectBySubtypingRelation(test_subtypingRelationEdges.get(1), test_entityTypes.get(1).centerAnchorPoint());
+        this._diagram.reconnectBySubtypingRelation(test_entityTypes.get(2).centerAnchorPoint(), test_subtypingRelationEdges.get(2));
+        this._diagram.reconnectBySubtypingRelation(test_entityTypes.get(3).centerAnchorPoint(), test_subtypingRelationEdges.get(0));
+
+        for (int i=0; i<4; i++) { this._diagram.undoState(); }
 
         // Check result
         for (EntityType entityType : test_entityTypes) { test_entityTypesLogicErrors.put(entityType, new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(entityType)))); }
@@ -1228,34 +1237,46 @@ class Test_nodesConnection extends Test_globalTest {
     void subtypingRelation_redoReconnect() {
         // Prepare data and start testing
         for (int i=0; i<5; i++) { test_addDiagramElement(this._diagram.addNode(new EntityType())); }
-        test_addDiagramElement(this._diagram.connectBySubtypingRelation(test_entityTypes.get(0).centerAnchorPoint(), test_entityTypes.get(1).centerAnchorPoint()));
-        test_addDiagramElement(this._diagram.connectBySubtypingRelation(test_entityTypes.get(0).centerAnchorPoint(), test_entityTypes.get(2).centerAnchorPoint()));
-        test_addDiagramElement(this._diagram.connectBySubtypingRelation(test_entityTypes.get(1).centerAnchorPoint(), test_entityTypes.get(3).centerAnchorPoint()));
+        SubtypingRelationEdge edge0 = this._diagram.connectBySubtypingRelation(test_entityTypes.get(0).centerAnchorPoint(), test_entityTypes.get(1).centerAnchorPoint());
+        SubtypingRelationEdge edge1 = this._diagram.connectBySubtypingRelation(test_entityTypes.get(0).centerAnchorPoint(), test_entityTypes.get(2).centerAnchorPoint());
+        SubtypingRelationEdge edge2 = this._diagram.connectBySubtypingRelation(test_entityTypes.get(1).centerAnchorPoint(), test_entityTypes.get(3).centerAnchorPoint());
 
-        for (int i=0; i<3; i++) { this._diagram.undoState(); }
-        for (int i=0; i<3; i++) { this._diagram.redoState(); }
+        this._diagram.reconnectBySubtypingRelation(edge0, test_entityTypes.get(4).centerAnchorPoint());
+        test_addDiagramElement(this._diagram.reconnectBySubtypingRelation(edge1, test_entityTypes.get(1).centerAnchorPoint()));
+        test_addDiagramElement(this._diagram.reconnectBySubtypingRelation(test_entityTypes.get(2).centerAnchorPoint(), edge2));
+        test_addDiagramElement(this._diagram.reconnectBySubtypingRelation(test_entityTypes.get(3).centerAnchorPoint(), edge0));
+
+        for (int i=0; i<4; i++) { this._diagram.undoState(); }
+        for (int i=0; i<4; i++) { this._diagram.redoState(); }
 
         // Check result
         for (EntityType entityType : test_entityTypes) { test_entityTypesLogicErrors.put(entityType, new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(entityType)))); }
     }
 
     @Test
-    void subtypingRelation_connectAfterUndo() {
+    void subtypingRelation_reconnectAfterUndo() {
         // Prepare data and start testing
         for (int i=0; i<5; i++) { test_addDiagramElement(this._diagram.addNode(new EntityType())); }
-        this._diagram.connectBySubtypingRelation(test_entityTypes.get(0).centerAnchorPoint(), test_entityTypes.get(1).centerAnchorPoint());
-        this._diagram.connectBySubtypingRelation(test_entityTypes.get(0).centerAnchorPoint(), test_entityTypes.get(2).centerAnchorPoint());
-        this._diagram.connectBySubtypingRelation(test_entityTypes.get(1).centerAnchorPoint(), test_entityTypes.get(3).centerAnchorPoint());
+        SubtypingRelationEdge edge0 = this._diagram.connectBySubtypingRelation(test_entityTypes.get(0).centerAnchorPoint(), test_entityTypes.get(1).centerAnchorPoint());
+        SubtypingRelationEdge edge1 = this._diagram.connectBySubtypingRelation(test_entityTypes.get(0).centerAnchorPoint(), test_entityTypes.get(2).centerAnchorPoint());
+        SubtypingRelationEdge edge2 = this._diagram.connectBySubtypingRelation(test_entityTypes.get(1).centerAnchorPoint(), test_entityTypes.get(3).centerAnchorPoint());
 
-        for (int i=0; i<3; i++) { this._diagram.undoState(); }
+        this._diagram.reconnectBySubtypingRelation(edge0, test_entityTypes.get(4).centerAnchorPoint());
+        test_addDiagramElement(this._diagram.reconnectBySubtypingRelation(edge1, test_entityTypes.get(1).centerAnchorPoint()));
+        this._diagram.reconnectBySubtypingRelation(test_entityTypes.get(2).centerAnchorPoint(), edge2);
+        this._diagram.reconnectBySubtypingRelation(test_entityTypes.get(3).centerAnchorPoint(), edge0);
 
-        test_addDiagramElement(this._diagram.connectBySubtypingRelation(test_entityTypes.get(2).centerAnchorPoint(), test_entityTypes.get(3).centerAnchorPoint()));
-        test_addDiagramElement(this._diagram.connectBySubtypingRelation(test_entityTypes.get(0).centerAnchorPoint(), test_entityTypes.get(4).centerAnchorPoint()));
+        this._diagram.undoState();
+        this._diagram.undoState();
+
+        test_addDiagramElement(this._diagram.reconnectBySubtypingRelation(edge2, test_entityTypes.get(2).centerAnchorPoint()));
+        test_addDiagramElement(this._diagram.reconnectBySubtypingRelation(edge0, test_entityTypes.get(3).centerAnchorPoint()));
 
         // Check result
         for (EntityType entityType : test_entityTypes) { test_entityTypesLogicErrors.put(entityType, new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(entityType)))); }
     }
 
+    /*
     // * Role relation
     @Test
     void roleRelation_connect() {

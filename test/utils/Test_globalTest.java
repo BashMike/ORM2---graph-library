@@ -309,7 +309,6 @@ public class Test_globalTest {
         for (var c : test_subtypingConstraintRelationEdgesLogicErrors.values()) { test_expLogicErrors.addAll(c); }
         for (var c : test_roleConstraintRelationEdgesLogicErrors.values())      { test_expLogicErrors.addAll(c); }
 
-        // Assertions.assertEquals(test_expLogicErrors.size(), this._diagram.logicErrors().count());
         Assertions.assertEquals(test_expLogicErrors, this._diagram.logicErrors().collect(Collectors.toCollection(HashSet::new)));
     }
 

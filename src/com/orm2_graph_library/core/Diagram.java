@@ -24,6 +24,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -420,15 +421,15 @@ public class Diagram implements Serializable {
     }
 
     public class AddPredicateAction extends AddNodeAction<Predicate> {
-        private AddPredicateAction(Diagram diagram, @NotNull Predicate node) { super(diagram, node); }
+        private AddPredicateAction(Diagram diagram, @NotNull Predicate node) {
+            super(diagram, node);
+            this._node.roles().forEach(e -> this._emergedLogicErrors.add(new RoleHasNoTextSetLogicError(e)));
+        }
 
         @Override
         public void _execute() {
             super._execute();
-            this._node.roles().forEach(e -> {
-                this._diagram._addElement(e);
-                this._emergedLogicErrors.add(new RoleHasNoTextSetLogicError(e));
-            });
+            this._node.roles().forEach(e -> this._diagram._addElement(e));
         }
 
         @Override
@@ -528,10 +529,7 @@ public class Diagram implements Serializable {
         @Override
         public void _execute() {
             super._execute();
-            this._node.roles().forEach(e -> {
-                this._solvedLogicErrors.addAll(e.getLogicErrors(RoleHasNoTextSetLogicError.class).collect(Collectors.toCollection(ArrayList::new)));
-                this._diagram._removeElement(e);
-            });
+            this._node.roles().forEach(e -> this._diagram._removeElement(e));
         }
 
         @Override
@@ -712,23 +710,32 @@ public class Diagram implements Serializable {
     }
 
     abstract public class ReconnectAction<T extends DiagramElement, G extends DiagramElement> extends Action {
-        final protected AnchorPoint<T> _beginAnchorPoint;
-        final protected AnchorPoint<G> _endAnchorPoint;
+        final protected AnchorPoint<T> _newBeginAnchorPoint;
+        final protected AnchorPoint<G> _newEndAnchorPoint;
+        final protected AnchorPoint<T> _oldBeginAnchorPoint;
+        final protected AnchorPoint<G> _oldEndAnchorPoint;
         final protected Edge<T, G>     _edge;
 
         private ReconnectAction(@NotNull Diagram diagram, @NotNull AnchorPoint<T> beginAnchorPoint, @NotNull Edge<T, G> edge) {
             super(diagram);
-            this._beginAnchorPoint = beginAnchorPoint;
-            this._endAnchorPoint   = null;
-            this._edge             = edge;
+            this._edge                = edge;
+            this._newBeginAnchorPoint = beginAnchorPoint;
+            this._newEndAnchorPoint   = null;
+            this._oldBeginAnchorPoint = edge.beginAnchorPoint();
+            this._oldEndAnchorPoint   = edge.endAnchorPoint();
+
+            this._solvedLogicErrors.addAll(diagram.getLogicErrorsFor(edge).collect(Collectors.toCollection(ArrayList::new)));
 
             // Check if edge connects diagram element with itself
-            if (this._edge.begin() == this._beginAnchorPoint.owner()) {
+            if (this._edge.end() == this._newBeginAnchorPoint.owner()) {
                 this._throwActionError(new DiagramElementSelfConnectedActionError(this._edge.beginAnchorPoint().owner()));
             }
 
             // Check if edge connects diagram elements twice
-            var existEdges = this._diagram.getElements(Edge.class).filter(e -> e.isSameTo(this._edge) || e.isOppositeTo(this._edge)).collect(Collectors.toCollection(ArrayList::new));
+            var existEdges = this._diagram.getElements(Edge.class)
+                    .filter(e -> e.begin() == this._newBeginAnchorPoint.owner() && e.end() == this._edge.end() ||
+                            e.begin() == this._edge.end() && e.end() == this._newBeginAnchorPoint.owner())
+                    .collect(Collectors.toCollection(ArrayList::new));
 
             if (!existEdges.isEmpty() && !(existEdges.get(0) instanceof SubtypingRelationEdge && existEdges.get(0).isOppositeTo(this._edge))) {
                 this._throwActionError(new DoubleConnectionActionError(this._edge.beginAnchorPoint().owner(), this._edge.endAnchorPoint().owner(), existEdges.get(0)));
@@ -737,17 +744,24 @@ public class Diagram implements Serializable {
 
         private ReconnectAction(@NotNull Diagram diagram, @NotNull Edge<T, G> edge, @NotNull AnchorPoint<G> endAnchorPoint) {
             super(diagram);
-            this._beginAnchorPoint = null;
-            this._endAnchorPoint   = endAnchorPoint;
-            this._edge             = edge;
+            this._edge                = edge;
+            this._newBeginAnchorPoint = null;
+            this._newEndAnchorPoint   = endAnchorPoint;
+            this._oldBeginAnchorPoint = edge.beginAnchorPoint();
+            this._oldEndAnchorPoint   = edge.endAnchorPoint();
+
+            this._solvedLogicErrors.addAll(diagram.getLogicErrorsFor(edge).collect(Collectors.toCollection(ArrayList::new)));
 
             // Check if edge connects diagram element with itself
-            if (this._edge.beginAnchorPoint().owner() == this._edge.endAnchorPoint().owner()) {
+            if (this._edge.begin() == this._newEndAnchorPoint.owner()) {
                 this._throwActionError(new DiagramElementSelfConnectedActionError(this._edge.beginAnchorPoint().owner()));
             }
 
             // Check if edge connects diagram elements twice
-            var existEdges = this._diagram.getElements(Edge.class).filter(e -> e.isSameTo(this._edge) || e.isOppositeTo(this._edge)).collect(Collectors.toCollection(ArrayList::new));
+            var existEdges = this._diagram.getElements(Edge.class)
+                    .filter(e -> e.begin() == this._edge.begin() && e.end() == this._newEndAnchorPoint.owner() ||
+                        e.begin() == this._newEndAnchorPoint.owner() && e.end() == this._edge.begin())
+                    .collect(Collectors.toCollection(ArrayList::new));
 
             if (!existEdges.isEmpty() && !(existEdges.get(0) instanceof SubtypingRelationEdge && existEdges.get(0).isOppositeTo(this._edge))) {
                 this._throwActionError(new DoubleConnectionActionError(this._edge.beginAnchorPoint().owner(), this._edge.endAnchorPoint().owner(), existEdges.get(0)));
@@ -756,8 +770,23 @@ public class Diagram implements Serializable {
 
         public Edge<T, G> edge() { return this._edge; }
 
-        @Override public void _execute() { this._diagram._addElement(this._edge); }
-        @Override public void _undo()    { this._diagram._removeElement(this._edge); }
+        @Override public void _execute() {
+            if (this._newBeginAnchorPoint != null) {
+                this._edge._setBeginAnchorPoint(this._newBeginAnchorPoint);
+            }
+            else if (this._newEndAnchorPoint != null) {
+                this._edge._setEndAnchorPoint(this._newEndAnchorPoint);
+            }
+        }
+
+        @Override public void _undo() {
+            if (this._newBeginAnchorPoint != null) {
+                this._edge._setBeginAnchorPoint(this._oldBeginAnchorPoint);
+            }
+            else if (this._newEndAnchorPoint != null) {
+                this._edge._setEndAnchorPoint(this._oldEndAnchorPoint);
+            }
+        }
     }
 
     public class ReconnectBySubtypingRelationAction extends ReconnectAction<EntityType, EntityType> {
