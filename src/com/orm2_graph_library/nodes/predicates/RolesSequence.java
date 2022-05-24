@@ -5,7 +5,6 @@ import com.orm2_graph_library.core.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,38 +31,42 @@ public class RolesSequence extends DiagramElement {
         this._roles.addAll(roles);
     }
 
-    @Override
-    protected void _initSelf() {}
+    @Override protected void _initSelf() {}
+    @Override protected void _finalizeSelf() {}
 
     // ---------------- connection ----------------
     public Predicate ownerPredicate() { return this._roles.get(0).ownerPredicate(); }
 
     // ---------------- attributes ----------------
-    public ArrayList<Role> roles() { return new ArrayList<>(this._roles); }
+    // * Roles
+    public Stream<Role> roles() { return this._roles.stream(); }
 
+    // * Uniqueness
+    public boolean isUnique() { return this._roles.get(0).ownerPredicate().isRolesSequenceUnique(this); }
+
+    // * Anchor points
     public AnchorPoint<RolesSequence> anchorPoint() { return new RolesSequenceAnchorPoint(this); }
 
+    @Override public Stream<AnchorPoint> anchorPoints() { return Stream.of(this.anchorPoint()); }
+
+    // * Geometry
     @Override
     public GeometryApproximation geometryApproximation() { return null; }
 
     // ----------------- contract -----------------
     @Override
-    public <T extends DiagramElement> ArrayList<T> getIncidentElements(Class<T> elementType) {
-        ArrayList<T> result = new ArrayList<>();
+    public <T extends DiagramElement> Stream<T> getIncidentElements(Class<T> elementType) {
+        Stream<T> result = Stream.of();
 
-        if (Edge.class.isAssignableFrom(elementType)) {
-            result = this._ownerDiagram.getElements(elementType)
-                    .filter(e -> ((Edge)e).begin() == this || ((Edge)e).end() == this)
-                    .collect(Collectors.toCollection(ArrayList::new));
+        if (Edge.class.isAssignableFrom(elementType) || elementType == DiagramElement.class) {
+            if (elementType != DiagramElement.class) { result = this._ownerDiagram.getElements(elementType).filter(e -> ((Edge)e).begin() == this || ((Edge)e).end() == this); }
+            else                                     { result = (Stream<T>)this._ownerDiagram.getElements(Edge.class).filter(e -> ((Edge)e).begin() == this || ((Edge)e).end() == this); }
         }
-        else if (Node.class.isAssignableFrom(elementType)) {
+
+        if (Node.class.isAssignableFrom(elementType) || elementType == DiagramElement.class) {
             for (Edge edge : this._ownerDiagram.getElements(Edge.class).collect(Collectors.toCollection(ArrayList::new))) {
-                if (edge.begin() == this && elementType.isAssignableFrom(edge.endAnchorPoint().owner().getClass())) {
-                    result.add((T)edge.end());
-                }
-                if (edge.endAnchorPoint().owner() == this && elementType.isAssignableFrom(edge.beginAnchorPoint().getClass())) {
-                    result.add((T)edge.begin());
-                }
+                if (edge.begin() == this && elementType.isAssignableFrom(edge.end().getClass())) { result = Stream.concat(result, Stream.of((T)edge.end())); }
+                if (edge.end() == this && elementType.isAssignableFrom(edge.begin().getClass())) { result = Stream.concat(result, Stream.of((T)edge.begin())); }
             }
         }
 
@@ -82,5 +85,23 @@ public class RolesSequence extends DiagramElement {
         else {
             return false;
         }
+    }
+
+    @Override
+    public int hashCode() {
+        int roleIndexesSum = 0;
+        for (Role role : this._roles) { roleIndexesSum += role.indexInPredicate(); }
+
+        return roleIndexesSum;
+    }
+
+    // ---------------- additional ----------------
+    @Override
+    public String toString() {
+        String result = "predicate@" + this.ownerPredicate().hashCode() + ".roles{" + this._roles.get(0).indexInPredicate();
+        for (int i=1; i<this._roles.size(); i++) { result += ", " + this._roles.get(i).indexInPredicate(); }
+        result += "}";
+
+        return result;
     }
 }

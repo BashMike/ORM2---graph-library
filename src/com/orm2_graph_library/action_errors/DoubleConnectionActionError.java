@@ -27,4 +27,22 @@ public class DoubleConnectionActionError<T extends DiagramElement, G extends Dia
     // ----------------- contract -----------------
     @Override
     public String description() { return "Double connection between \"" + this._beginDiagramElement + "\" and \"" + this._endDiagramElement + "\"" + "."; }
+
+    // ---------------- comparison ----------------
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof DoubleConnectionActionError) {
+            DoubleConnectionActionError<T, G, F> otherConverted = (DoubleConnectionActionError<T, G, F>)other;
+
+            return (this._beginDiagramElement == otherConverted._beginDiagramElement &&
+                    this._endDiagramElement   == otherConverted._endDiagramElement &&
+                    this._existEdge           == otherConverted._existEdge);
+        }
+        else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() { return this._beginDiagramElement.hashCode() * this._endDiagramElement.hashCode() * this._existEdge.hashCode(); }
 }

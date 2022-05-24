@@ -1,240 +1,707 @@
 import com.orm2_graph_library.core.Diagram;
+import com.orm2_graph_library.core.DiagramElement;
+import com.orm2_graph_library.core.LogicError;
+import com.orm2_graph_library.logic_errors.EntityTypeWithNoneRefModeLogicError;
 import com.orm2_graph_library.nodes.common.EntityType;
+import com.orm2_graph_library.nodes.common.ref_modes.NoneRefMode;
+import com.orm2_graph_library.nodes.predicates.ObjectifiedPredicate;
+import com.orm2_graph_library.nodes.predicates.Predicate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import utils.Test_globalTest;
 
-public class Test_nodesModification {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+
+public class Test_nodesModification extends Test_globalTest {
     // ==================== TEST ====================
     // ---------------- ENTITY TYPES ----------------
     // * Name
     @Test
     void entityType_setName() {
         // Prepare data and start testing
-        Diagram diagram = new Diagram();
-        EntityType entityType = new EntityType();
-
-        diagram.addNode(entityType);
-        entityType.setName("Hello");
+        test_addDiagramElement(this._diagram.addNode(new EntityType()));
+        test_entityTypes.get(0).setName("Hello");
 
         // Check result
-        Assertions.assertEquals("Hello", entityType.name());
+        Assertions.assertEquals("Hello", test_entityTypes.get(0).name());
+        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
     }
 
     @Test
     void entityType_undoSetName() {
         // Prepare data and start testing
-        Diagram diagram = new Diagram();
-        EntityType entityType = new EntityType();
+        test_addDiagramElement(this._diagram.addNode(new EntityType()));
+        test_entityTypes.get(0).setName("Hello");
 
-        diagram.addNode(entityType);
-        entityType.setName("Hello");
-
-        diagram.undoState();
+        this._diagram.undoState();
 
         // Check result
-        Assertions.assertEquals(entityType.basicName() + " " + 1, entityType.name());
+        Assertions.assertEquals(test_entityTypes.get(0).basicName() + " " + 1, test_entityTypes.get(0).name());
+        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
     }
 
     @Test
     void entityType_setTheSameName() {
         // Prepare data and start testing
-        Diagram diagram = new Diagram();
-        EntityType entityType = new EntityType();
-
-        diagram.addNode(entityType);
-        entityType.setName("Hello");
-        entityType.setName("Hello");
-        entityType.setName("Hello");
-        entityType.setName("Hello");
-        entityType.setName("Hello");
-        entityType.setName("Hello");
+        test_addDiagramElement(this._diagram.addNode(new EntityType()));
+        for (int i=0; i<5; i++) { test_entityTypes.get(0).setName("Hello"); }
 
         // Check result
-        Assertions.assertEquals("Hello", entityType.name());
+        Assertions.assertEquals("Hello", test_entityTypes.get(0).name());
+        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
     }
 
     @Test
     void entityType_undoSetTheSameName() {
         // Prepare data and start testing
-        Diagram diagram = new Diagram();
-        EntityType entityType = new EntityType();
+        test_addDiagramElement(this._diagram.addNode(new EntityType()));
+        for (int i=0; i<5; i++) { test_entityTypes.get(0).setName("Hello"); }
 
-        diagram.addNode(entityType);
-        entityType.setName("Hello");
-        entityType.setName("Hello");
-        entityType.setName("Hello");
-        entityType.setName("Hello");
-        entityType.setName("Hello");
-        entityType.setName("Hello");
-
-        diagram.undoState();
+        this._diagram.undoState();
 
         // Check result
-        Assertions.assertEquals(entityType.basicName() + " " + 1, entityType.name());
-    }
-
-    @Test
-    void entityType_setNameWhenNotInDiagram() {
-        // Prepare data and start testing
-        EntityType entityType = new EntityType();
-
-        // Check result
-        Assertions.assertThrows(NullPointerException.class, () -> entityType.setName("Hello"));
+        Assertions.assertEquals(test_entityTypes.get(0).basicName() + " " + 1, test_entityTypes.get(0).name());
+        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
     }
 
     // * IsPersonal flag
     @Test
     void entityType_setIsPersonal() {
         // Prepare data and start testing
-        Diagram diagram = new Diagram();
-        EntityType entityType = new EntityType();
-
-        diagram.addNode(entityType);
-        entityType.setIsPersonal(true);
+        test_addDiagramElement(this._diagram.addNode(new EntityType()));
+        test_entityTypes.get(0).setIsPersonal(true);
 
         // Check result
-        Assertions.assertTrue(entityType.isPersonal());
+        Assertions.assertTrue(test_entityTypes.get(0).isPersonal());
+        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
     }
 
     @Test
     void entityType_undoSetIsPersonal() {
         // Prepare data and start testing
-        Diagram diagram = new Diagram();
-        EntityType entityType = new EntityType();
+        test_addDiagramElement(this._diagram.addNode(new EntityType()));
+        test_entityTypes.get(0).setIsPersonal(true);
 
-        diagram.addNode(entityType);
-        entityType.setIsPersonal(true);
-
-        diagram.undoState();
+        this._diagram.undoState();
 
         // Check result
-        Assertions.assertFalse(entityType.isPersonal());
+        Assertions.assertFalse(test_entityTypes.get(0).isPersonal());
+        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
     }
 
     @Test
     void entityType_setTheSameIsPersonal() {
         // Prepare data and start testing
-        Diagram diagram = new Diagram();
-        EntityType entityType = new EntityType();
-
-        diagram.addNode(entityType);
-        entityType.setIsPersonal(true);
-        entityType.setIsPersonal(true);
-        entityType.setIsPersonal(true);
-        entityType.setIsPersonal(true);
-        entityType.setIsPersonal(true);
-        entityType.setIsPersonal(true);
+        test_addDiagramElement(this._diagram.addNode(new EntityType()));
+        for (int i=0; i<5; i++) { test_entityTypes.get(0).setIsPersonal(true); }
 
         // Check result
-        Assertions.assertTrue(entityType.isPersonal());
+        Assertions.assertTrue(test_entityTypes.get(0).isPersonal());
+        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
     }
 
     @Test
     void entityType_undoSetTheSameIsPersonal() {
         // Prepare data and start testing
-        Diagram diagram = new Diagram();
-        EntityType entityType = new EntityType();
-
-        diagram.addNode(entityType);
-        entityType.setIsPersonal(true);
-        entityType.setIsPersonal(true);
-        entityType.setIsPersonal(true);
-        entityType.setIsPersonal(true);
-        entityType.setIsPersonal(true);
-        entityType.setIsPersonal(true);
-
-        diagram.undoState();
+        test_addDiagramElement(this._diagram.addNode(new EntityType()));
+        for (int i=0; i<5; i++) { test_entityTypes.get(0).setIsPersonal(true); }
 
         // Check result
-        Assertions.assertFalse(entityType.isPersonal());
-    }
-
-    @Test
-    void entityType_setIsPersonalWhenNotInDiagram() {
-        // Prepare data and start testing
-        EntityType entityType = new EntityType();
-
-        // Check result
-        Assertions.assertThrows(NullPointerException.class, () -> entityType.setIsPersonal(false));
+        Assertions.assertTrue(test_entityTypes.get(0).isPersonal());
+        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
     }
 
     // * IsIndependent flag
     @Test
     void entityType_setIsIndependent() {
         // Prepare data and start testing
-        Diagram diagram = new Diagram();
-        EntityType entityType = new EntityType();
-
-        diagram.addNode(entityType);
-        entityType.setIsIndependent(true);
+        test_addDiagramElement(this._diagram.addNode(new EntityType()));
+        test_entityTypes.get(0).setIsIndependent(true);
 
         // Check result
-        Assertions.assertTrue(entityType.isIndependent());
+        Assertions.assertTrue(test_entityTypes.get(0).isIndependent());
+        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
     }
 
     @Test
     void entityType_undoSetIsIndependent() {
         // Prepare data and start testing
-        Diagram diagram = new Diagram();
-        EntityType entityType = new EntityType();
+        test_addDiagramElement(this._diagram.addNode(new EntityType()));
+        test_entityTypes.get(0).setIsIndependent(true);
 
-        diagram.addNode(entityType);
-        entityType.setIsIndependent(true);
-
-        diagram.undoState();
+        this._diagram.undoState();
 
         // Check result
-        Assertions.assertFalse(entityType.isIndependent());
+        Assertions.assertFalse(test_entityTypes.get(0).isIndependent());
+        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
     }
 
     @Test
     void entityType_setTheSameIsIndependent() {
         // Prepare data and start testing
-        Diagram diagram = new Diagram();
-        EntityType entityType = new EntityType();
-
-        diagram.addNode(entityType);
-        entityType.setIsIndependent(true);
-        entityType.setIsIndependent(true);
-        entityType.setIsIndependent(true);
-        entityType.setIsIndependent(true);
-        entityType.setIsIndependent(true);
-        entityType.setIsIndependent(true);
+        test_addDiagramElement(this._diagram.addNode(new EntityType()));
+        for (int i=0; i<5; i++) { test_entityTypes.get(0).setIsIndependent(true); }
 
         // Check result
-        Assertions.assertTrue(entityType.isIndependent());
+        Assertions.assertTrue(test_entityTypes.get(0).isIndependent());
+        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
     }
 
     @Test
     void entityType_undoSetTheSameIsIndependent() {
         // Prepare data and start testing
-        Diagram diagram = new Diagram();
-        EntityType entityType = new EntityType();
+        test_addDiagramElement(this._diagram.addNode(new EntityType()));
+        for (int i=0; i<5; i++) { test_entityTypes.get(0).setIsIndependent(true); }
 
-        diagram.addNode(entityType);
-        entityType.setIsIndependent(true);
-        entityType.setIsIndependent(true);
-        entityType.setIsIndependent(true);
-        entityType.setIsIndependent(true);
-        entityType.setIsIndependent(true);
-        entityType.setIsIndependent(true);
-
-        diagram.undoState();
+        this._diagram.undoState();
 
         // Check result
-        Assertions.assertFalse(entityType.isIndependent());
-    }
-
-    @Test
-    void entityType_setIsIndependentWhenNotInDiagram() {
-        // Prepare data and start testing
-        EntityType entityType = new EntityType();
-
-        // Check result
-        Assertions.assertThrows(NullPointerException.class, () -> entityType.setIsIndependent(false));
+        Assertions.assertFalse(test_entityTypes.get(0).isIndependent());
+        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
     }
 
     // TODO - @test :: Setting reference mode and data type for entity type.
 
+    @Test
+    void entityType_setAttributesWhenNotInDiagram() {
+        // Prepare data and start testing
+        EntityType entityType = new EntityType();
+
+        // Check result
+        Assertions.assertThrows(NullPointerException.class, () -> entityType.setName("Hello"));
+        Assertions.assertThrows(NullPointerException.class, () -> entityType.setIsPersonal(false));
+        Assertions.assertThrows(NullPointerException.class, () -> entityType.setIsIndependent(false));
+        Assertions.assertThrows(NullPointerException.class, () -> entityType.setRefMode(new NoneRefMode()));
+    }
+
     // * Complex modification
+
+    // ----------------- PREDICATES -----------------
+    // * Roles sequence uniqueness
+    @Test
+    void predicate_makeRolesSequencesUnique() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+
+        ArrayList<int[]> uniqueRolesSequencesIndexes = new ArrayList<>();
+        uniqueRolesSequencesIndexes.add(new int[]{0, 2, 3});
+        uniqueRolesSequencesIndexes.add(new int[]{1, 2, 3});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 2});
+        uniqueRolesSequencesIndexes.add(new int[]{1});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 1, 2});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 1, 2, 3});
+
+        for (int[] indexes : uniqueRolesSequencesIndexes) {
+            test_addDiagramElement(test_predicates.get(0).rolesSequence(indexes));
+            test_predicates.get(0).makeRolesSequenceUnique(indexes);
+        }
+
+        // Check result
+        for (int[] indexes : uniqueRolesSequencesIndexes) {
+            Assertions.assertTrue(test_predicates.get(0).isRolesSequenceUnique(indexes));
+            Assertions.assertTrue(test_predicates.get(0).isRolesSequenceUnique(test_predicates.get(0).rolesSequence(indexes)));
+        }
+    }
+
+    @Test
+    void predicate_undoMakingSomeRolesSequencesUnique() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+
+        ArrayList<int[]> uniqueRolesSequencesIndexes = new ArrayList<>();
+        uniqueRolesSequencesIndexes.add(new int[]{0, 2, 3});
+        uniqueRolesSequencesIndexes.add(new int[]{1, 2, 3});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 2});
+        uniqueRolesSequencesIndexes.add(new int[]{1});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 1, 2});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 1, 2, 3});
+
+        for (int[] indexes : uniqueRolesSequencesIndexes) {
+            test_addDiagramElement(test_predicates.get(0).rolesSequence(indexes));
+            test_predicates.get(0).makeRolesSequenceUnique(indexes);
+        }
+
+        for (int i=0; i<3; i++) { this._diagram.undoState(); }
+
+        // Check result
+        for (int[] indexes : uniqueRolesSequencesIndexes.subList(0, 2)) {
+            Assertions.assertTrue(test_predicates.get(0).isRolesSequenceUnique(indexes));
+            Assertions.assertTrue(test_predicates.get(0).isRolesSequenceUnique(test_predicates.get(0).rolesSequence(indexes)));
+        }
+
+        for (int[] indexes : uniqueRolesSequencesIndexes.subList(3, 5)) {
+            Assertions.assertFalse(test_predicates.get(0).isRolesSequenceUnique(indexes));
+            Assertions.assertFalse(test_predicates.get(0).isRolesSequenceUnique(test_predicates.get(0).rolesSequence(indexes)));
+        }
+    }
+
+    @Test
+    void predicate_undoMakingRolesSequencesUnique() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+
+        ArrayList<int[]> uniqueRolesSequencesIndexes = new ArrayList<>();
+        uniqueRolesSequencesIndexes.add(new int[]{0, 2, 3});
+        uniqueRolesSequencesIndexes.add(new int[]{1, 2, 3});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 2});
+        uniqueRolesSequencesIndexes.add(new int[]{1});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 1, 2});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 1, 2, 3});
+
+        for (int[] indexes : uniqueRolesSequencesIndexes) {
+            test_addDiagramElement(test_predicates.get(0).rolesSequence(indexes));
+            test_predicates.get(0).makeRolesSequenceUnique(indexes);
+        }
+
+        for (int i=0; i<6; i++) { this._diagram.undoState(); }
+
+        // Check result
+        for (int[] indexes : uniqueRolesSequencesIndexes) {
+            Assertions.assertFalse(test_predicates.get(0).isRolesSequenceUnique(indexes));
+            Assertions.assertFalse(test_predicates.get(0).isRolesSequenceUnique(test_predicates.get(0).rolesSequence(indexes)));
+        }
+    }
+
+    @Test
+    void predicate_redoMakingSomeRolesSequencesUnique() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+
+        ArrayList<int[]> uniqueRolesSequencesIndexes = new ArrayList<>();
+        uniqueRolesSequencesIndexes.add(new int[]{0, 2, 3});
+        uniqueRolesSequencesIndexes.add(new int[]{1, 2, 3});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 2});
+        uniqueRolesSequencesIndexes.add(new int[]{1});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 1, 2});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 1, 2, 3});
+
+        for (int[] indexes : uniqueRolesSequencesIndexes) {
+            test_addDiagramElement(test_predicates.get(0).rolesSequence(indexes));
+            test_predicates.get(0).makeRolesSequenceUnique(indexes);
+        }
+
+        for (int i=0; i<3; i++) { this._diagram.undoState(); }
+        for (int i=0; i<3; i++) { this._diagram.redoState(); }
+
+        // Check result
+        for (int[] indexes : uniqueRolesSequencesIndexes) {
+            Assertions.assertTrue(test_predicates.get(0).isRolesSequenceUnique(indexes));
+            Assertions.assertTrue(test_predicates.get(0).isRolesSequenceUnique(test_predicates.get(0).rolesSequence(indexes)));
+        }
+    }
+
+    /*
+    @Test
+    void predicate_redoMakingRolesSequencesUnique() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+
+        ArrayList<int[]> uniqueRolesSequencesIndexes = new ArrayList<>();
+        uniqueRolesSequencesIndexes.add(new int[]{0, 2, 3});
+        uniqueRolesSequencesIndexes.add(new int[]{1, 2, 3});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 2});
+        uniqueRolesSequencesIndexes.add(new int[]{1});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 1, 2});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 1, 2, 3});
+
+        for (int[] indexes : uniqueRolesSequencesIndexes) {
+            test_addDiagramElement(test_predicates.get(0).rolesSequence(indexes));
+            test_predicates.get(0).makeRolesSequenceUnique(indexes);
+        }
+
+        for (int i=0; i<6; i++) { this._diagram.undoState(); }
+        for (int i=0; i<6; i++) { this._diagram.redoState(); }
+
+        // Check result
+        for (int[] indexes : uniqueRolesSequencesIndexes) {
+            Assertions.assertTrue(test_predicates.get(0).isRolesSequenceUnique(indexes));
+            Assertions.assertTrue(test_predicates.get(0).isRolesSequenceUnique(test_predicates.get(0).rolesSequence(indexes)));
+        }
+    }
+    
+    @Test
+    void predicate_makeRolesSequencesUnique() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+
+        ArrayList<int[]> uniqueRolesSequencesIndexes = new ArrayList<>();
+        uniqueRolesSequencesIndexes.add(new int[]{0, 2, 3});
+        uniqueRolesSequencesIndexes.add(new int[]{1, 2, 3});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 2});
+        uniqueRolesSequencesIndexes.add(new int[]{1});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 1, 2});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 1, 2, 3});
+
+        for (int[] indexes : uniqueRolesSequencesIndexes) {
+            test_addDiagramElement(test_predicates.get(0).rolesSequence(indexes));
+            test_predicates.get(0).makeRolesSequenceUnique(indexes);
+        }
+
+        // Check result
+        for (int[] indexes : uniqueRolesSequencesIndexes) {
+            Assertions.assertTrue(test_predicates.get(0).isRolesSequenceUnique(indexes));
+            Assertions.assertTrue(test_predicates.get(0).isRolesSequenceUnique(test_predicates.get(0).rolesSequence(indexes)));
+        }
+    }
+
+    @Test
+    void predicate_undoMakingSomeRolesSequencesUnique() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+
+        ArrayList<int[]> uniqueRolesSequencesIndexes = new ArrayList<>();
+        uniqueRolesSequencesIndexes.add(new int[]{0, 2, 3});
+        uniqueRolesSequencesIndexes.add(new int[]{1, 2, 3});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 2});
+        uniqueRolesSequencesIndexes.add(new int[]{1});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 1, 2});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 1, 2, 3});
+
+        for (int[] indexes : uniqueRolesSequencesIndexes) {
+            test_addDiagramElement(test_predicates.get(0).rolesSequence(indexes));
+            test_predicates.get(0).makeRolesSequenceUnique(indexes);
+        }
+
+        for (int i=0; i<3; i++) { this._diagram.undoState(); }
+
+        // Check result
+        for (int[] indexes : uniqueRolesSequencesIndexes.subList(0, 2)) {
+            Assertions.assertTrue(test_predicates.get(0).isRolesSequenceUnique(indexes));
+            Assertions.assertTrue(test_predicates.get(0).isRolesSequenceUnique(test_predicates.get(0).rolesSequence(indexes)));
+        }
+
+        for (int[] indexes : uniqueRolesSequencesIndexes.subList(3, 5)) {
+            Assertions.assertFalse(test_predicates.get(0).isRolesSequenceUnique(indexes));
+            Assertions.assertFalse(test_predicates.get(0).isRolesSequenceUnique(test_predicates.get(0).rolesSequence(indexes)));
+        }
+    }
+
+    @Test
+    void predicate_undoMakingRolesSequencesUnique() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+
+        ArrayList<int[]> uniqueRolesSequencesIndexes = new ArrayList<>();
+        uniqueRolesSequencesIndexes.add(new int[]{0, 2, 3});
+        uniqueRolesSequencesIndexes.add(new int[]{1, 2, 3});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 2});
+        uniqueRolesSequencesIndexes.add(new int[]{1});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 1, 2});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 1, 2, 3});
+
+        for (int[] indexes : uniqueRolesSequencesIndexes) {
+            test_addDiagramElement(test_predicates.get(0).rolesSequence(indexes));
+            test_predicates.get(0).makeRolesSequenceUnique(indexes);
+        }
+
+        for (int i=0; i<6; i++) { this._diagram.undoState(); }
+
+        // Check result
+        for (int[] indexes : uniqueRolesSequencesIndexes) {
+            Assertions.assertFalse(test_predicates.get(0).isRolesSequenceUnique(indexes));
+            Assertions.assertFalse(test_predicates.get(0).isRolesSequenceUnique(test_predicates.get(0).rolesSequence(indexes)));
+        }
+    }
+
+    @Test
+    void predicate_redoMakingSomeRolesSequencesUnique() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+
+        ArrayList<int[]> uniqueRolesSequencesIndexes = new ArrayList<>();
+        uniqueRolesSequencesIndexes.add(new int[]{0, 2, 3});
+        uniqueRolesSequencesIndexes.add(new int[]{1, 2, 3});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 2});
+        uniqueRolesSequencesIndexes.add(new int[]{1});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 1, 2});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 1, 2, 3});
+
+        for (int[] indexes : uniqueRolesSequencesIndexes) {
+            test_addDiagramElement(test_predicates.get(0).rolesSequence(indexes));
+            test_predicates.get(0).makeRolesSequenceUnique(indexes);
+        }
+
+        for (int i=0; i<3; i++) { this._diagram.undoState(); }
+        for (int i=0; i<3; i++) { this._diagram.redoState(); }
+
+        // Check result
+        for (int[] indexes : uniqueRolesSequencesIndexes) {
+            Assertions.assertTrue(test_predicates.get(0).isRolesSequenceUnique(indexes));
+            Assertions.assertTrue(test_predicates.get(0).isRolesSequenceUnique(test_predicates.get(0).rolesSequence(indexes)));
+        }
+    }
+
+    @Test
+    void predicate_redoMakingRolesSequencesUnique() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+
+        ArrayList<int[]> uniqueRolesSequencesIndexes = new ArrayList<>();
+        uniqueRolesSequencesIndexes.add(new int[]{0, 2, 3});
+        uniqueRolesSequencesIndexes.add(new int[]{1, 2, 3});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 2});
+        uniqueRolesSequencesIndexes.add(new int[]{1});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 1, 2});
+        uniqueRolesSequencesIndexes.add(new int[]{0, 1, 2, 3});
+
+        for (int[] indexes : uniqueRolesSequencesIndexes) {
+            test_addDiagramElement(test_predicates.get(0).rolesSequence(indexes));
+            test_predicates.get(0).makeRolesSequenceUnique(indexes);
+        }
+
+        for (int i=0; i<6; i++) { this._diagram.undoState(); }
+        for (int i=0; i<6; i++) { this._diagram.redoState(); }
+
+        // Check result
+        for (int[] indexes : uniqueRolesSequencesIndexes) {
+            Assertions.assertTrue(test_predicates.get(0).isRolesSequenceUnique(indexes));
+            Assertions.assertTrue(test_predicates.get(0).isRolesSequenceUnique(test_predicates.get(0).rolesSequence(indexes)));
+        }
+    }
+    */
+
+    // * Predicate objectifying
+    @Test
+    void predicate_objectify() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+        test_addDiagramElement(this._diagram.addNode(new ObjectifiedPredicate(test_predicates.get(0))));
+
+        // Check result
+        Assertions.assertTrue(test_predicates.get(0).hasOwnerObjectifiedPredicate());
+        Assertions.assertEquals(test_objectifiedPredicates.get(0), test_predicates.get(0).ownerObjectifiedPredicate());
+    }
+
+    @Test
+    void predicate_undoObjectifying() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+        this._diagram.addNode(new ObjectifiedPredicate(test_predicates.get(0)));
+
+        this._diagram.undoState();
+
+        // Check result
+        Assertions.assertFalse(test_predicates.get(0).hasOwnerObjectifiedPredicate());
+    }
+
+    @Test
+    void predicate_redoObjectifying() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+        test_addDiagramElement(this._diagram.addNode(new ObjectifiedPredicate(test_predicates.get(0))));
+
+        this._diagram.undoState();
+        this._diagram.redoState();
+
+        // Check result
+        Assertions.assertTrue(test_predicates.get(0).hasOwnerObjectifiedPredicate());
+        Assertions.assertEquals(test_objectifiedPredicates.get(0), test_predicates.get(0).ownerObjectifiedPredicate());
+    }
+
+    @Test
+    void predicate_objectifyTwice() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+        test_addDiagramElement(this._diagram.addNode(new ObjectifiedPredicate(test_predicates.get(0))));
+
+        // Check result
+        Assertions.assertThrows(RuntimeException.class, () -> this._diagram.addNode(new ObjectifiedPredicate(test_predicates.get(0))));
+    }
+
+    @Test
+    void predicate_unobjectifyByRemovingObjectifiedPredicate() {
+        // Prepare data and start testing
+        Predicate predicate = this._diagram.addNode(new Predicate(4));
+        ObjectifiedPredicate objectifiedPredicate = this._diagram.addNode(new ObjectifiedPredicate(predicate));
+
+        this._diagram.removeNode(objectifiedPredicate);
+
+        // Check result
+        Assertions.assertFalse(predicate.hasOwnerObjectifiedPredicate());
+    }
+
+    @Test
+    void predicate_undoUnobjectifyingByRemovingObjectifiedPredicate() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+        test_addDiagramElement(this._diagram.addNode(new ObjectifiedPredicate(test_predicates.get(0))));
+
+        this._diagram.removeNode(test_objectifiedPredicates.get(0));
+
+        this._diagram.undoState();
+
+        // Check result
+        Assertions.assertTrue(test_predicates.get(0).hasOwnerObjectifiedPredicate());
+        Assertions.assertEquals(test_objectifiedPredicates.get(0), test_predicates.get(0).ownerObjectifiedPredicate());
+        Assertions.assertEquals(test_predicates.get(0), test_objectifiedPredicates.get(0).innerPredicate());
+    }
+
+    @Test
+    void predicate_redoUnobjectifyingByRemovingObjectifiedPredicate() {
+        // Prepare data and start testing
+        Predicate predicate = this._diagram.addNode(new Predicate(4));
+        ObjectifiedPredicate objectifiedPredicate = this._diagram.addNode(new ObjectifiedPredicate(predicate));
+
+        this._diagram.removeNode(objectifiedPredicate);
+
+        this._diagram.undoState();
+        this._diagram.redoState();
+
+        // Check result
+        Assertions.assertFalse(predicate.hasOwnerObjectifiedPredicate());
+    }
+
+    @Test
+    void predicate_unobjectifyByObjectifiedPredicateInterface() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+        ObjectifiedPredicate objectifiedPredicate = this._diagram.addNode(new ObjectifiedPredicate(test_predicates.get(0)));
+
+        objectifiedPredicate.becomeUnobjectified();
+
+        // Check result
+        Assertions.assertFalse(test_predicates.get(0).hasOwnerObjectifiedPredicate());
+        Assertions.assertTrue(this._diagram.hasOnlyElements(Predicate.class));
+    }
+
+    @Test
+    void predicate_undoUnobjectifyingByObjectifiedPredicateInterface() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+        test_addDiagramElement(this._diagram.addNode(new ObjectifiedPredicate(test_predicates.get(0))));
+
+        test_objectifiedPredicates.get(0).becomeUnobjectified();
+
+        this._diagram.undoState();
+
+        // Check result
+        Assertions.assertTrue(test_predicates.get(0).hasOwnerObjectifiedPredicate());
+        Assertions.assertEquals(test_objectifiedPredicates.get(0), test_predicates.get(0).ownerObjectifiedPredicate());
+        Assertions.assertEquals(test_predicates.get(0), test_objectifiedPredicates.get(0).innerPredicate());
+    }
+
+    @Test
+    void predicate_redoUnobjectifyingByObjectifiedPredicateInterface() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new Predicate(4)));
+        ObjectifiedPredicate objectifiedPredicate = this._diagram.addNode(new ObjectifiedPredicate(test_predicates.get(0)));
+
+        objectifiedPredicate.becomeUnobjectified();
+
+        this._diagram.undoState();
+        this._diagram.redoState();
+
+        // Check result
+        Assertions.assertFalse(test_predicates.get(0).hasOwnerObjectifiedPredicate());
+        Assertions.assertTrue(this._diagram.hasOnlyElements(Predicate.class));
+    }
+
+    @Test
+    void predicate_setAttributesWhenNotInDiagram() {
+        // Prepare data and start testing
+        Predicate predicate = new Predicate(4);
+
+        // Check result
+        Assertions.assertThrows(NullPointerException.class, () -> predicate.makeRolesSequenceUnique(0, 2, 3));
+        Assertions.assertThrows(NullPointerException.class, () -> predicate.makeRolesSequenceUnique(1, 2, 3));
+        Assertions.assertThrows(NullPointerException.class, () -> predicate.makeRolesSequenceUnique(0, 2));
+        Assertions.assertThrows(NullPointerException.class, () -> predicate.makeRolesSequenceUnique(1));
+        Assertions.assertThrows(NullPointerException.class, () -> predicate.makeRolesSequenceUnique(0, 1, 2));
+        Assertions.assertThrows(NullPointerException.class, () -> predicate.makeRolesSequenceUnique(0, 1, 2, 3));
+    }
+
+
+    // ----------- OBJECTIFIED PREDICATES -----------
+    // * Name
+    @Test
+    void objectifiedPredicate_setName() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new ObjectifiedPredicate(new Predicate(1))));
+        test_objectifiedPredicates.get(0).setName("Hello");
+
+        // Check result
+        Assertions.assertEquals("Hello", test_objectifiedPredicates.get(0).name());
+    }
+
+    @Test
+    void objectifiedPredicate_undoSetName() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new ObjectifiedPredicate(new Predicate(1))));
+        test_objectifiedPredicates.get(0).setName("Hello");
+
+        this._diagram.undoState();
+
+        // Check result
+        Assertions.assertEquals(test_objectifiedPredicates.get(0).basicName() + " " + 1, test_objectifiedPredicates.get(0).name());
+    }
+
+    @Test
+    void objectifiedPredicate_setTheSameName() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new ObjectifiedPredicate(new Predicate(1))));
+        for (int i=0; i<5; i++) { test_objectifiedPredicates.get(0).setName("Hello"); }
+
+        // Check result
+        Assertions.assertEquals("Hello", test_objectifiedPredicates.get(0).name());
+    }
+
+    @Test
+    void objectifiedPredicate_undoSetTheSameName() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new ObjectifiedPredicate(new Predicate(1))));
+        for (int i=0; i<5; i++) { test_objectifiedPredicates.get(0).setName("Hello"); }
+
+        this._diagram.undoState();
+
+        // Check result
+        Assertions.assertEquals(test_objectifiedPredicates.get(0).basicName() + " " + 1, test_objectifiedPredicates.get(0).name());
+    }
+
+    // * IsIndependent flag
+    @Test
+    void ObjectifiedPredicate_setIsIndependent() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new ObjectifiedPredicate(new Predicate(1))));
+        test_objectifiedPredicates.get(0).setIsIndependent(true);
+
+        // Check result
+        Assertions.assertTrue(test_objectifiedPredicates.get(0).isIndependent());
+    }
+
+    @Test
+    void ObjectifiedPredicate_undoSetIsIndependent() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new ObjectifiedPredicate(new Predicate(1))));
+        test_objectifiedPredicates.get(0).setIsIndependent(true);
+
+        this._diagram.undoState();
+
+        // Check result
+        Assertions.assertFalse(test_objectifiedPredicates.get(0).isIndependent());
+    }
+
+    @Test
+    void ObjectifiedPredicate_setTheSameIsIndependent() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new ObjectifiedPredicate(new Predicate(1))));
+        for (int i=0; i<5; i++) { test_objectifiedPredicates.get(0).setIsIndependent(true); }
+
+        // Check result
+        Assertions.assertTrue(test_objectifiedPredicates.get(0).isIndependent());
+    }
+
+    @Test
+    void ObjectifiedPredicate_undoSetTheSameIsIndependent() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new ObjectifiedPredicate(new Predicate(1))));
+        for (int i=0; i<5; i++) { test_objectifiedPredicates.get(0).setIsIndependent(true); }
+
+        this._diagram.undoState();
+
+        // Check result
+        Assertions.assertFalse(test_objectifiedPredicates.get(0).isIndependent());
+    }
 }

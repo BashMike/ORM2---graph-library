@@ -1,15 +1,45 @@
 import com.orm2_graph_library.core.DiagramElement;
+import com.orm2_graph_library.core.Edge;
+import com.orm2_graph_library.core.LogicError;
+import com.orm2_graph_library.edges.RoleConstraintRelationEdge;
+import com.orm2_graph_library.logic_errors.ConstraintHasNotEnoughConnectsLogicError;
+import com.orm2_graph_library.logic_errors.EntityTypeWithNoneRefModeLogicError;
+import com.orm2_graph_library.logic_errors.RoleHasNoTextSetLogicError;
 import com.orm2_graph_library.nodes.common.EntityType;
+import com.orm2_graph_library.nodes.common.RefMode;
 import com.orm2_graph_library.nodes.common.ValueType;
+import com.orm2_graph_library.nodes.common.ref_modes.NoneRefMode;
 import com.orm2_graph_library.nodes.constraints.*;
 import com.orm2_graph_library.nodes.predicates.ObjectifiedPredicate;
 import com.orm2_graph_library.nodes.predicates.Predicate;
 import com.orm2_graph_library.nodes.predicates.Role;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import utils.Test_globalTest;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
 class Test_nodesLifeCycle extends Test_globalTest {
+    // ==================== INIT ====================
+    @AfterEach
+    private void testEnd_nodesLifeCycle() {
+        for (EntityType entityType : test_entityTypes) { test_entityTypesLogicErrors.computeIfAbsent(entityType, k -> new HashSet<>()).add(new EntityTypeWithNoneRefModeLogicError(entityType)); }
+        for (Constraint constraint : test_constraints) { test_constraintsLogicErrors.computeIfAbsent(constraint, k -> new HashSet<>()).add(new ConstraintHasNotEnoughConnectsLogicError(constraint, new ArrayList<>())); }
+
+        for (Predicate predicate : test_predicates) {
+            for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
+                LogicError logicError = new RoleHasNoTextSetLogicError(role);
+
+                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
+                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+            }
+        }
+    }
+
     // ==================== TEST ====================
     // ---------------- ENTITY TYPES ----------------
     @Test
@@ -19,7 +49,7 @@ class Test_nodesLifeCycle extends Test_globalTest {
 
         // Check result
         Assertions.assertTrue(this._diagram.getElements(DiagramElement.class).allMatch(e -> e instanceof EntityType));
-        Assertions.assertTrue(this._diagram.getElements(EntityType.class).allMatch(e -> e.refMode().equals(EntityType.RefMode.NONE)));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).allMatch(e -> e.refMode().equals(new NoneRefMode())));
         Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 1")));
         Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 2")));
         Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 3")));
@@ -41,7 +71,7 @@ class Test_nodesLifeCycle extends Test_globalTest {
         // Check result
         Assertions.assertTrue(this._diagram.canRedoState());
         Assertions.assertTrue(this._diagram.getElements(DiagramElement.class).allMatch(e -> e instanceof EntityType));
-        Assertions.assertTrue(this._diagram.getElements(EntityType.class).allMatch(e -> e.refMode().equals(EntityType.RefMode.NONE)));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).allMatch(e -> e.refMode().equals(new NoneRefMode())));
         Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 1")));
         Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 2")));
     }
@@ -57,7 +87,7 @@ class Test_nodesLifeCycle extends Test_globalTest {
         // Check result
         Assertions.assertFalse(this._diagram.canRedoState());
         Assertions.assertTrue(this._diagram.getElements(DiagramElement.class).allMatch(e -> e instanceof EntityType));
-        Assertions.assertTrue(this._diagram.getElements(EntityType.class).allMatch(e -> e.refMode().equals(EntityType.RefMode.NONE)));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).allMatch(e -> e.refMode().equals(new NoneRefMode())));
         Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 1")));
         Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 2")));
         Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 3")));
@@ -82,7 +112,7 @@ class Test_nodesLifeCycle extends Test_globalTest {
         // Check result
         Assertions.assertFalse(this._diagram.canRedoState());
         Assertions.assertTrue(this._diagram.getElements(DiagramElement.class).allMatch(e -> e instanceof EntityType));
-        Assertions.assertTrue(this._diagram.getElements(EntityType.class).allMatch(e -> e.refMode().equals(EntityType.RefMode.NONE)));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).allMatch(e -> e.refMode().equals(new NoneRefMode())));
         Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 1")));
         Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 2")));
         Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 3")));
@@ -101,7 +131,7 @@ class Test_nodesLifeCycle extends Test_globalTest {
 
         // Check result
         Assertions.assertTrue(this._diagram.getElements(DiagramElement.class).allMatch(e -> e instanceof EntityType));
-        Assertions.assertTrue(this._diagram.getElements(EntityType.class).allMatch(e -> e.refMode().equals(EntityType.RefMode.NONE)));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).allMatch(e -> e.refMode().equals(new NoneRefMode())));
         Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 2")));
         Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 4")));
         Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 5")));
@@ -137,7 +167,7 @@ class Test_nodesLifeCycle extends Test_globalTest {
         // Check result
         Assertions.assertFalse(this._diagram.canRedoState());
         Assertions.assertTrue(this._diagram.getElements(DiagramElement.class).allMatch(e -> e instanceof EntityType));
-        Assertions.assertTrue(this._diagram.getElements(EntityType.class).allMatch(e -> e.refMode().equals(EntityType.RefMode.NONE)));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).allMatch(e -> e.refMode().equals(new NoneRefMode())));
         Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 4")));
         Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 5")));
     }
@@ -157,7 +187,7 @@ class Test_nodesLifeCycle extends Test_globalTest {
 
         // Check result
         Assertions.assertTrue(this._diagram.getElements(DiagramElement.class).allMatch(e -> e instanceof EntityType));
-        Assertions.assertTrue(this._diagram.getElements(EntityType.class).allMatch(e -> e.refMode().equals(EntityType.RefMode.NONE)));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).allMatch(e -> e.refMode().equals(new NoneRefMode())));
         Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 2")));
         Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 3")));
         Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 5")));
@@ -202,8 +232,27 @@ class Test_nodesLifeCycle extends Test_globalTest {
         // Check result
         Assertions.assertFalse(this._diagram.canRedoState());
         Assertions.assertTrue(this._diagram.getElements(DiagramElement.class).allMatch(e -> e instanceof EntityType));
-        Assertions.assertTrue(this._diagram.getElements(EntityType.class).allMatch(e -> e.refMode().equals(EntityType.RefMode.NONE)));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).allMatch(e -> e.refMode().equals(new NoneRefMode())));
         Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().startsWith("Entity Type ")));
+    }
+
+    @Test
+    void entityType_addAddedNode() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new EntityType()));
+
+        // Check result
+        Assertions.assertThrows(RuntimeException.class, () -> this._diagram.addNode(test_entityTypes.get(0)));
+    }
+
+    @Test
+    void entityType_removeRemovedNode() {
+        // Prepare data and start testing
+        EntityType entityType = this._diagram.addNode(new EntityType());
+        this._diagram.removeNode(entityType);
+
+        // Check result
+        Assertions.assertThrows(RuntimeException.class, () -> this._diagram.removeNode(entityType));
     }
 
     // ----------------- VALUE TYPES ----------------
@@ -393,6 +442,25 @@ class Test_nodesLifeCycle extends Test_globalTest {
         Assertions.assertTrue(this._diagram.getElements(ValueType.class).anyMatch(e -> e.name().startsWith("Value Type ")));
     }
 
+    @Test
+    void valueType_addAddedNode() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new ValueType()));
+
+        // Check result
+        Assertions.assertThrows(RuntimeException.class, () -> this._diagram.addNode(test_valueTypes.get(0)));
+    }
+
+    @Test
+    void valueType_removeRemovedNode() {
+        // Prepare data and start testing
+        ValueType valueType = this._diagram.addNode(new ValueType());
+        this._diagram.removeNode(valueType);
+
+        // Check result
+        Assertions.assertThrows(RuntimeException.class, () -> this._diagram.removeNode(valueType));
+    }
+
     // ------------------ PREDICATE -----------------
     @Test
     void predicate_adding() {
@@ -541,7 +609,10 @@ class Test_nodesLifeCycle extends Test_globalTest {
             }
         }
 
-        while (this._diagram.canUndoState()) { this._diagram.undoState(); }
+        while (this._diagram.canUndoState()) {
+            this._diagram.undoState();
+        }
+
         test_removeAllDiagramElements();
 
         // Check result
@@ -614,6 +685,27 @@ class Test_nodesLifeCycle extends Test_globalTest {
 
         // Check result
         Assertions.assertThrows(RuntimeException.class, () -> this._diagram.removeNode(test_predicates.get(0).getRole(0)));
+    }
+
+    @Test
+    void predicate_addAddedNodeAndItsComponents() {
+        // Prepare data and start testing
+        Predicate predicate = test_addDiagramElement(this._diagram.addNode(new Predicate(3)));
+
+        // Check result
+        Assertions.assertThrows(RuntimeException.class, () -> this._diagram.addNode(predicate));
+        predicate.roles().forEach(e -> Assertions.assertThrows(RuntimeException.class, () -> this._diagram.removeNode(e)));
+    }
+
+    @Test
+    void predicate_removeRemovedNodeAndItsComponents() {
+        // Prepare data and start testing
+        Predicate predicate = this._diagram.addNode(new Predicate(3));
+        this._diagram.removeNode(predicate);
+
+        // Check result
+        Assertions.assertThrows(RuntimeException.class, () -> this._diagram.removeNode(predicate));
+        predicate.roles().forEach(e -> Assertions.assertThrows(RuntimeException.class, () -> this._diagram.removeNode(e)));
     }
 
     // ----------- OBJECTIFIED PREDICATES -----------
@@ -941,6 +1033,42 @@ class Test_nodesLifeCycle extends Test_globalTest {
         Assertions.assertThrows(RuntimeException.class, () -> this._diagram.removeNode(test_objectifiedPredicates.get(0).innerPredicate().getRole(0)));
     }
 
+    @Test
+    void objectifiedPredicate_addAddedNodeAndItsComponents() {
+        // Prepare data and start testing
+        ObjectifiedPredicate objectifiedPredicate = test_addDiagramElement(this._diagram.addNode(new ObjectifiedPredicate(new Predicate(3))));
+
+        // Check result
+        Assertions.assertThrows(RuntimeException.class, () -> this._diagram.addNode(objectifiedPredicate));
+        Assertions.assertThrows(RuntimeException.class, () -> this._diagram.addNode(objectifiedPredicate.innerPredicate()));
+        objectifiedPredicate.innerPredicate().roles().forEach(e -> Assertions.assertThrows(RuntimeException.class, () -> this._diagram.removeNode(e)));
+    }
+
+    @Test
+    void objectifiedPredicate_removeRemovedNodeAndItsComponents() {
+        // Prepare data and start testing
+        ObjectifiedPredicate objectifiedPredicate = this._diagram.addNode(new ObjectifiedPredicate(new Predicate(3)));
+        this._diagram.removeNode(objectifiedPredicate);
+
+        // Check result
+        Assertions.assertThrows(RuntimeException.class, () -> this._diagram.removeNode(objectifiedPredicate));
+        Assertions.assertThrows(RuntimeException.class, () -> this._diagram.removeNode(objectifiedPredicate.innerPredicate()));
+        objectifiedPredicate.innerPredicate().roles().forEach(e -> Assertions.assertThrows(RuntimeException.class, () -> this._diagram.removeNode(e)));
+    }
+
+    @Test
+    void objectifiedPredicate_unobjectifyAndRemoveNodeAndAddInnerPredicateWithItsRoles() {
+        // Prepare data and start testing
+        ObjectifiedPredicate objectifiedPredicate = this._diagram.addNode(new ObjectifiedPredicate(new Predicate(3)));
+        Predicate predicate = objectifiedPredicate.becomeUnobjectified();
+        test_addDiagramElement(predicate);
+
+        // Check result
+        Assertions.assertThrows(RuntimeException.class, () -> this._diagram.removeNode(objectifiedPredicate));
+        Assertions.assertThrows(RuntimeException.class, () -> this._diagram.addNode(predicate));
+        predicate.roles().forEach(e -> Assertions.assertThrows(RuntimeException.class, () -> this._diagram.addNode(e)));
+    }
+
     // ----------------- CONSTRAINTS ----------------
     @Test
     void constraint_adding() {
@@ -1165,5 +1293,37 @@ class Test_nodesLifeCycle extends Test_globalTest {
         // Check result
         Assertions.assertFalse(this._diagram.canRedoState());
         Assertions.assertTrue(this._diagram.getElements(DiagramElement.class).allMatch(e -> e instanceof Constraint));
+    }
+
+    @Test
+    void constraint_addAddedNodes() {
+        // Prepare data and start testing
+        test_addDiagramElement(this._diagram.addNode(new EqualityConstraint()));
+        test_addDiagramElement(this._diagram.addNode(new ExclusionConstraint()));
+        test_addDiagramElement(this._diagram.addNode(new ExclusiveOrConstraint()));
+        test_addDiagramElement(this._diagram.addNode(new InclusiveOrConstraint()));
+        test_addDiagramElement(this._diagram.addNode(new SubsetConstraint()));
+        test_addDiagramElement(this._diagram.addNode(new UniquenessConstraint()));
+
+        // Check result
+        for (Constraint constraint : test_constraints) { Assertions.assertThrows(RuntimeException.class, () -> this._diagram.addNode(constraint)); }
+    }
+
+    @Test
+    void constraint_removeRemovedNodes() {
+        // Prepare data and start testing
+        ArrayList<Constraint> removedConstraints = new ArrayList<>();
+
+        removedConstraints.add(this._diagram.addNode(new EqualityConstraint()));
+        removedConstraints.add(this._diagram.addNode(new ExclusionConstraint()));
+        removedConstraints.add(this._diagram.addNode(new ExclusiveOrConstraint()));
+        removedConstraints.add(this._diagram.addNode(new InclusiveOrConstraint()));
+        removedConstraints.add(this._diagram.addNode(new SubsetConstraint()));
+        removedConstraints.add(this._diagram.addNode(new UniquenessConstraint()));
+
+        for (Constraint constraint : removedConstraints) { this._diagram.removeNode(constraint); }
+
+        // Check result
+        for (Constraint constraint : removedConstraints) { Assertions.assertThrows(RuntimeException.class, () -> this._diagram.removeNode(constraint)); }
     }
 }

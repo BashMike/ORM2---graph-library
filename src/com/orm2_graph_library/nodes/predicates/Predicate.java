@@ -2,20 +2,22 @@ package com.orm2_graph_library.nodes.predicates;
 
 import com.orm2_graph_library.core.*;
 import com.orm2_graph_library.nodes_shapes.RectangleShape;
+import com.orm2_graph_library.utils.Point2D;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Predicate extends Node implements Movable {
     // ================ ATTRIBUTES ================
     private ObjectifiedPredicate       _ownerObjectifiedPredicate = null;
-
     final private ArrayList<Role>      _roles                     = new ArrayList<>();
     private DiagramElement.Orientation _orientation               = DiagramElement.Orientation.HORIZONTAL;
     final private Set<RolesSequence>   _rolesSequences            = new HashSet<>();
+    final private Set<RolesSequence>   _uniqueRolesSequences      = new HashSet<>();
 
     // ================ OPERATIONS ================
     // ----------------- creating -----------------
@@ -34,14 +36,52 @@ public class Predicate extends Node implements Movable {
     }
 
     // ---------------- connection ----------------
-    @Override
-    protected void _initSelf() {}
+    @Override protected void _initSelf() {}
+    @Override protected void _finalizeSelf() {}
 
-    @NotNull public ObjectifiedPredicate ownerObjectifiedPredicate() { return this._ownerObjectifiedPredicate; }
-    public boolean hasOwnerObjectifiedPredicate() { return (this._ownerObjectifiedPredicate != null); }
+    @NotNull
+    public ObjectifiedPredicate ownerObjectifiedPredicate() {
+        /*
+        ObjectifiedPredicate result = null;
 
-    void setOwnerObjectifiedPredicate(@NotNull ObjectifiedPredicate objectifiedPredicate) { this._ownerObjectifiedPredicate = objectifiedPredicate; }
-    void unsetOwnerObjectifiedPredicate()                                                 { this._ownerObjectifiedPredicate = null; }
+        if (this.hasOwnerDiagram()) {
+            ArrayList<ObjectifiedPredicate> objectifiedPredicatesOwners = this._ownerDiagram.getElements(ObjectifiedPredicate.class).filter(e -> e.innerPredicate() == this).collect(Collectors.toCollection(ArrayList::new));
+
+            assert objectifiedPredicatesOwners.size() <= 1 : "ASSERT :: " + objectifiedPredicatesOwners.size() + " objectified predicates with same inner predicate in the diagram.";
+            if (objectifiedPredicatesOwners.size() == 1) {
+                result = objectifiedPredicatesOwners.get(0);
+            }
+        }
+
+        return result;
+        */
+        return this._ownerObjectifiedPredicate;
+    }
+
+    public boolean hasOwnerObjectifiedPredicate() {
+        /*
+        ArrayList<ObjectifiedPredicate> objectifiedPredicatesOwners = new ArrayList<>();
+
+        if (this.hasOwnerDiagram()) {
+            objectifiedPredicatesOwners = this._ownerDiagram.getElements(ObjectifiedPredicate.class).filter(e -> e.innerPredicate() == this).collect(Collectors.toCollection(ArrayList::new));
+            assert objectifiedPredicatesOwners.size() <= 1 : "ASSERT :: " + objectifiedPredicatesOwners.size() + " objectified predicates with same inner predicate in the diagram.";
+        }
+
+        return objectifiedPredicatesOwners.size() == 1;
+        */
+        return (this._ownerObjectifiedPredicate != null);
+    }
+
+    void _setOwnerObjectifiedPredicate(@NotNull ObjectifiedPredicate ownerObjectifiedPredicate) {
+        if (!this.hasOwnerObjectifiedPredicate()) {
+            this._ownerObjectifiedPredicate = ownerObjectifiedPredicate;
+        }
+        else {
+            throw new RuntimeException("ERROR :: attempt to set objectified predicate as owner twice.");
+        }
+    }
+
+    void _unsetOwnerObjectifiedPredicate() { this._ownerObjectifiedPredicate = null; }
 
     // ---------------- attributes ----------------
     // * Roles
@@ -50,9 +90,18 @@ public class Predicate extends Node implements Movable {
 
     public int arity() { return this._roles.size(); }
 
+    public String rolesText(@NotNull String delimiter) {
+        String result = this._roles.get(0).text();
+        for (int i=1; i<this._roles.size(); i++) { result += delimiter + this._roles.get(i).text(); }
+
+        return result;
+    }
+
     public RolesSequence rolesSequence(int... rolesIndexes) {
         ArrayList<Role> roles = new ArrayList<>();
-        for (int rolesIndex : rolesIndexes) { roles.add(this._roles.get(rolesIndex)); }
+        for (int rolesIndex : Arrays.stream(rolesIndexes).sorted().toArray()) {
+            roles.add(this._roles.get(rolesIndex));
+        }
 
         if (new HashSet<>(roles).size() != roles.size()) {
             throw new RuntimeException("ERROR :: Attempt to get roles sequence with duplicated roles in it.");
@@ -66,7 +115,7 @@ public class Predicate extends Node implements Movable {
 
         if (rolesSequences.isEmpty()) {
             this._rolesSequences.add(rolesSequence);
-            this._ownerDiagram.addRolesSequence(rolesSequence);
+            this._addDiagramElementToOwnerDiagram(rolesSequence); // TODO - @modify :: Secure adding role sequence to the diagram.
 
             return rolesSequence;
         }
@@ -75,7 +124,27 @@ public class Predicate extends Node implements Movable {
         }
     }
 
-    public ArrayList<RolesSequence> allRolesSequences() { return new ArrayList<>(this._rolesSequences); }
+    public boolean isInternalRolesSequence(RolesSequence rolesSequence) { return this._rolesSequences.contains(rolesSequence); }
+    public boolean hasRolesSequence(int... rolesIndexes) {
+        ArrayList<Role> roles = new ArrayList<>();
+        for (int rolesIndex : Arrays.stream(rolesIndexes).sorted().toArray()) {
+            roles.add(this._roles.get(rolesIndex));
+        }
+
+        return this._rolesSequences.contains(new RolesSequence(roles));
+    }
+
+    public Stream<RolesSequence> usedRolesSequences() { return this._rolesSequences.stream().filter(e -> e.hasIncidentElements(DiagramElement.class)); }
+
+    public boolean isRolesSequenceUnique(@NotNull RolesSequence rolesSequence) { return this._uniqueRolesSequences.contains(rolesSequence); }
+    public boolean isRolesSequenceUnique(int... rolesIndexes) { return this.hasRolesSequence(rolesIndexes) && this.isRolesSequenceUnique(this.rolesSequence(rolesIndexes)); }
+    public Stream<RolesSequence> uniqueRolesSequences() { return this._uniqueRolesSequences.stream(); }
+
+    public void makeRolesSequenceUnique   (int... rolesIndexes) { this._ownerDiagramActionManager().executeAction(new MakeRolesSequenceUniqueAction   (this._ownerDiagram, this, this.rolesSequence(rolesIndexes))); }
+    public void makeRolesSequenceNonUnique(int... rolesIndexes) { this._ownerDiagramActionManager().executeAction(new MakeRolesSequenceNonUniqueAction(this._ownerDiagram, this, this.rolesSequence(rolesIndexes))); }
+
+    // * Anchor points
+    @Override public Stream<AnchorPoint> anchorPoints() { return Stream.of(); }
 
     // * Geometry
     public DiagramElement.Orientation orientation() { return this._orientation; }
@@ -89,12 +158,12 @@ public class Predicate extends Node implements Movable {
     public void setRolesBorderSize(int borderWidth, int borderHeight) {
         for (Role role : this._roles) { role.setBorderSize(borderWidth, borderHeight); }
     }
-    public void moveTo(Point leftTop) {
+    public void moveTo(Point2D leftTop) {
         this._ownerDiagramActionManager().executeAction(new MovePredicateAction(this._ownerDiagram, this, this._leftTop, leftTop));
     }
 
     public void moveBy(int shiftX, int shiftY) {
-        Point newLeftTop = new Point(this._leftTop);
+        Point2D newLeftTop = new Point2D(this._leftTop);
         newLeftTop.translate(shiftX, shiftY);
 
         this._ownerDiagramActionManager().executeAction(new MovePredicateAction(this._ownerDiagram, this, this._leftTop, newLeftTop));
@@ -120,30 +189,34 @@ public class Predicate extends Node implements Movable {
 
     // ----------------- contract -----------------
     @Override
-    public <T extends DiagramElement> ArrayList<T> getIncidentElements(Class<T> elementType) {
-        ArrayList<T> result = super.getIncidentElements(elementType);
-        for (Role role : this._roles) { result.addAll(role.getIncidentElements(elementType)); }
+    public <T extends DiagramElement> Stream<T> getIncidentElements(Class<T> elementType) {
+        Stream<T> result = super.getIncidentElements(elementType);
+        for (Role role : this._roles) { result = Stream.concat(result, role.getIncidentElements(elementType)); }
 
-        for (RolesSequence rolesSequence : this._rolesSequences) {
-            result.addAll(rolesSequence.getIncidentElements(elementType));
+        for (RolesSequence rolesSequence : this.usedRolesSequences().collect(Collectors.toCollection(ArrayList::new))) {
+            result = Stream.concat(result, rolesSequence.getIncidentElements(elementType));
         }
 
         return result;
     }
 
     // ================= SUBTYPES =================
-    private class ChangePredicateOrientationAction extends Action {
+    public class ChangePredicateOrientationAction extends Action {
         private final Predicate                  _node;
         private final DiagramElement.Orientation _oldOrientation;
         private final DiagramElement.Orientation _newOrientation;
 
-        public ChangePredicateOrientationAction(@NotNull Diagram diagram, @NotNull Predicate node, @NotNull DiagramElement.Orientation oldOrientation, @NotNull DiagramElement.Orientation newOrientation) {
+        private ChangePredicateOrientationAction(@NotNull Diagram diagram, @NotNull Predicate node, @NotNull DiagramElement.Orientation oldOrientation, @NotNull DiagramElement.Orientation newOrientation) {
             super(diagram);
 
             this._node           = node;
             this._oldOrientation = oldOrientation;
             this._newOrientation = newOrientation;
         }
+
+        public Predicate node() { return this._node; }
+        public DiagramElement.Orientation oldOrientation() { return this._oldOrientation; }
+        public DiagramElement.Orientation newOrientation() { return this._newOrientation; }
 
         @Override public void _execute() { this._changeOrientationOfNodesAndItsComponents(this._newOrientation); }
         @Override public void _undo()    { this._changeOrientationOfNodesAndItsComponents(this._oldOrientation); }
@@ -164,18 +237,85 @@ public class Predicate extends Node implements Movable {
         }
     }
 
-    private class MovePredicateAction extends Action {
-        private final Predicate _node;
-        private final Point     _oldNodeLeftTop;
-        private final Point     _newNodeLeftTop;
+    public class MakeRolesSequenceUniqueAction extends Action {
+        private final Predicate     _node;
+        private final RolesSequence _rolesSequence;
 
-        public MovePredicateAction(@NotNull Diagram diagram, @NotNull Predicate node, @NotNull Point oldNodeLeftTop, @NotNull Point newNodeLeftTop) {
+        private MakeRolesSequenceUniqueAction(@NotNull Diagram diagram, @NotNull Predicate node, @NotNull RolesSequence rolesSequence) {
+            super(diagram);
+
+            this._node = node;
+            this._rolesSequence = rolesSequence;
+        }
+
+        public Predicate node() { return this._node; }
+        public RolesSequence rolesSequence() { return this._rolesSequence; }
+
+        @Override public void _execute() { _uniqueRolesSequences.add(this._rolesSequence); }
+        @Override public void _undo()    { _uniqueRolesSequences.remove(this._rolesSequence); }
+    }
+
+
+    public class MakeRolesSequenceNonUniqueAction extends Action {
+        final private Predicate     _node;
+        final private RolesSequence _rolesSequence;
+
+        private MakeRolesSequenceNonUniqueAction(@NotNull Diagram diagram, @NotNull Predicate node, @NotNull RolesSequence rolesSequence) {
+            super(diagram);
+
+            this._node = node;
+            this._rolesSequence = rolesSequence;
+        }
+
+        public Predicate node() { return this._node; }
+        public RolesSequence rolesSequence() { return this._rolesSequence; }
+
+        @Override public void _execute() { _uniqueRolesSequences.remove(this._rolesSequence); }
+        @Override public void _undo()    { _uniqueRolesSequences.add(this._rolesSequence); }
+    }
+
+    /*
+    public class PredicateBecomesObjectifiedAction extends Action {
+        final private Predicate            _node;
+        final private ObjectifiedPredicate _objectifiedPredicate;
+
+        private PredicateBecomesObjectifiedAction(@NotNull Diagram diagram, @NotNull Predicate node, @NotNull ObjectifiedPredicate objectifiedPredicate) {
+            super(diagram);
+
+            this._node                 = node;
+            this._objectifiedPredicate = objectifiedPredicate;
+        }
+
+        @Override
+        public void _execute() {
+            if (!hasOwnerObjectifiedPredicate()) { this._node._ownerObjectifiedPredicate = this._node._addDiagramElementToOwnerDiagram(this._objectifiedPredicate); }
+            else                                 { throw new RuntimeException("ERROR :: attempt to objectified predicate that is already objectified."); }
+        }
+
+        @Override
+        public void _undo() {
+            this._node._ownerObjectifiedPredicate = null;
+            this._node._removeDiagramElementToOwnerDiagram(this._objectifiedPredicate);
+        }
+    }
+    */
+
+    public class MovePredicateAction extends Action {
+        private final Predicate _node;
+        private final Point2D   _oldNodeLeftTop;
+        private final Point2D   _newNodeLeftTop;
+
+        private MovePredicateAction(@NotNull Diagram diagram, @NotNull Predicate node, @NotNull Point2D oldNodeLeftTop, @NotNull Point2D newNodeLeftTop) {
             super(diagram);
 
             this._node           = node;
             this._oldNodeLeftTop = oldNodeLeftTop;
             this._newNodeLeftTop = newNodeLeftTop;
         }
+
+        public Predicate node() { return this._node; }
+        public Point2D oldNodeLeftTop() { return this._oldNodeLeftTop; }
+        public Point2D newNodeLeftTop() { return this._newNodeLeftTop; }
 
         @Override
         public void _execute() {

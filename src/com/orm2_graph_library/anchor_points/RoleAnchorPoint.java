@@ -2,6 +2,7 @@ package com.orm2_graph_library.anchor_points;
 
 import com.orm2_graph_library.core.DiagramElement;
 import com.orm2_graph_library.nodes.predicates.Role;
+import com.orm2_graph_library.utils.Point2D;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -15,7 +16,7 @@ public class RoleAnchorPoint extends NodeAnchorPoint<Role> {
     }
 
     @Override @NotNull
-    public Point position() {
+    public Point2D position() {
         if (this._initialOrientation == this._owner.ownerPredicate().orientation()) {
             return super.position();
         }
@@ -38,7 +39,7 @@ public class RoleAnchorPoint extends NodeAnchorPoint<Role> {
             }
         }
 
-        assert false : "ASSERT :: Getting position with anchor point with impossible anchor position.";
-        return new Point(0, 0);
+        assert false : "ASSERT :: Getting position of anchor point with impossible anchor position.";
+        return new Point2D(0, 0);
     }
 }

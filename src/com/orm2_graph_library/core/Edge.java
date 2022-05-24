@@ -1,5 +1,6 @@
 package com.orm2_graph_library.core;
 
+import com.orm2_graph_library.utils.Point2D;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -8,8 +9,9 @@ import java.util.stream.Stream;
 
 public abstract class Edge <B extends DiagramElement, E extends DiagramElement> extends DiagramElement {
     // ================ ATTRIBUTES ================
-    private final AnchorPoint<B> _beginAnchorPoint;
-    private final AnchorPoint<E> _endAnchorPoint;
+    // Does we need to calculate
+    final protected AnchorPoint<B> _beginAnchorPoint;
+    final protected AnchorPoint<E> _endAnchorPoint;
 
     // ================ OPERATIONS ================
     // ----------------- creating -----------------
@@ -28,7 +30,7 @@ public abstract class Edge <B extends DiagramElement, E extends DiagramElement> 
     // TODO - @add :: Getting starting and ending points depending on attachment points of begin and end elements.
     @Override
     public GeometryApproximation geometryApproximation() {
-        ArrayList<Point> points = new ArrayList<>();
+        ArrayList<Point2D> points = new ArrayList<>();
         points.add(this._beginAnchorPoint.position());
         points.add(this._endAnchorPoint.position());
 
@@ -37,10 +39,10 @@ public abstract class Edge <B extends DiagramElement, E extends DiagramElement> 
 
     // ----------------- contract -----------------
     @Override
-    public <T extends DiagramElement> ArrayList<T> getIncidentElements(Class<T> elementType) {
-        ArrayList<T> result = new ArrayList<>();
-        if (elementType.isAssignableFrom(this.begin().getClass())) { result.add((T)this.begin()); }
-        if (elementType.isAssignableFrom(this.end().getClass()))   { result.add((T)this.end()); }
+    public <T extends DiagramElement> Stream<T> getIncidentElements(Class<T> elementType) {
+        Stream<T> result = Stream.of();
+        if (elementType.isAssignableFrom(this.begin().getClass())) { result = Stream.concat(result, Stream.of((T)this.begin())); }
+        if (elementType.isAssignableFrom(this.end().getClass()))   { result = Stream.concat(result, Stream.of((T)this.end())); }
 
         return result;
     }

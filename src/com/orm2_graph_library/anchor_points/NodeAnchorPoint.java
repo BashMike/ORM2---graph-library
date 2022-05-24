@@ -2,6 +2,7 @@ package com.orm2_graph_library.anchor_points;
 
 import com.orm2_graph_library.core.AnchorPoint;
 import com.orm2_graph_library.core.Node;
+import com.orm2_graph_library.utils.Point2D;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -12,8 +13,8 @@ public class NodeAnchorPoint<G extends Node> extends AnchorPoint<G> {
     }
 
     @Override @NotNull
-    public Point position() {
-        Point result = (Point)this._owner.borderLeftTop().clone();
+    public Point2D position() {
+        Point2D result = new Point2D(this._owner.borderLeftTop());
 
         switch (this._anchorPosition) {
             case UP    -> result.translate(this._owner.borderWidth()/2, 0);

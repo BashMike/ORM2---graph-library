@@ -1,22 +1,21 @@
 package com.orm2_graph_library;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import com.orm2_graph_library.core.Diagram;
+import com.orm2_graph_library.nodes.common.DataType;
+import com.orm2_graph_library.nodes.common.EntityType;
+import com.orm2_graph_library.nodes.common.data_types.IntegerDataType;
+import com.orm2_graph_library.nodes.predicates.ObjectifiedPredicate;
+import com.orm2_graph_library.nodes.predicates.Predicate;
+import com.thoughtworks.xstream.XStream;
 
 public class Main {
-    static private Map<int[], Object> _map = new HashMap<>();
-
-    private void addNewValue(Object value, int... indexes) {
-        _map.put(indexes, value);
-    }
-
     public static void main(String[] args) {
-        _map.put(new int[]{0, 2}, 4);
-        _map.put(new int[]{0, 2}, 8);
+        Diagram diagram = new Diagram();
+        diagram.addNode(new EntityType());
+        diagram.addNode(new ObjectifiedPredicate(new Predicate(4)));
 
-        for (var objectInfo : _map.entrySet()) {
-            System.out.println(Arrays.stream(objectInfo.getKey()).toString() + ": " + objectInfo.getValue());
-        }
+        diagram.saveToXmlFile("Hello.xml", false);
+        diagram = Diagram.loadFromXmlFile("Hello.xml");
+        System.out.println("HELLO");
     }
 }

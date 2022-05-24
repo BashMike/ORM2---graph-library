@@ -1,12 +1,14 @@
 package com.orm2_graph_library.core;
 
+import com.orm2_graph_library.utils.Point2D;
+
 import java.awt.*;
 
 // TODO - @modify :: Change abstract class to interface.
 // TODO - @modify :: Two interfaces for moving self: 1. Move with recording actions and 2. Move without recording actions!?
 // TODO - @modify :: Record inner components movement (Different movement actions :: GOOD!).
 public interface Movable {
-    void moveTo(Point leftTop);
+    void moveTo(Point2D leftTop);
     void moveBy(int shiftX, int shiftY);
 }
 

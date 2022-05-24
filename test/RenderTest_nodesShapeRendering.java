@@ -1,6 +1,7 @@
 import com.orm2_graph_library.anchor_points.AnchorPosition;
 import com.orm2_graph_library.core.Diagram;
 import com.orm2_graph_library.core.DiagramElement;
+import com.orm2_graph_library.core.Edge;
 import com.orm2_graph_library.core.Node;
 import com.orm2_graph_library.nodes.common.EntityType;
 import com.orm2_graph_library.nodes.common.ObjectType;
@@ -8,13 +9,20 @@ import com.orm2_graph_library.nodes.constraints.Constraint;
 import com.orm2_graph_library.nodes.constraints.SubsetConstraint;
 import com.orm2_graph_library.nodes.predicates.ObjectifiedPredicate;
 import com.orm2_graph_library.nodes.predicates.Predicate;
+import com.orm2_graph_library.nodes.predicates.Role;
+import com.orm2_graph_library.nodes.predicates.RolesSequence;
+import com.orm2_graph_library.utils.Point2D;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.geom.Area;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-public class RenderTest_nodesShapeRendering extends JFrame {
+public class RenderTest_nodesShapeRendering extends JFrame implements MouseListener {
     // ================== STATIC ==================
     static Dimension _objectTypeSize                           = new Dimension(100, 50);
 
@@ -24,12 +32,26 @@ public class RenderTest_nodesShapeRendering extends JFrame {
     static int       _objectifiedPredicateBorderRoundingDegree = 15;
 
     static Dimension _roleSize                                 = new Dimension(20, 10);
+    static Class     _nodeTypeToPlace                          = EntityType.class;
 
     // ================ OPERATIONS ================
     // ----------------- creating -----------------
     static public void main(String[] args) {
         SwingUtilities.invokeLater(RenderTest_nodesShapeRendering::new);
     }
+
+    @Override
+    public void mouseClicked(MouseEvent me) {
+        System.out.println(me.getPoint());
+    }
+
+    @Override public void mousePressed(MouseEvent me) {
+        System.out.println(me.getPoint());
+    }
+
+    @Override public void mouseReleased(MouseEvent me) {}
+    @Override public void mouseEntered(MouseEvent me) {}
+    @Override public void mouseExited(MouseEvent me) {}
 
     public RenderTest_nodesShapeRendering() {
         // Set JFrame settings
@@ -42,9 +64,21 @@ public class RenderTest_nodesShapeRendering extends JFrame {
 
         // Render nodes
         Diagram diagram = this._createDiagram();
-        this._initDiagramElementsSizes(diagram);
+        DiagramElementsPanel panel = new DiagramElementsPanel(diagram, DiagramElementsPanel.RenderMode.WIREFRAME);
 
-        this.getContentPane().add(new DiagramElementsPanel(diagram, DiagramElementsPanel.RenderMode.WIREFRAME));
+        this.getContentPane().add(panel);
+        panel.setFocusable(false);
+        panel.setFocusable(true);
+        panel.requestFocus(true);
+        panel.requestFocusInWindow();
+
+        this.toFront();
+        this.requestFocusInWindow();
+
+        System.out.println(panel.hasFocus());
+        System.out.println(this.hasFocus());
+        System.out.println(this.getFocusOwner());
+        System.out.println(this.getMostRecentFocusOwner());
     }
 
     private Diagram _createDiagram() {
@@ -60,28 +94,30 @@ public class RenderTest_nodesShapeRendering extends JFrame {
 
         Constraint c0 = diagram.addNode(new SubsetConstraint());
 
+        this._initDiagramElementsSizes(diagram);
+
         // Modify nodes
-        sp0.moveTo(new Point(200, 200));
+        sp0.moveTo(new Point2D(200, 200));
         sp0.setOrientation(DiagramElement.Orientation.VERTICAL);
-        sp1.moveTo(new Point(20, 20));
+        sp1.moveTo(new Point2D(20, 20));
 
-        e0.moveTo(new Point(350, 150));
-        e1.moveTo(new Point(450, 250));
+        e0.moveTo(new Point2D(350, 150));
+        e1.moveTo(new Point2D(450, 250));
 
-        c0.moveTo(new Point(30, 30));
+        c0.moveTo(new Point2D(80, 80));
 
-        op0.moveTo(new Point(100, 30));
+        op0.moveTo(new Point2D(200, 200));
         op0.innerPredicate().setOrientation(DiagramElement.Orientation.VERTICAL);
 
         // Connect nodes
         diagram.connectBySubtypingRelation(e0.centerAnchorPoint(), e1.centerAnchorPoint());
-        diagram.connectByRoleConstraintRelation(sp0.rolesSequence(0, 3), c0.centerAnchorPoint());
-        diagram.connectByRoleRelation(sp0.getRole(2).anchorPoint(AnchorPosition.LEFT), op0.rightAnchorPoint());
-        diagram.connectByRoleRelation(sp1.getRole(2).anchorPoint(AnchorPosition.RIGHT), op0.leftAnchorPoint());
+        diagram.connectByRoleConstraintRelation(c0.centerAnchorPoint(), sp0.rolesSequence(0, 3));
+        diagram.connectByRoleRelation(sp0.getRole(2).anchorPoint(AnchorPosition.LEFT),  op0.rightAnchorPoint());
+        // diagram.connectByRoleRelation(sp1.getRole(2).anchorPoint(AnchorPosition.DOWN), op0.leftAnchorPoint());
 
         // Modify diagram elements
         c0.moveBy(300, 100);
-        e1.moveTo(new Point(450, 250));
+        e1.moveTo(new Point2D(450, 250));
 
         return diagram;
     }
@@ -115,12 +151,13 @@ public class RenderTest_nodesShapeRendering extends JFrame {
         public DiagramElementsPanel(Diagram diagram, RenderMode renderMode) {
             this._diagram    = diagram;
             this._renderMode = renderMode;
+
+            this.requestFocusInWindow();
         }
 
         @Override
         public void paintComponent(Graphics g) {
-            Graphics2D g2 = (Graphics2D)g;
-
+            // Collect diagram elements to render
             ArrayList<DiagramElement> initialDiagramElements = this._diagram.getElements(DiagramElement.class).collect(Collectors.toCollection(ArrayList::new));
             ArrayList<DiagramElement> diagramElementsToRender = new ArrayList<>(initialDiagramElements);
 
@@ -137,40 +174,71 @@ public class RenderTest_nodesShapeRendering extends JFrame {
                 }
             }
 
+            // Render nodes
+            Graphics2D g2 = (Graphics2D)g;
+
             for (DiagramElement de : diagramElementsToRender) {
-                ArrayList<Point> diagramElementPoints = de.geometryApproximation().points();
+                Polygon polygon = (de instanceof RolesSequence ? null : de.geometryApproximation().polygon());
 
                 if (de instanceof Node) {
-                    int[] pointsX = new int[diagramElementPoints.size()];
-                    int[] pointsY = new int[diagramElementPoints.size()];
-
-                    for (int i = 0; i < pointsX.length; i++) { pointsX[i] = diagramElementPoints.get(i).x; }
-                    for (int i = 0; i < pointsY.length; i++) { pointsY[i] = diagramElementPoints.get(i).y; }
-
-                    Shape diagramElementShape = new Polygon(pointsX, pointsY, pointsX.length);
-
                     if (this._renderMode == RenderMode.NORMAL) {
                         g2.setColor(Color.WHITE);
-                        g2.draw(diagramElementShape);
+                        g2.draw(polygon);
                     } else if (this._renderMode == RenderMode.WIREFRAME) {
                         g2.setColor(Color.BLUE);
-                        g2.fill(diagramElementShape);
+                        g2.fill(polygon);
 
                         g2.setColor(Color.MAGENTA);
-                        g2.draw(diagramElementShape);
+                        g2.draw(polygon);
 
-                        for (Point p : diagramElementPoints) {
+                        for (int i=0; i<polygon.npoints; i++) {
                             g2.setColor(Color.GREEN);
-                            g2.drawRect(p.x, p.y, 0, 0);
+                            g2.drawRect(polygon.xpoints[i], polygon.ypoints[i], 0, 0);
                         }
                     }
                 }
-                else if (diagramElementPoints.size() > 1) {
+            }
+
+            // Render edges
+            for (DiagramElement de : diagramElementsToRender) {
+                Polygon polygon = (de instanceof RolesSequence ? null : de.geometryApproximation().polygon());
+
+                if (de instanceof Edge && polygon.npoints > 1) {
                     if (this._renderMode == RenderMode.NORMAL)         { g2.setColor(Color.WHITE); }
                     else if (this._renderMode == RenderMode.WIREFRAME) { g2.setColor(Color.GREEN); }
 
-                    for (int i=0; i<diagramElementPoints.size()-1; i++) {
-                        g2.drawLine(diagramElementPoints.get(i).x, diagramElementPoints.get(i).y, diagramElementPoints.get(i+1).x, diagramElementPoints.get(i+1).y);
+                    for (int i=0; i<polygon.npoints-1; i++) {
+                        g2.drawLine(polygon.xpoints[i], polygon.ypoints[i], polygon.xpoints[i+1], polygon.ypoints[i+1]);
+                    }
+                }
+            }
+
+            // Render intersections of nodes
+            for (DiagramElement de : diagramElementsToRender) {
+                for (DiagramElement de2 : diagramElementsToRender) {
+                    boolean areNodes                             = (de instanceof Node && de2 instanceof Node);
+                    boolean isSecondPredicateForFirstObjectified = (de instanceof ObjectifiedPredicate && de2 instanceof Predicate &&
+                            ((ObjectifiedPredicate)de).innerPredicate() == de2);
+                    boolean isSecondObjectifiedForFirstPredicate = (de instanceof Predicate && de2 instanceof ObjectifiedPredicate &&
+                            ((ObjectifiedPredicate)de2).innerPredicate() == de);
+                    boolean isSecondRoleForFirstPredicate        = (de instanceof Predicate && de2 instanceof Role &&
+                            ((Predicate)de).roles().anyMatch(e -> e == de2));
+                    boolean isSecondPredicateForFirstRole        = (de instanceof Role && de2 instanceof Predicate &&
+                            ((Predicate)de2).roles().anyMatch(e -> e == de));
+                    boolean isSecondRoleForFirstObjectified      = (de instanceof ObjectifiedPredicate && de2 instanceof Role &&
+                            ((ObjectifiedPredicate)de).innerPredicate().roles().anyMatch(e -> e == de2));
+                    boolean isSecondObjectifiedForFirstRole      = (de instanceof Role && de2 instanceof ObjectifiedPredicate &&
+                            ((ObjectifiedPredicate)de2).innerPredicate().roles().anyMatch(e -> e == de));
+
+                    if (de != de2 && areNodes &&
+                            !isSecondPredicateForFirstObjectified && !isSecondRoleForFirstPredicate &&
+                            !isSecondObjectifiedForFirstPredicate && !isSecondPredicateForFirstRole &&
+                            !isSecondRoleForFirstObjectified && !isSecondObjectifiedForFirstRole)
+                    {
+                        Shape intersectionShape = de.geometryApproximation().getIntersectionWith(de2.geometryApproximation());
+
+                        g2.setColor(Color.RED);
+                        g2.fill(intersectionShape);
                     }
                 }
             }

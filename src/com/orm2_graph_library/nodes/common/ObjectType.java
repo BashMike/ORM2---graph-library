@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 abstract public class ObjectType extends RoleParticipant {
     // ================ ATTRIBUTES ================
@@ -39,6 +40,8 @@ abstract public class ObjectType extends RoleParticipant {
         this._name = this.basicName() + " " + (index-1);
     }
 
+    @Override protected void _finalizeSelf() {}
+
     // ---------------- attributes ----------------
     // * Name
     public String name() { return this._name; }
@@ -64,68 +67,54 @@ abstract public class ObjectType extends RoleParticipant {
 
     // ----------------- contract -----------------
     @Override
-    public <T extends DiagramElement> ArrayList<T> getIncidentElements(Class<T> elementType) {
-        ArrayList<T> result = super.getIncidentElements(elementType);
+    public <T extends DiagramElement> Stream<T> getIncidentElements(Class<T> elementType) {
+        Stream<T> result = super.getIncidentElements(elementType);
 
         if (Predicate.class.isAssignableFrom(elementType)) {
-            result.addAll(this._ownerDiagram.getElements(elementType)
-                    .filter(e -> e.isIncidentElement(this))
-                    .collect(Collectors.toCollection(ArrayList::new)));
+            result = Stream.concat(result, this._ownerDiagram.getElements(elementType)
+                    .filter(e -> e.isIncidentElement(this)));
         }
         else if (ObjectifiedPredicate.class.isAssignableFrom(elementType)) {
-            result.addAll(this._ownerDiagram.getElements(elementType)
-                    .filter(e -> e.isIncidentElement(this))
-                    .collect(Collectors.toCollection(ArrayList::new)));
+            result = Stream.concat(result, this._ownerDiagram.getElements(elementType)
+                    .filter(e -> e.isIncidentElement(this)));
         }
 
         return result;
     }
 
     // ================= SUBTYPES =================
-    protected abstract class ObjectTypeAttributeChangeAction extends Action {
-        final protected ObjectType _node;
-        final protected Object     _oldAttributeValue;
-        final protected Object     _newAttributeValue;
-
-        public ObjectTypeAttributeChangeAction(@NotNull Diagram diagram, @NotNull ObjectType node, @NotNull Object oldAttributeValue, @NotNull Object newAttributeValue) {
-            super(diagram);
-
-            this._node    = node;
-            this._oldAttributeValue = oldAttributeValue;
-            this._newAttributeValue = newAttributeValue;
-
-            // Check if object type's old name is the same as new name
-            if (this._oldAttributeValue.equals(this._newAttributeValue)) { this._becomeInvalid(); }
-        }
-    }
-
-    private class ObjectTypeNameChangeAction extends ObjectTypeAttributeChangeAction {
-        public ObjectTypeNameChangeAction(@NotNull Diagram diagram, @NotNull ObjectType node, @NotNull String oldName, @NotNull String newName) {
+    public class ObjectTypeNameChangeAction extends Diagram.DiagramElementAttributeChangeAction {
+        protected ObjectTypeNameChangeAction(@NotNull Diagram diagram, @NotNull ObjectType node, @NotNull String oldName, @NotNull String newName) {
             super(diagram, node, oldName, newName);
             this._postValidators.add(new ObjectTypesNameDuplicationPostValidator(diagram, this, node, oldName, newName));
         }
 
-        @Override
-        public void _execute() { this._node._name = (String)this._newAttributeValue; }
-        @Override
-        public void _undo() { this._node._name = (String)this._oldAttributeValue; }
+        public ObjectType node() { return (ObjectType)this._diagramElement; }
+        public String oldName() { return (String)this._oldAttributeValue; }
+        public String newName() { return (String)this._newAttributeValue; }
+
+        @Override public void _execute() { ((ObjectType)this._diagramElement)._name = (String)this._newAttributeValue; }
+        @Override public void _undo()    { ((ObjectType)this._diagramElement)._name = (String)this._oldAttributeValue; } }
+
+    public class ObjectTypeIsPersonalFlagChangeAction extends Diagram.DiagramElementAttributeChangeAction {
+        private ObjectTypeIsPersonalFlagChangeAction(@NotNull Diagram diagram, @NotNull ObjectType node, boolean oldIsPersonal, boolean newIsPersonal) { super(diagram, node, oldIsPersonal, newIsPersonal); }
+
+        public ObjectType node() { return (ObjectType)this._diagramElement; }
+        public boolean oldIsPersonal() { return (Boolean)this._oldAttributeValue; }
+        public boolean newIsPersonal() { return (Boolean)this._newAttributeValue; }
+
+        @Override public void _execute() { ((ObjectType)this._diagramElement)._isPersonal = (boolean)this._newAttributeValue; }
+        @Override public void _undo()    { ((ObjectType)this._diagramElement)._isPersonal = (boolean)this._oldAttributeValue; }
     }
 
-    private class ObjectTypeIsPersonalFlagChangeAction extends ObjectTypeAttributeChangeAction {
-        public ObjectTypeIsPersonalFlagChangeAction(@NotNull Diagram diagram, @NotNull ObjectType node, boolean oldIsPersonal, boolean newIsPersonal) { super(diagram, node, oldIsPersonal, newIsPersonal); }
+    public class ObjectTypeIsIndependentFlagChangeAction extends Diagram.DiagramElementAttributeChangeAction {
+        private ObjectTypeIsIndependentFlagChangeAction(@NotNull Diagram diagram, @NotNull ObjectType node, boolean oldIsIndependent, boolean newIsIndependent) { super(diagram, node, oldIsIndependent, newIsIndependent); }
 
-        @Override
-        public void _execute() { this._node._isPersonal = (boolean)this._newAttributeValue; }
-        @Override
-        public void _undo() { this._node._isPersonal = (boolean)this._oldAttributeValue; }
-    }
+        public ObjectType node() { return (ObjectType)this._diagramElement; }
+        public boolean oldIsIndependent() { return (Boolean)this._oldAttributeValue; }
+        public boolean newIsIndependent() { return (Boolean)this._newAttributeValue; }
 
-    private class ObjectTypeIsIndependentFlagChangeAction extends ObjectTypeAttributeChangeAction {
-        public ObjectTypeIsIndependentFlagChangeAction(@NotNull Diagram diagram, @NotNull ObjectType node, boolean oldIsIndependent, boolean newIsIndependent) { super(diagram, node, oldIsIndependent, newIsIndependent); }
-
-        @Override
-        public void _execute() { this._node._isIndependent = (boolean)this._newAttributeValue; }
-        @Override
-        public void _undo() { this._node._isIndependent = (boolean)this._oldAttributeValue; }
+        @Override public void _execute() { ((ObjectType)this._diagramElement)._isIndependent = (boolean)this._newAttributeValue; }
+        @Override public void _undo()    { ((ObjectType)this._diagramElement)._isIndependent = (boolean)this._oldAttributeValue; }
     }
 }

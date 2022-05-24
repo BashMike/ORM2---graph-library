@@ -1,35 +1,27 @@
 package com.orm2_graph_library.core;
 
-import com.orm2_graph_library.anchor_points.AnchorPosition;
-import com.orm2_graph_library.anchor_points.NodeAnchorPoint;
-import com.orm2_graph_library.edges.SubtypingRelationEdge;
-import com.orm2_graph_library.nodes.predicates.Predicate;
-import com.orm2_graph_library.nodes.predicates.RolesSequence;
+import com.orm2_graph_library.utils.Point2D;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-// TODO - @add :: Add storage of all sizes and distances.
-// TODO - @add :: Add SHAPE class (GEOMETRY class has information about size, position and type of diagram element's figure).
-// TODO - @add :: SHAPE class must have method for getting its geometry approximation.
 public abstract class Node extends DiagramElement {
     // ================ ATTRIBUTES ================
     protected Shape _shape   = null;
-    protected Point _leftTop = new Point(0, 0);
+    protected Point2D _leftTop = new Point2D(0, 0);
 
     // ================ OPERATIONS ================
     // ----------------- creating -----------------
     public Node() {}
 
     // ---------------- attributes ----------------
-    public Point borderLeftTop()     { return new Point(this._leftTop.x, this._leftTop.y); }
-    public Point borderLeftBottom()  { return new Point(this.borderLeftTop().x,                      this.borderLeftTop().y + this.borderHeight()); }
-    public Point borderRightTop()    { return new Point(this.borderLeftTop().x + this.borderWidth(), this.borderLeftTop().y); }
-    public Point borderRightBottom() { return new Point(this.borderLeftTop().x + this.borderWidth(), this.borderLeftTop().y + this.borderHeight()); }
+    // * Geometry
+    public Point2D borderLeftTop()     { return new Point2D(this._leftTop.x, this._leftTop.y); }
+    public Point2D borderLeftBottom()  { return new Point2D(this.borderLeftTop().x,                      this.borderLeftTop().y + this.borderHeight()); }
+    public Point2D borderRightTop()    { return new Point2D(this.borderLeftTop().x + this.borderWidth(), this.borderLeftTop().y); }
+    public Point2D borderRightBottom() { return new Point2D(this.borderLeftTop().x + this.borderWidth(), this.borderLeftTop().y + this.borderHeight()); }
 
     abstract public int borderWidth();
     abstract public int borderHeight();
@@ -41,21 +33,20 @@ public abstract class Node extends DiagramElement {
 
     // ----------------- contract -----------------
     @Override
-    public <T extends DiagramElement> ArrayList<T> getIncidentElements(Class<T> elementType) {
-        ArrayList<T> result = new ArrayList<>();
+    public <T extends DiagramElement> Stream<T> getIncidentElements(Class<T> elementType) {
+        Stream<T> result = Stream.of();
 
         if (Edge.class.isAssignableFrom(elementType)) {
             result = this._ownerDiagram.getElements(elementType)
-                    .filter(e -> ((Edge)e).begin() == this || ((Edge)e).end() == this)
-                    .collect(Collectors.toCollection(ArrayList::new));
+                    .filter(e -> ((Edge)e).begin() == this || ((Edge)e).end() == this);
         }
         else if (Node.class.isAssignableFrom(elementType)) {
             for (Edge edge : this._ownerDiagram.getElements(Edge.class).collect(Collectors.toCollection(ArrayList::new))) {
                 if (edge.beginAnchorPoint().owner() == this && elementType.isAssignableFrom(edge.endAnchorPoint().owner().getClass())) {
-                    result.add((T)edge.end());
+                    result = Stream.concat(result, Stream.of((T)edge.end()));
                 }
                 if (edge.endAnchorPoint().owner() == this && elementType.isAssignableFrom(edge.beginAnchorPoint().getClass())) {
-                    result.add((T)edge.begin());
+                    result = Stream.concat(result, Stream.of((T)edge.begin()));
                 }
             }
         }
