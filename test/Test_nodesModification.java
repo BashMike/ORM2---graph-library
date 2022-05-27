@@ -1,5 +1,3 @@
-import com.orm2_graph_library.core.Diagram;
-import com.orm2_graph_library.core.DiagramElement;
 import com.orm2_graph_library.core.LogicError;
 import com.orm2_graph_library.logic_errors.EntityTypeWithNoneRefModeLogicError;
 import com.orm2_graph_library.logic_errors.RoleHasNoTextSetLogicError;
@@ -13,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import utils.Test_globalTest;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;

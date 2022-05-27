@@ -1,5 +1,7 @@
 package com.orm2_graph_library.nodes.common;
 
+import org.jetbrains.annotations.NotNull;
+
 public abstract class DataType {
     public String name() {
         String name = this.getClass().getSimpleName();
@@ -11,4 +13,7 @@ public abstract class DataType {
 
         return result;
     }
+
+    @Override
+    public boolean equals(@NotNull Object other) { return (this.getClass().equals(other.getClass())); }
 }

@@ -149,6 +149,32 @@ public class Test_diagramLogicErrors extends Test_globalTest {
     }
 
     @Test
+    void entityType_twoCycleConnectionByReconnection() {
+        // Prepare data and start testing
+        for (int i=0; i<5; i++) { test_addDiagramElement(this._diagram.addNode(new EntityType())); }
+
+        test_addDiagramElement(this._diagram.connectBySubtypingRelation(test_entityTypes.get(0).centerAnchorPoint(), test_entityTypes.get(1).centerAnchorPoint()));
+        test_addDiagramElement(this._diagram.connectBySubtypingRelation(test_entityTypes.get(1).centerAnchorPoint(), test_entityTypes.get(2).centerAnchorPoint()));
+        SubtypingRelationEdge edge0 = this._diagram.connectBySubtypingRelation(test_entityTypes.get(2).centerAnchorPoint(), test_entityTypes.get(0).centerAnchorPoint());
+
+        test_addDiagramElement(this._diagram.connectBySubtypingRelation(test_entityTypes.get(3).centerAnchorPoint(), test_entityTypes.get(4).centerAnchorPoint()));
+        SubtypingRelationEdge edge1 = this._diagram.connectBySubtypingRelation(test_entityTypes.get(4).centerAnchorPoint(), test_entityTypes.get(3).centerAnchorPoint());
+
+        test_addDiagramElement(this._diagram.reconnectSubtypingRelation(test_entityTypes.get(4).centerAnchorPoint(), edge0));
+        test_addDiagramElement(this._diagram.reconnectSubtypingRelation(test_entityTypes.get(2).centerAnchorPoint(), edge1));
+
+        // Check result
+        ArrayList<EntityType> entityTypeCycle = new ArrayList<>(List.of(test_entityTypes.get(2), test_entityTypes.get(3), test_entityTypes.get(4), test_entityTypes.get(0), test_entityTypes.get(1)));
+        for (var entityType : test_entityTypes) {
+            test_entityTypesLogicErrors.put(entityType, new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(entityType), new SubtypingCycleLogicError(entityTypeCycle))));
+        }
+
+        for (var subtypingRelationEdge : test_subtypingRelationEdges) {
+            test_subtypingRelationEdgesLogicErrors.put(subtypingRelationEdge, new HashSet<>(List.of(new SubtypingCycleLogicError(entityTypeCycle))));
+        }
+    }
+
+    @Test
     void subtypingRelation_simpleCycle() {
         // Prepare data and start testing
         for (int i=0; i<5; i++) { test_addDiagramElement(this._diagram.addNode(new EntityType())); }

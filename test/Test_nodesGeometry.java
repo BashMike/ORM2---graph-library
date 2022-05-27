@@ -9,6 +9,7 @@ import com.orm2_graph_library.edges.SubtypingRelationEdge;
 import com.orm2_graph_library.logic_errors.ConstraintHasNotEnoughConnectsLogicError;
 import com.orm2_graph_library.logic_errors.EntityTypeWithNoneRefModeLogicError;
 import com.orm2_graph_library.logic_errors.RoleHasNoTextSetLogicError;
+import com.orm2_graph_library.logic_errors.ValueTypeWithNoneDataTypeLogicError;
 import com.orm2_graph_library.nodes.common.EntityType;
 import com.orm2_graph_library.nodes.common.ValueType;
 import com.orm2_graph_library.nodes.constraints.Constraint;
@@ -45,6 +46,7 @@ public class Test_nodesGeometry extends Test_globalTest {
     @AfterEach
     private void testEnd_nodesGeometry() {
         for (EntityType entityType : test_entityTypes) { test_entityTypesLogicErrors.put(entityType, new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(entityType)))); }
+        for (ValueType valueType : test_valueTypes) { test_valueTypesLogicErrors.put(valueType, new HashSet<>(List.of(new ValueTypeWithNoneDataTypeLogicError(valueType)))); }
 
         ArrayList<DiagramElement> diagramElements = new ArrayList<>();
         diagramElements.addAll(test_entityTypes);

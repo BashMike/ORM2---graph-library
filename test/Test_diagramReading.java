@@ -1,19 +1,17 @@
 import com.orm2_graph_library.anchor_points.AnchorPosition;
-import com.orm2_graph_library.core.Diagram;
-import com.orm2_graph_library.core.Edge;
 import com.orm2_graph_library.core.LogicError;
 import com.orm2_graph_library.edges.RoleRelationEdge;
-import com.orm2_graph_library.edges.SubtypingRelationEdge;
-import com.orm2_graph_library.logic_errors.ConstraintHasExtraConnectsLogicError;
-import com.orm2_graph_library.logic_errors.EntityTypeWithNoneRefModeLogicError;
-import com.orm2_graph_library.logic_errors.RoleHasNoTextSetLogicError;
+import com.orm2_graph_library.logic_errors.*;
 import com.orm2_graph_library.nodes.common.EntityType;
 import com.orm2_graph_library.nodes.common.ObjectType;
 import com.orm2_graph_library.nodes.common.ValueType;
 import com.orm2_graph_library.nodes.constraints.Constraint;
 import com.orm2_graph_library.nodes.constraints.SubsetConstraint;
 import com.orm2_graph_library.nodes.constraints.UniquenessConstraint;
-import com.orm2_graph_library.nodes.predicates.*;
+import com.orm2_graph_library.nodes.predicates.ObjectifiedPredicate;
+import com.orm2_graph_library.nodes.predicates.Predicate;
+import com.orm2_graph_library.nodes.predicates.Role;
+import com.orm2_graph_library.nodes.predicates.RolesSequence;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import utils.Test_globalTest;
@@ -65,6 +63,7 @@ public class Test_diagramReading extends Test_globalTest {
 
         // Check result
         for (EntityType entityType : test_entityTypes) { test_entityTypesLogicErrors.put(entityType, new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(entityType)))); }
+        for (ValueType valueType : test_valueTypes) { test_valueTypesLogicErrors.put(valueType, new HashSet<>(List.of(new ValueTypeWithNoneDataTypeLogicError(valueType)))); }
 
         for (Predicate predicate : test_predicates) {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
@@ -103,8 +102,6 @@ public class Test_diagramReading extends Test_globalTest {
                 .filter(e -> e.hasIncidentElements(UniquenessConstraint.class))
                 .collect(Collectors.toCollection(HashSet::new));
 
-        ArrayList<LogicError> logicErrors = this._diagram.getLogicErrorsFor(test_constraints.get(0)).collect(Collectors.toCollection(ArrayList::new));
-
         // Check result
         Set<RolesSequence> exp_rolesSequences = new HashSet<>();
         exp_rolesSequences.add(test_predicates.get(0).rolesSequence(0, 1));
@@ -121,6 +118,20 @@ public class Test_diagramReading extends Test_globalTest {
                 test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
             }
         }
+
+        ArrayList<LogicError> logicErrors = new ArrayList<>();
+        logicErrors.add(new RolesSequencesOfSamePredicateAreConstrainedLogicError(test_constraints.get(0), new ArrayList<>(List.of(test_roleConstraintRelationEdges.get(0), test_roleConstraintRelationEdges.get(1)))));
+        logicErrors.add(new TwoOrMoreRolesSequencesWithIncompatibleSizeAreConnectedLogicError(test_constraints.get(0), new ArrayList<>(List.of(test_roleConstraintRelationEdges.get(0), test_roleConstraintRelationEdges.get(1)))));
+        logicErrors.add(new TwoOrMoreRolesSequencesWithIncompatibleSizeAreConnectedLogicError(test_constraints.get(1), new ArrayList<>(List.of(test_roleConstraintRelationEdges.get(2), test_roleConstraintRelationEdges.get(3), test_roleConstraintRelationEdges.get(4)))));
+
+        test_constraintsLogicErrors.put(test_constraints.get(0), new HashSet<>(List.of(logicErrors.get(0), logicErrors.get(1))));
+        test_roleConstraintRelationEdgesLogicErrors.put(test_roleConstraintRelationEdges.get(0), new HashSet<>(List.of(logicErrors.get(0), logicErrors.get(1))));
+        test_roleConstraintRelationEdgesLogicErrors.put(test_roleConstraintRelationEdges.get(1), new HashSet<>(List.of(logicErrors.get(0), logicErrors.get(1))));
+
+        test_constraintsLogicErrors.put(test_constraints.get(1), new HashSet<>(List.of(logicErrors.get(2))));
+        test_roleConstraintRelationEdgesLogicErrors.put(test_roleConstraintRelationEdges.get(2), new HashSet<>(List.of(logicErrors.get(2))));
+        test_roleConstraintRelationEdgesLogicErrors.put(test_roleConstraintRelationEdges.get(3), new HashSet<>(List.of(logicErrors.get(2))));
+        test_roleConstraintRelationEdgesLogicErrors.put(test_roleConstraintRelationEdges.get(4), new HashSet<>(List.of(logicErrors.get(2))));
     }
 
     // ----------------- PREDICATES -----------------
@@ -168,6 +179,7 @@ public class Test_diagramReading extends Test_globalTest {
         Assertions.assertEquals(exp_predicates, real_predicates);
 
         for (EntityType entityType : test_entityTypes) { test_entityTypesLogicErrors.put(entityType, new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(entityType)))); }
+        for (ValueType valueType : test_valueTypes) { test_valueTypesLogicErrors.put(valueType, new HashSet<>(List.of(new ValueTypeWithNoneDataTypeLogicError(valueType)))); }
 
         for (Predicate predicate : test_predicates) {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
@@ -222,6 +234,7 @@ public class Test_diagramReading extends Test_globalTest {
         Assertions.assertEquals(exp_predicates, real_predicates);
 
         for (EntityType entityType : test_entityTypes) { test_entityTypesLogicErrors.put(entityType, new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(entityType)))); }
+        for (ValueType valueType : test_valueTypes) { test_valueTypesLogicErrors.put(valueType, new HashSet<>(List.of(new ValueTypeWithNoneDataTypeLogicError(valueType)))); }
 
         for (Predicate predicate : test_predicates) {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
@@ -278,6 +291,7 @@ public class Test_diagramReading extends Test_globalTest {
         Assertions.assertEquals(exp_predicates, real_predicates);
 
         for (EntityType entityType : test_entityTypes) { test_entityTypesLogicErrors.put(entityType, new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(entityType)))); }
+        for (ValueType valueType : test_valueTypes) { test_valueTypesLogicErrors.put(valueType, new HashSet<>(List.of(new ValueTypeWithNoneDataTypeLogicError(valueType)))); }
 
         for (Predicate predicate : test_predicates) {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
@@ -306,13 +320,8 @@ public class Test_diagramReading extends Test_globalTest {
         test_addDiagramElement(this._diagram.connectByRoleRelation(test_predicates.get(0).getRole(0).anchorPoint(AnchorPosition.LEFT),  test_entityTypes.get(0).centerAnchorPoint()));
         test_addDiagramElement(this._diagram.connectByRoleRelation(test_predicates.get(1).getRole(1).anchorPoint(AnchorPosition.UP),    test_valueTypes.get(0).centerAnchorPoint()));
         test_addDiagramElement(this._diagram.connectByRoleRelation(test_predicates.get(0).getRole(2).anchorPoint(AnchorPosition.RIGHT), test_entityTypes.get(1).centerAnchorPoint()));
-
         test_addDiagramElement(this._diagram.connectByRoleRelation(test_objectifiedPredicates.get(0).innerPredicate().getRole(0).anchorPoint(AnchorPosition.LEFT),  test_entityTypes.get(0).centerAnchorPoint()));
-        test_addDiagramElement(this._diagram.connectByRoleRelation(test_objectifiedPredicates.get(0).innerPredicate().getRole(1).anchorPoint(AnchorPosition.DOWN),  test_entityTypes.get(1).centerAnchorPoint()));
         test_addDiagramElement(this._diagram.connectByRoleRelation(test_objectifiedPredicates.get(0).innerPredicate().getRole(2).anchorPoint(AnchorPosition.RIGHT), test_valueTypes.get(0).centerAnchorPoint()));
-
-        test_addDiagramElement(this._diagram.connectByRoleRelation(test_predicates.get(1).getRole(0).anchorPoint(AnchorPosition.LEFT),  test_entityTypes.get(1).centerAnchorPoint()));
-        test_addDiagramElement(this._diagram.connectByRoleRelation(test_predicates.get(1).getRole(2).anchorPoint(AnchorPosition.RIGHT), test_valueTypes.get(1).centerAnchorPoint()));
 
         test_addDiagramElement(this._diagram.connectByRoleConstraintRelation(test_constraints.get(0).centerAnchorPoint(), test_predicates.get(0).rolesSequence(0, 1)));
         test_addDiagramElement(this._diagram.connectByRoleConstraintRelation(test_constraints.get(0).centerAnchorPoint(), test_objectifiedPredicates.get(0).innerPredicate().rolesSequence(0, 2)));
@@ -334,6 +343,7 @@ public class Test_diagramReading extends Test_globalTest {
         Assertions.assertEquals(exp_predicates, real_predicates);
 
         for (EntityType entityType : test_entityTypes) { test_entityTypesLogicErrors.put(entityType, new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(entityType)))); }
+        for (ValueType valueType : test_valueTypes) { test_valueTypesLogicErrors.put(valueType, new HashSet<>(List.of(new ValueTypeWithNoneDataTypeLogicError(valueType)))); }
 
         for (Predicate predicate : test_predicates) {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {

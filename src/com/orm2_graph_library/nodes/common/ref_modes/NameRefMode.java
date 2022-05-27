@@ -1,4 +1,8 @@
 package com.orm2_graph_library.nodes.common.ref_modes;
 
-public class NameRefMode {
+import com.orm2_graph_library.nodes.common.RefMode;
+import com.orm2_graph_library.nodes.common.data_types.IntegerDataType;
+import com.orm2_graph_library.nodes.common.data_types.TextDataType;
+
+public class NameRefMode extends RefMode {
 }

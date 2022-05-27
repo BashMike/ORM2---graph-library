@@ -1,12 +1,10 @@
 import com.orm2_graph_library.core.DiagramElement;
-import com.orm2_graph_library.core.Edge;
 import com.orm2_graph_library.core.LogicError;
-import com.orm2_graph_library.edges.RoleConstraintRelationEdge;
 import com.orm2_graph_library.logic_errors.ConstraintHasNotEnoughConnectsLogicError;
 import com.orm2_graph_library.logic_errors.EntityTypeWithNoneRefModeLogicError;
 import com.orm2_graph_library.logic_errors.RoleHasNoTextSetLogicError;
+import com.orm2_graph_library.logic_errors.ValueTypeWithNoneDataTypeLogicError;
 import com.orm2_graph_library.nodes.common.EntityType;
-import com.orm2_graph_library.nodes.common.RefMode;
 import com.orm2_graph_library.nodes.common.ValueType;
 import com.orm2_graph_library.nodes.common.ref_modes.NoneRefMode;
 import com.orm2_graph_library.nodes.constraints.*;
@@ -28,6 +26,7 @@ class Test_nodesLifeCycle extends Test_globalTest {
     @AfterEach
     private void testEnd_nodesLifeCycle() {
         for (EntityType entityType : test_entityTypes) { test_entityTypesLogicErrors.computeIfAbsent(entityType, k -> new HashSet<>()).add(new EntityTypeWithNoneRefModeLogicError(entityType)); }
+        for (ValueType valueType : test_valueTypes) { test_valueTypesLogicErrors.put(valueType, new HashSet<>(List.of(new ValueTypeWithNoneDataTypeLogicError(valueType)))); }
         for (Constraint constraint : test_constraints) { test_constraintsLogicErrors.computeIfAbsent(constraint, k -> new HashSet<>()).add(new ConstraintHasNotEnoughConnectsLogicError(constraint, new ArrayList<>())); }
 
         for (Predicate predicate : test_predicates) {

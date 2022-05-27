@@ -2,6 +2,7 @@ package com.orm2_graph_library.nodes.predicates;
 
 import com.orm2_graph_library.anchor_points.RolesSequenceAnchorPoint;
 import com.orm2_graph_library.core.*;
+import com.orm2_graph_library.nodes.constraints.UniquenessConstraint;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -42,7 +43,14 @@ public class RolesSequence extends DiagramElement {
     public Stream<Role> roles() { return this._roles.stream(); }
 
     // * Uniqueness
-    public boolean isUnique() { return this._roles.get(0).ownerPredicate().isRolesSequenceUnique(this); }
+    public boolean isUnique() {
+        if (this._roles.get(0).ownerPredicate().isRolesSequenceUnique(this)) {
+            return true;
+        }
+        else {
+            return this.hasIncidentElements(UniquenessConstraint.class);
+        }
+    }
 
     // * Anchor points
     public AnchorPoint<RolesSequence> anchorPoint() { return new RolesSequenceAnchorPoint(this); }

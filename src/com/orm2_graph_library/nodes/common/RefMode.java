@@ -1,21 +1,19 @@
 package com.orm2_graph_library.nodes.common;
 
-import com.orm2_graph_library.nodes.common.ref_modes.NoneRefMode;
-
-import java.util.ArrayList;
+import org.jetbrains.annotations.NotNull;
 
 public abstract class RefMode {
-    private EntityType            _ownerEntityType     = null;
-    protected DataType            _currentDataType     = null;
-    protected ArrayList<DataType> _acceptableDataTypes = new ArrayList<>();
+    public String name() {
+        String name = this.getClass().getSimpleName();
 
-    public ArrayList<DataType> acceptableDataTypes() { return new ArrayList<>(this._acceptableDataTypes); }
+        String result = Character.toString(name.charAt(0));
+        for (int i=1; i < name.length(); i++) {
+            result += (Character.isUpperCase(name.charAt(i)) ? " " + Character.toLowerCase(name.charAt(i)) : name.charAt(i));
+        }
 
-    public DataType dataType() { return this._currentDataType; }
-    // public void setDataType(DataType dataType) { this._currentDataType = (DataType)dataType.clone(); }
-    public void setDataType(DataType dataType) { this._currentDataType = dataType; }
-
-    void _setOwnerEntityType(EntityType entityType) {
-        this._ownerEntityType = entityType;
+        return result;
     }
+
+    @Override
+    public boolean equals(@NotNull Object other) { return (this.getClass().equals(other.getClass())); }
 }

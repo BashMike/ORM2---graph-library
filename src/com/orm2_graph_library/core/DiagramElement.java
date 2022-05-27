@@ -51,6 +51,7 @@ public abstract class DiagramElement {
 
     // * Logic errors
     public<T extends LogicError> Stream<T> getLogicErrors(@NotNull Class<T> logicErrorsType) { return this._ownerDiagram.getLogicErrorsFor(this).filter(e -> logicErrorsType.isAssignableFrom(e.getClass())).map(e -> (T)e); }
+    public<T extends LogicError> boolean hasLogicErrors(@NotNull Class<T> logicErrorsType) { return this._ownerDiagram.getLogicErrorsFor(this).anyMatch(e -> logicErrorsType.isAssignableFrom(e.getClass())); }
 
     // * Geometry
     abstract public GeometryApproximation geometryApproximation();

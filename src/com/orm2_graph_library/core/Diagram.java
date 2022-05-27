@@ -1,8 +1,6 @@
 package com.orm2_graph_library.core;
 
-import com.orm2_graph_library.action_errors.DiagramElementSelfConnectedActionError;
-import com.orm2_graph_library.action_errors.DoubleConnectionActionError;
-import com.orm2_graph_library.action_errors.ObjectifiedPredicateIsConnectedToItsInnerPredicateActionError;
+import com.orm2_graph_library.action_errors.*;
 import com.orm2_graph_library.edges.RoleConstraintRelationEdge;
 import com.orm2_graph_library.edges.RoleRelationEdge;
 import com.orm2_graph_library.edges.SubtypingConstraintRelationEdge;
@@ -10,6 +8,7 @@ import com.orm2_graph_library.edges.SubtypingRelationEdge;
 import com.orm2_graph_library.logic_errors.ConstraintHasNotEnoughConnectsLogicError;
 import com.orm2_graph_library.logic_errors.EntityTypeWithNoneRefModeLogicError;
 import com.orm2_graph_library.logic_errors.RoleHasNoTextSetLogicError;
+import com.orm2_graph_library.logic_errors.ValueTypeWithNoneDataTypeLogicError;
 import com.orm2_graph_library.nodes.common.EntityType;
 import com.orm2_graph_library.nodes.common.ValueType;
 import com.orm2_graph_library.nodes.constraints.*;
@@ -24,7 +23,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -246,43 +244,43 @@ public class Diagram implements Serializable {
         }
     }
 
-    public <T extends EntityType> SubtypingRelationEdge reconnectBySubtypingRelation(AnchorPoint<T> beginEntityTypeAnchorPoint, SubtypingRelationEdge edge) {
-        this._actionManager.executeAction(new ReconnectBySubtypingRelationAction(this, (AnchorPoint<EntityType>)beginEntityTypeAnchorPoint, edge));
+    public <T extends EntityType> SubtypingRelationEdge reconnectSubtypingRelation(AnchorPoint<T> beginEntityTypeAnchorPoint, SubtypingRelationEdge edge) {
+        this._actionManager.executeAction(new ReconnectSubtypingRelationAction(this, (AnchorPoint<EntityType>)beginEntityTypeAnchorPoint, edge));
         return edge;
     }
 
-    public <T extends EntityType> SubtypingRelationEdge reconnectBySubtypingRelation(SubtypingRelationEdge edge, AnchorPoint<T> endEntityTypeAnchorPoint) {
-        this._actionManager.executeAction(new ReconnectBySubtypingRelationAction(this, edge, (AnchorPoint<EntityType>)endEntityTypeAnchorPoint));
+    public <T extends EntityType> SubtypingRelationEdge reconnectSubtypingRelation(SubtypingRelationEdge edge, AnchorPoint<T> endEntityTypeAnchorPoint) {
+        this._actionManager.executeAction(new ReconnectSubtypingRelationAction(this, edge, (AnchorPoint<EntityType>)endEntityTypeAnchorPoint));
         return edge;
     }
 
-    public <T extends Role> RoleRelationEdge reconnectByRoleRelation(AnchorPoint<T> roleAnchorPoint, RoleRelationEdge edge) {
-        this._actionManager.executeAction(new ReconnectByRoleRelationAction(this, (AnchorPoint<Role>)roleAnchorPoint, edge));
+    public <T extends Role> RoleRelationEdge reconnectRoleRelation(AnchorPoint<T> roleAnchorPoint, RoleRelationEdge edge) {
+        this._actionManager.executeAction(new ReconnectRoleRelationAction(this, (AnchorPoint<Role>)roleAnchorPoint, edge));
         return edge;
     }
 
-    public <T extends RoleParticipant> RoleRelationEdge reconnectByRoleRelation(RoleRelationEdge edge, AnchorPoint<T> roleParticipantAnchorPoint) {
-        this._actionManager.executeAction(new ReconnectByRoleRelationAction(this, edge, (AnchorPoint<RoleParticipant>)roleParticipantAnchorPoint));
+    public <T extends RoleParticipant> RoleRelationEdge reconnectRoleRelation(RoleRelationEdge edge, AnchorPoint<T> roleParticipantAnchorPoint) {
+        this._actionManager.executeAction(new ReconnectRoleRelationAction(this, edge, (AnchorPoint<RoleParticipant>)roleParticipantAnchorPoint));
         return edge;
     }
 
-    public <T extends Constraint, G extends SubtypingRelationEdge> SubtypingConstraintRelationEdge reconnectBySubtypingConstraintRelation(AnchorPoint<T> constraintAnchorPoint, SubtypingConstraintRelationEdge edge) {
-        this._actionManager.executeAction(new ReconnectBySubtypingConstraintRelationAction(this, (AnchorPoint<Constraint>)constraintAnchorPoint, edge));
+    public <T extends Constraint, G extends SubtypingRelationEdge> SubtypingConstraintRelationEdge reconnectSubtypingConstraintRelation(AnchorPoint<T> constraintAnchorPoint, SubtypingConstraintRelationEdge edge) {
+        this._actionManager.executeAction(new ReconnectSubtypingConstraintRelationAction(this, (AnchorPoint<Constraint>)constraintAnchorPoint, edge));
         return edge;
     }
 
-    public <T extends SubtypingRelationEdge> SubtypingConstraintRelationEdge reconnectBySubtypingConstraintRelation(SubtypingConstraintRelationEdge edge, AnchorPoint<T> subtypingRelationEdgeAnchorPoint) {
-        this._actionManager.executeAction(new ReconnectBySubtypingConstraintRelationAction(this, edge, (AnchorPoint<SubtypingRelationEdge>)subtypingRelationEdgeAnchorPoint));
+    public <T extends SubtypingRelationEdge> SubtypingConstraintRelationEdge reconnectSubtypingConstraintRelation(SubtypingConstraintRelationEdge edge, AnchorPoint<T> subtypingRelationEdgeAnchorPoint) {
+        this._actionManager.executeAction(new ReconnectSubtypingConstraintRelationAction(this, edge, (AnchorPoint<SubtypingRelationEdge>)subtypingRelationEdgeAnchorPoint));
         return edge;
     }
 
-    public <T extends Constraint> RoleConstraintRelationEdge reconnectByRoleConstraintRelation(AnchorPoint<T> constraintAnchorPoint, RoleConstraintRelationEdge edge) {
-        this._actionManager.executeAction(new ReconnectByRoleConstraintRelationAction(this, (AnchorPoint<Constraint>)constraintAnchorPoint, edge));
+    public <T extends Constraint> RoleConstraintRelationEdge reconnectRoleConstraintRelation(AnchorPoint<T> constraintAnchorPoint, RoleConstraintRelationEdge edge) {
+        this._actionManager.executeAction(new ReconnectRoleConstraintRelationAction(this, (AnchorPoint<Constraint>)constraintAnchorPoint, edge));
         return edge;
     }
 
-    public RoleConstraintRelationEdge reconnectByRoleConstraintRelation(RoleConstraintRelationEdge edge, RolesSequence rolesSequence) {
-        this._actionManager.executeAction(new ReconnectByRoleConstraintRelationAction(this, edge, rolesSequence.anchorPoint()));
+    public RoleConstraintRelationEdge reconnectRoleConstraintRelation(RoleConstraintRelationEdge edge, RolesSequence rolesSequence) {
+        this._actionManager.executeAction(new ReconnectRoleConstraintRelationAction(this, edge, rolesSequence.anchorPoint()));
         return edge;
     }
 
@@ -417,7 +415,10 @@ public class Diagram implements Serializable {
     }
 
     public class AddValueTypeAction extends AddNodeAction<ValueType> {
-        private AddValueTypeAction(Diagram diagram, @NotNull ValueType node) { super(diagram, node); }
+        private AddValueTypeAction(Diagram diagram, @NotNull ValueType node) {
+            super(diagram, node);
+            this._emergedLogicErrors.add(new ValueTypeWithNoneDataTypeLogicError(node));
+        }
     }
 
     public class AddPredicateAction extends AddNodeAction<Predicate> {
@@ -593,7 +594,11 @@ public class Diagram implements Serializable {
     public class ConnectBySubtypingRelationAction extends ConnectAction<EntityType, EntityType> {
         private ConnectBySubtypingRelationAction(@NotNull Diagram diagram, @NotNull SubtypingRelationEdge edge) {
             super(diagram, edge);
-            this._postValidators.add(new ConnectBySubtypingRelationPostValidator(diagram, this, edge.beginAnchorPoint().owner()));
+            this._postValidators.add(new ConnectBySubtypingRelationPostValidator(diagram, this, edge));
+
+            if (edge.begin().isIndependent()) {
+                this._throwActionError(new MakeIndependentEntityTypeBeInheritedActionError(edge.begin()));
+            }
         }
     }
 
@@ -603,6 +608,9 @@ public class Diagram implements Serializable {
 
             if (edge.end() instanceof ObjectifiedPredicate edgeEndConverted && edge.begin().ownerPredicate() == edgeEndConverted.innerPredicate()) {
                 this._throwActionError(new ObjectifiedPredicateIsConnectedToItsInnerPredicateActionError((ObjectifiedPredicate)edge.end()));
+            }
+            else if (edge.begin().hasIncidentElements(RoleRelationEdge.class)) {
+                this._throwActionError(new RoleHasTwoOrMoreRoleParticipantsActionError(edge.begin()));
             }
         }
     }
@@ -675,6 +683,7 @@ public class Diagram implements Serializable {
         private DisconnectSubtypingConstraintRelationAction(@NotNull Diagram diagram, @NotNull Constraint constraint, @NotNull SubtypingRelationEdge edge) {
             super(diagram, diagram.getConnectBySubtypingConstraintRelation(constraint, edge));
             this._postValidators.add(new DisconnectGlobalConstraintRelationPostValidator(diagram, this, constraint, this._edge));
+            this._postValidators.add(new DisconnectSubtypingConstraintRelationPostValidator(diagram, this, constraint, (SubtypingConstraintRelationEdge)this._edge));
         }
     }
 
@@ -685,6 +694,7 @@ public class Diagram implements Serializable {
         private DisconnectRoleConstraintRelationAction(@NotNull Diagram diagram, @NotNull Constraint constraint, @NotNull RolesSequence rolesSequence) {
             super(diagram, diagram.getConnectByRoleConstraintRelation(constraint, rolesSequence));
             this._postValidators.add(new DisconnectGlobalConstraintRelationPostValidator(diagram, this, constraint, this._edge));
+            this._postValidators.add(new DisconnectRoleConstraintRelationPostValidator(diagram, this, constraint, (RoleConstraintRelationEdge)this._edge));
 
             if (constraint instanceof SubsetConstraint) {
                 this._subsetConstraintEdges = constraint.getIncidentElements(RoleConstraintRelationEdge.class).filter(e -> e != this._edge).collect(Collectors.toCollection(ArrayList::new));
@@ -737,7 +747,7 @@ public class Diagram implements Serializable {
                             e.begin() == this._edge.end() && e.end() == this._newBeginAnchorPoint.owner())
                     .collect(Collectors.toCollection(ArrayList::new));
 
-            if (!existEdges.isEmpty() && !(existEdges.get(0) instanceof SubtypingRelationEdge && existEdges.get(0).isOppositeTo(this._edge))) {
+            if (!existEdges.isEmpty() && !(existEdges.get(0) instanceof SubtypingRelationEdge && existEdges.get(0).isOppositeTo(this._edge)) && edge.begin() != beginAnchorPoint.owner()) {
                 this._throwActionError(new DoubleConnectionActionError(this._edge.beginAnchorPoint().owner(), this._edge.endAnchorPoint().owner(), existEdges.get(0)));
             }
         }
@@ -763,7 +773,7 @@ public class Diagram implements Serializable {
                         e.begin() == this._newEndAnchorPoint.owner() && e.end() == this._edge.begin())
                     .collect(Collectors.toCollection(ArrayList::new));
 
-            if (!existEdges.isEmpty() && !(existEdges.get(0) instanceof SubtypingRelationEdge && existEdges.get(0).isOppositeTo(this._edge))) {
+            if (!existEdges.isEmpty() && !(existEdges.get(0) instanceof SubtypingRelationEdge && existEdges.get(0).isOppositeTo(this._edge)) && edge.end()!= endAnchorPoint.owner()) {
                 this._throwActionError(new DoubleConnectionActionError(this._edge.beginAnchorPoint().owner(), this._edge.endAnchorPoint().owner(), existEdges.get(0)));
             }
         }
@@ -771,46 +781,133 @@ public class Diagram implements Serializable {
         public Edge<T, G> edge() { return this._edge; }
 
         @Override public void _execute() {
-            if (this._newBeginAnchorPoint != null) {
-                this._edge._setBeginAnchorPoint(this._newBeginAnchorPoint);
-            }
-            else if (this._newEndAnchorPoint != null) {
-                this._edge._setEndAnchorPoint(this._newEndAnchorPoint);
-            }
+            this._diagram._removeElement(this._edge);
+
+            if      (this._newBeginAnchorPoint != null) { this._edge._setBeginAnchorPoint(this._newBeginAnchorPoint); }
+            else if (this._newEndAnchorPoint != null)   { this._edge._setEndAnchorPoint(this._newEndAnchorPoint); }
+
+            this._diagram._addElement(this._edge);
         }
 
         @Override public void _undo() {
-            if (this._newBeginAnchorPoint != null) {
-                this._edge._setBeginAnchorPoint(this._oldBeginAnchorPoint);
+            this._diagram._removeElement(this._edge);
+
+            if      (this._newBeginAnchorPoint != null) { this._edge._setBeginAnchorPoint(this._oldBeginAnchorPoint); }
+            else if (this._newEndAnchorPoint != null)   { this._edge._setEndAnchorPoint(this._oldEndAnchorPoint); }
+
+            this._diagram._addElement(this._edge);
+        }
+    }
+
+    public class ReconnectSubtypingRelationAction extends ReconnectAction<EntityType, EntityType> {
+        private ReconnectSubtypingRelationAction(@NotNull Diagram diagram, @NotNull AnchorPoint<EntityType> beginEntityTypeAnchorPoint, @NotNull SubtypingRelationEdge edge) {
+            super(diagram, beginEntityTypeAnchorPoint, edge);
+
+            this._postValidators.add(new DisconnectSubtypingRelationPostValidator(diagram, this, (SubtypingRelationEdge)this._edge));
+            this._edge._setBeginAnchorPoint(this._newBeginAnchorPoint);
+            this._postValidators.add(new ConnectBySubtypingRelationPostValidator(diagram, this, (SubtypingRelationEdge)this._edge));
+            this._edge._setBeginAnchorPoint(this._oldBeginAnchorPoint);
+        }
+
+        private ReconnectSubtypingRelationAction(@NotNull Diagram diagram, @NotNull SubtypingRelationEdge edge, @NotNull AnchorPoint<EntityType> endEntityTypeAnchorPoint) {
+            super(diagram, edge, endEntityTypeAnchorPoint);
+
+            this._postValidators.add(new DisconnectSubtypingRelationPostValidator(diagram, this, (SubtypingRelationEdge)this._edge));
+            this._edge._setEndAnchorPoint(this._newEndAnchorPoint);
+            this._postValidators.add(new ConnectBySubtypingRelationPostValidator(diagram, this, (SubtypingRelationEdge)this._edge));
+            this._edge._setEndAnchorPoint(this._oldEndAnchorPoint);
+        }
+    }
+
+    public class ReconnectRoleRelationAction extends ReconnectAction<Role, RoleParticipant> {
+        private ReconnectRoleRelationAction(@NotNull Diagram diagram, @NotNull AnchorPoint<Role> roleAnchorPoint, @NotNull RoleRelationEdge edge) {
+            super(diagram, roleAnchorPoint, edge);
+
+            if (edge.end() instanceof ObjectifiedPredicate edgeEndConverted && roleAnchorPoint.owner().ownerPredicate() == edgeEndConverted.innerPredicate()) {
+                this._throwActionError(new ObjectifiedPredicateIsConnectedToItsInnerPredicateActionError((ObjectifiedPredicate)edge.end()));
             }
-            else if (this._newEndAnchorPoint != null) {
-                this._edge._setEndAnchorPoint(this._oldEndAnchorPoint);
+            else if (roleAnchorPoint.owner().hasIncidentElements(RoleRelationEdge.class)) {
+                this._throwActionError(new RoleHasTwoOrMoreRoleParticipantsActionError(edge.begin()));
+            }
+        }
+
+        private ReconnectRoleRelationAction(@NotNull Diagram diagram, @NotNull RoleRelationEdge edge, @NotNull AnchorPoint<RoleParticipant> roleParticipantAnchorPoint) {
+            super(diagram, edge, roleParticipantAnchorPoint);
+
+            if (roleParticipantAnchorPoint.owner() instanceof ObjectifiedPredicate edgeEndConverted && edge.begin().ownerPredicate() == edgeEndConverted.innerPredicate()) {
+                this._throwActionError(new ObjectifiedPredicateIsConnectedToItsInnerPredicateActionError(edgeEndConverted));
             }
         }
     }
 
-    public class ReconnectBySubtypingRelationAction extends ReconnectAction<EntityType, EntityType> {
-        private ReconnectBySubtypingRelationAction(@NotNull Diagram diagram, @NotNull AnchorPoint<EntityType> beginEntityTypeAnchorPoint, @NotNull SubtypingRelationEdge edge) { super(diagram, beginEntityTypeAnchorPoint, edge); }
-        private ReconnectBySubtypingRelationAction(@NotNull Diagram diagram, @NotNull SubtypingRelationEdge edge, @NotNull AnchorPoint<EntityType> endEntityTypeAnchorPoint)   { super(diagram, edge, endEntityTypeAnchorPoint); }
-    }
-
-    public class ReconnectByRoleRelationAction extends ReconnectAction<Role, RoleParticipant> {
-        private ReconnectByRoleRelationAction(@NotNull Diagram diagram, @NotNull AnchorPoint<Role> roleAnchorPoint, @NotNull RoleRelationEdge edge)                       { super(diagram, roleAnchorPoint, edge); }
-        private ReconnectByRoleRelationAction(@NotNull Diagram diagram, @NotNull RoleRelationEdge edge, @NotNull AnchorPoint<RoleParticipant> roleParticipantAnchorPoint) { super(diagram, edge, roleParticipantAnchorPoint); }
-    }
-
-    public class ReconnectBySubtypingConstraintRelationAction extends ReconnectAction<Constraint, SubtypingRelationEdge> {
-        private ReconnectBySubtypingConstraintRelationAction(@NotNull Diagram diagram, @NotNull AnchorPoint<Constraint> constraintAnchorPoint, @NotNull SubtypingConstraintRelationEdge edge)                       { super(diagram, constraintAnchorPoint, edge); }
-        private ReconnectBySubtypingConstraintRelationAction(@NotNull Diagram diagram, @NotNull SubtypingConstraintRelationEdge edge, @NotNull AnchorPoint<SubtypingRelationEdge> subtypingRelationEdgeAnchorPoint) { super(diagram, edge, subtypingRelationEdgeAnchorPoint); }
-    }
-
-    public class ReconnectByRoleConstraintRelationAction extends ReconnectAction<Constraint, RolesSequence> {
-        private ReconnectByRoleConstraintRelationAction(@NotNull Diagram diagram, @NotNull AnchorPoint<Constraint> constraintAnchorPoint, @NotNull RoleConstraintRelationEdge edge) {
+    public class ReconnectSubtypingConstraintRelationAction extends ReconnectAction<Constraint, SubtypingRelationEdge> {
+        private ReconnectSubtypingConstraintRelationAction(@NotNull Diagram diagram, @NotNull AnchorPoint<Constraint> constraintAnchorPoint, @NotNull SubtypingConstraintRelationEdge edge) {
             super(diagram, constraintAnchorPoint, edge);
+
+            this._postValidators.add(new DisconnectGlobalConstraintRelationPostValidator(diagram, this, this._edge.begin(), this._edge));
+            this._edge._setBeginAnchorPoint(this._newBeginAnchorPoint);
+            this._postValidators.add(new ConnectByGlobalConstraintRelationPostValidator(diagram, this, this._edge.begin(), this._edge));
+            this._postValidators.add(new ConnectBySubtypingConstraintRelationPostValidator(diagram, this, this._edge.begin(), (SubtypingConstraintRelationEdge)this._edge));
+            this._edge._setBeginAnchorPoint(this._oldBeginAnchorPoint);
         }
 
-        private ReconnectByRoleConstraintRelationAction(@NotNull Diagram diagram, @NotNull RoleConstraintRelationEdge edge, @NotNull AnchorPoint<RolesSequence> rolesSequenceAnchorPoint) {
+        private ReconnectSubtypingConstraintRelationAction(@NotNull Diagram diagram, @NotNull SubtypingConstraintRelationEdge edge, @NotNull AnchorPoint<SubtypingRelationEdge> subtypingRelationEdgeAnchorPoint) {
+            super(diagram, edge, subtypingRelationEdgeAnchorPoint);
+
+            this._postValidators.add(new DisconnectGlobalConstraintRelationPostValidator(diagram, this, this._edge.begin(), this._edge));
+            this._edge._setEndAnchorPoint(this._newEndAnchorPoint);
+            this._postValidators.add(new ConnectByGlobalConstraintRelationPostValidator(diagram, this, this._edge.begin(), this._edge));
+            this._postValidators.add(new ConnectBySubtypingConstraintRelationPostValidator(diagram, this, this._edge.begin(), (SubtypingConstraintRelationEdge)this._edge));
+            this._edge._setEndAnchorPoint(this._oldEndAnchorPoint);
+        }
+
+    }
+
+    public class ReconnectRoleConstraintRelationAction extends ReconnectAction<Constraint, RolesSequence> {
+        private ArrayList<RoleConstraintRelationEdge> _subsetConstraintEdges                = null;
+        private ArrayList<Boolean>                    _subsetConstraintEdgesOldIsEndingEdge = null;
+
+        private ReconnectRoleConstraintRelationAction(@NotNull Diagram diagram, @NotNull AnchorPoint<Constraint> constraintAnchorPoint, @NotNull RoleConstraintRelationEdge edge) {
+            super(diagram, constraintAnchorPoint, edge);
+
+            if (edge.begin() instanceof SubsetConstraint) {
+                this._subsetConstraintEdges = edge.begin().getIncidentElements(RoleConstraintRelationEdge.class).filter(e -> e != this._edge).collect(Collectors.toCollection(ArrayList::new));
+                this._subsetConstraintEdges.add((RoleConstraintRelationEdge)this._edge);
+
+                this._subsetConstraintEdgesOldIsEndingEdge = this._subsetConstraintEdges.stream().map(e -> e.isEndingEdge()).collect(Collectors.toCollection(ArrayList::new));
+            }
+
+            this._postValidators.add(new DisconnectGlobalConstraintRelationPostValidator(diagram, this, this._edge.begin(), this._edge));
+            this._edge._setBeginAnchorPoint(this._newBeginAnchorPoint);
+            this._postValidators.add(new ConnectByGlobalConstraintRelationPostValidator(diagram, this, this._edge.begin(), this._edge));
+            this._postValidators.add(new ConnectByRoleConstraintRelationPostValidator(diagram, this, this._edge.begin(), (RoleConstraintRelationEdge)this._edge));
+            this._edge._setBeginAnchorPoint(this._oldBeginAnchorPoint);
+        }
+
+        private ReconnectRoleConstraintRelationAction(@NotNull Diagram diagram, @NotNull RoleConstraintRelationEdge edge, @NotNull AnchorPoint<RolesSequence> rolesSequenceAnchorPoint) {
             super(diagram, edge, rolesSequenceAnchorPoint);
+
+            if (edge.begin() instanceof SubsetConstraint) {
+                this._subsetConstraintEdges = edge.begin().getIncidentElements(RoleConstraintRelationEdge.class).filter(e -> e != this._edge).collect(Collectors.toCollection(ArrayList::new));
+                this._subsetConstraintEdges.add((RoleConstraintRelationEdge)this._edge);
+
+                this._subsetConstraintEdgesOldIsEndingEdge = this._subsetConstraintEdges.stream().map(e -> e.isEndingEdge()).collect(Collectors.toCollection(ArrayList::new));
+            }
+
+            this._postValidators.add(new DisconnectGlobalConstraintRelationPostValidator(diagram, this, this._edge.begin(), this._edge));
+            this._edge._setEndAnchorPoint(this._newEndAnchorPoint);
+            this._postValidators.add(new ConnectByGlobalConstraintRelationPostValidator(diagram, this, this._edge.begin(), this._edge));
+            this._postValidators.add(new ConnectByRoleConstraintRelationPostValidator(diagram, this, this._edge.begin(), (RoleConstraintRelationEdge)this._edge));
+            this._edge._setEndAnchorPoint(this._oldEndAnchorPoint);
+        }
+
+        @Override
+        public void _undo() {
+            super._undo();
+
+            if (this._subsetConstraintEdges != null) {
+                for (int i=0; i<this._subsetConstraintEdges.size(); i++) { this._subsetConstraintEdges.get(i)._setIsEndingEdge(_subsetConstraintEdgesOldIsEndingEdge.get(i)); }
+            }
         }
     }
 
@@ -836,18 +933,18 @@ public class Diagram implements Serializable {
 
     X1	Уникальность имён среди узлов                                                               Узлы типа «Entity Type», «Value Type», «Objectified Predicate» должны иметь уникальные имена
 
-    2	Идентификаторы Entity Type                                                                  Узлы типа «Entity Type» должны иметь идентифицирующее значение, либо заданное через
+    X2	Идентификаторы Entity Type                                                                  Узлы типа «Entity Type» должны иметь идентифицирующее значение, либо заданное через
                                                                                                     Expand Ref Mode или Ref Mode, либо полученное от другого «Entity Type» узла путем соединения
                                                                                                     к ним через дугу «Subtype Connector»
 
-    3	Тип данных Value Type                                                                       Узлы типа «Value Type» должны иметь типы данных
+    X3	Тип данных Value Type                                                                       Узлы типа «Value Type» должны иметь типы данных
 
-    4	Ограничения на значение у Entity Type                                                       У узлов типа «Entity Type» и «Value Type» ограничения на возможные значения, если они заданы,
+    ##4	Ограничения на значение у Entity Type                                                       У узлов типа «Entity Type» и «Value Type» ограничения на возможные значения, если они заданы,
                                                                                                     должны соответствовать выбранному типу данных возможных значений
 
-    5	Задание предикатов                                                                          Узлы типа «N-nary Predicate» должны содержать описание предиката
+    X5	Задание предикатов                                                                          Узлы типа «N-nary Predicate» должны содержать описание предиката
 
-    6	Наследование идентифицирующего значения Entity Type только у одного Entity Type             Если задано несколько потомков у узла «Entity Type» через дугу «Subtype Connector»,
+  *  6	Наследование идентифицирующего значения Entity Type только у одного Entity Type             Если задано несколько потомков у узла «Entity Type» через дугу «Subtype Connector»,
                                                                                                     через которые есть данный узел может получить несколько типов идентифицирующего
                                                                                                     значения, то должна быть только одна дуга из этих дуг, у которой выставлен признак «Is Identification Path»
 
@@ -857,16 +954,16 @@ public class Diagram implements Serializable {
     X8	Ограничение на уникальность                                                                 Уникальность последовательности Role узлов должна быть задана либо через «External Uniqueness Constraint»,
                                                                                                     либо через указания у Predicate узла
 
-    9	Наследование только зависимых Entity Type                                                   Только узлы «Entity Type», у которых не выставлен признак «Is Independent» могут быть подтипом другого «Entity Type»
+    X9	Наследование только зависимых Entity Type                                                   Только узлы «Entity Type», у которых не выставлен признак «Is Independent» могут быть подтипом другого «Entity Type»
                                                                                                     посредством соединения с помощью дуги «Subtype Connector»
 
-    10	Взаимоисключающие друг друга потомки                                                        Узел «Entity Type» не может наследоваться от взаимоисключающих друг друга узлов «Entity Type». Иными словами,
+  * 10	Взаимоисключающие друг друга потомки                                                        Узел «Entity Type» не может наследоваться от взаимоисключающих друг друга узлов «Entity Type». Иными словами,
                                                                                                     результирующее множество объектов данного «Entity Type» не может быть пустым
 
-    11	Одновременное непосредственное наследование и опосредованное наследование Entity Type       Узел «Entity Type» наследоваться от другого узла «Entity Type» и непосредственно, и опосредованно
+  * 11	Одновременное непосредственное наследование и опосредованное наследование Entity Type       Узел «Entity Type» наследоваться от другого узла «Entity Type» и непосредственно, и опосредованно
                                                                                                     через другие узлы «Entity Type»
 
-    12	Связь Role узла с Entity Type, Value Type, Objectified Predicate                            Role узел должен иметь связь и только одну связь с узлом «Entity Type», «Value Type» или «Objectified Predicate»
+    X12	Связь Role узла с Entity Type, Value Type, Objectified Predicate                            Role узел должен иметь связь и только одну связь с узлом «Entity Type», «Value Type» или «Objectified Predicate»
 
     13	Ограничения на обязательность и исключение противоречат друг другу                          Не должно быть противоречий между ограничением у последовательности Role узлов на обязательность наличия и ограничением на исключение данной последовательности
 

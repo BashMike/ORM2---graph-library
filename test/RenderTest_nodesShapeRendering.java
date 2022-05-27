@@ -16,10 +16,8 @@ import com.orm2_graph_library.utils.Point2D;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.geom.Area;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
@@ -118,7 +116,7 @@ public class RenderTest_nodesShapeRendering extends JFrame implements MouseListe
         diagram.connectByRoleRelation(sp0.getRole(2).anchorPoint(AnchorPosition.LEFT),  op0.rightAnchorPoint());
         // diagram.connectByRoleRelation(sp1.getRole(2).anchorPoint(AnchorPosition.DOWN), op0.leftAnchorPoint());
 
-        diagram.reconnectBySubtypingRelation(e2.centerAnchorPoint(), se0);
+        diagram.reconnectSubtypingRelation(e2.centerAnchorPoint(), se0);
 
         // Modify diagram elements
         c0.moveBy(300, 100);

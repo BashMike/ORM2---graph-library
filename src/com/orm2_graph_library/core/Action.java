@@ -23,7 +23,6 @@ public abstract class Action {
     final public void execute() {
         this._diagram._actionManager.stopRecordingActions();
         this._execute();
-        this._diagram._actionManager.startRecordingActions();
 
         for (LogicError logicError : this._emergedLogicErrors) { this._diagram._addLogicError(logicError); }
         for (LogicError logicError : this._solvedLogicErrors)  { this._diagram._removeLogicError(logicError); }
@@ -32,6 +31,8 @@ public abstract class Action {
             for (PostValidator postValidator : this._postValidators) { postValidator.validate(); }
             this._wasValidated = true;
         }
+
+        this._diagram._actionManager.startRecordingActions();
     }
 
     final public void undo() {
