@@ -35,7 +35,7 @@ public class ObjectTypesNameDuplicationPostValidator extends PostValidator {
         ObjectTypesNameDuplicationLogicError oldSameNameLogicError = null;
         ObjectTypesNameDuplicationLogicError newSameNameLogicError = null;
 
-        for (LogicError logicError : this._diagram.logicErrors().toList()) {
+        for (LogicError logicError : this._diagram.logicErrors(LogicError.class).toList()) {
             if (logicError instanceof ObjectTypesNameDuplicationLogicError) {
                 if      (((ObjectTypesNameDuplicationLogicError)logicError).name().equals(this._oldName)) { oldSameNameLogicError = (ObjectTypesNameDuplicationLogicError)logicError; }
                 else if (((ObjectTypesNameDuplicationLogicError)logicError).name().equals(this._newName)) { newSameNameLogicError = (ObjectTypesNameDuplicationLogicError)logicError; }

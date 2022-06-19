@@ -11,8 +11,6 @@ import org.junit.jupiter.api.Test;
 import utils.Test_globalTest;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class Test_nodesModification extends Test_globalTest {
@@ -27,7 +25,7 @@ public class Test_nodesModification extends Test_globalTest {
 
         // Check result
         Assertions.assertEquals("Hello", test_entityTypes.get(0).name());
-        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
+        test_addLogicErrorTo(test_entityTypes.get(0), new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)));
     }
 
     @Test
@@ -40,7 +38,7 @@ public class Test_nodesModification extends Test_globalTest {
 
         // Check result
         Assertions.assertEquals(test_entityTypes.get(0).basicName() + " " + 1, test_entityTypes.get(0).name());
-        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
+        test_addLogicErrorTo(test_entityTypes.get(0), new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)));
     }
 
     @Test
@@ -51,7 +49,7 @@ public class Test_nodesModification extends Test_globalTest {
 
         // Check result
         Assertions.assertEquals("Hello", test_entityTypes.get(0).name());
-        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
+        test_addLogicErrorTo(test_entityTypes.get(0), new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)));
     }
 
     @Test
@@ -64,7 +62,7 @@ public class Test_nodesModification extends Test_globalTest {
 
         // Check result
         Assertions.assertEquals(test_entityTypes.get(0).basicName() + " " + 1, test_entityTypes.get(0).name());
-        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
+        test_addLogicErrorTo(test_entityTypes.get(0), new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)));
     }
 
     // * IsPersonal flag
@@ -76,7 +74,7 @@ public class Test_nodesModification extends Test_globalTest {
 
         // Check result
         Assertions.assertTrue(test_entityTypes.get(0).isPersonal());
-        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
+        test_addLogicErrorTo(test_entityTypes.get(0), new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)));
     }
 
     @Test
@@ -89,7 +87,7 @@ public class Test_nodesModification extends Test_globalTest {
 
         // Check result
         Assertions.assertFalse(test_entityTypes.get(0).isPersonal());
-        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
+        test_addLogicErrorTo(test_entityTypes.get(0), new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)));
     }
 
     @Test
@@ -100,7 +98,7 @@ public class Test_nodesModification extends Test_globalTest {
 
         // Check result
         Assertions.assertTrue(test_entityTypes.get(0).isPersonal());
-        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
+        test_addLogicErrorTo(test_entityTypes.get(0), new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)));
     }
 
     @Test
@@ -111,7 +109,7 @@ public class Test_nodesModification extends Test_globalTest {
 
         // Check result
         Assertions.assertTrue(test_entityTypes.get(0).isPersonal());
-        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
+        test_addLogicErrorTo(test_entityTypes.get(0), new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)));
     }
 
     // * IsIndependent flag
@@ -123,7 +121,7 @@ public class Test_nodesModification extends Test_globalTest {
 
         // Check result
         Assertions.assertTrue(test_entityTypes.get(0).isIndependent());
-        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
+        test_addLogicErrorTo(test_entityTypes.get(0), new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)));
     }
 
     @Test
@@ -136,7 +134,7 @@ public class Test_nodesModification extends Test_globalTest {
 
         // Check result
         Assertions.assertFalse(test_entityTypes.get(0).isIndependent());
-        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
+        test_addLogicErrorTo(test_entityTypes.get(0), new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)));
     }
 
     @Test
@@ -147,7 +145,7 @@ public class Test_nodesModification extends Test_globalTest {
 
         // Check result
         Assertions.assertTrue(test_entityTypes.get(0).isIndependent());
-        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
+        test_addLogicErrorTo(test_entityTypes.get(0), new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)));
     }
 
     @Test
@@ -160,7 +158,7 @@ public class Test_nodesModification extends Test_globalTest {
 
         // Check result
         Assertions.assertFalse(test_entityTypes.get(0).isIndependent());
-        test_entityTypesLogicErrors.put(test_entityTypes.get(0), new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)))));
+        test_addLogicErrorTo(test_entityTypes.get(0), new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)));
     }
 
     // TODO - @test :: Setting reference mode and data type for entity type.
@@ -209,8 +207,8 @@ public class Test_nodesModification extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -250,8 +248,8 @@ public class Test_nodesModification extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -286,8 +284,8 @@ public class Test_nodesModification extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -323,8 +321,8 @@ public class Test_nodesModification extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -360,8 +358,8 @@ public class Test_nodesModification extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -392,8 +390,8 @@ public class Test_nodesModification extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -435,15 +433,13 @@ public class Test_nodesModification extends Test_globalTest {
         test_predicates.get(0).getRole(2).setText("do");
 
         // Check result
-        LogicError logicError;
-
-        logicError = new RoleHasNoTextSetLogicError(test_predicates.get(0).getRole(1));
-        test_predicatesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(1).ownerPredicate(), k -> new HashSet<>()).add(logicError);
-        test_rolesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(1), k -> new HashSet<>()).add(logicError);
+        LogicError logicError = new RoleHasNoTextSetLogicError(test_predicates.get(0).getRole(1));
+        test_addLogicErrorTo(test_predicates.get(0).getRole(1).ownerPredicate(), logicError);
+        test_addLogicErrorTo(test_predicates.get(0).getRole(1), logicError);
 
         logicError = new RoleHasNoTextSetLogicError(test_predicates.get(0).getRole(3));
-        test_predicatesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(3).ownerPredicate(), k -> new HashSet<>()).add(logicError);
-        test_rolesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(3), k -> new HashSet<>()).add(logicError);
+        test_addLogicErrorTo(test_predicates.get(0).getRole(3).ownerPredicate(), logicError);
+        test_addLogicErrorTo(test_predicates.get(0).getRole(3), logicError);
     }
 
     @Test
@@ -461,8 +457,8 @@ public class Test_nodesModification extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -480,15 +476,13 @@ public class Test_nodesModification extends Test_globalTest {
         this._diagram.redoState();
 
         // Check result
-        LogicError logicError;
-
-        logicError = new RoleHasNoTextSetLogicError(test_predicates.get(0).getRole(1));
-        test_predicatesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(1).ownerPredicate(), k -> new HashSet<>()).add(logicError);
-        test_rolesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(1), k -> new HashSet<>()).add(logicError);
+        LogicError logicError = new RoleHasNoTextSetLogicError(test_predicates.get(0).getRole(1));
+        test_addLogicErrorTo(test_predicates.get(0).getRole(1).ownerPredicate(), logicError);
+        test_addLogicErrorTo(test_predicates.get(0).getRole(1), logicError);
 
         logicError = new RoleHasNoTextSetLogicError(test_predicates.get(0).getRole(3));
-        test_predicatesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(3).ownerPredicate(), k -> new HashSet<>()).add(logicError);
-        test_rolesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(3), k -> new HashSet<>()).add(logicError);
+        test_addLogicErrorTo(test_predicates.get(0).getRole(3).ownerPredicate(), logicError);
+        test_addLogicErrorTo(test_predicates.get(0).getRole(3), logicError);
     }
 
     @Test
@@ -505,15 +499,13 @@ public class Test_nodesModification extends Test_globalTest {
         test_predicates.get(0).getRole(3).setText("is");
 
         // Check result
-        LogicError logicError;
-
-        logicError = new RoleHasNoTextSetLogicError(test_predicates.get(0).getRole(0));
-        test_predicatesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(0).ownerPredicate(), k -> new HashSet<>()).add(logicError);
-        test_rolesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(0), k -> new HashSet<>()).add(logicError);
+        LogicError logicError = new RoleHasNoTextSetLogicError(test_predicates.get(0).getRole(0));
+        test_addLogicErrorTo(test_predicates.get(0).getRole(0).ownerPredicate(), logicError);
+        test_addLogicErrorTo(test_predicates.get(0).getRole(0), logicError);
 
         logicError = new RoleHasNoTextSetLogicError(test_predicates.get(0).getRole(2));
-        test_predicatesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(2).ownerPredicate(), k -> new HashSet<>()).add(logicError);
-        test_rolesLogicErrors.computeIfAbsent(test_predicates.get(0).getRole(2), k -> new HashSet<>()).add(logicError);
+        test_addLogicErrorTo(test_predicates.get(0).getRole(2).ownerPredicate(), logicError);
+        test_addLogicErrorTo(test_predicates.get(0).getRole(2), logicError);
     }
 
     /*
@@ -673,8 +665,8 @@ public class Test_nodesModification extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -694,8 +686,8 @@ public class Test_nodesModification extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -717,8 +709,8 @@ public class Test_nodesModification extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -736,8 +728,8 @@ public class Test_nodesModification extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -773,8 +765,8 @@ public class Test_nodesModification extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -810,8 +802,8 @@ public class Test_nodesModification extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -835,8 +827,8 @@ public class Test_nodesModification extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -860,8 +852,8 @@ public class Test_nodesModification extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -896,8 +888,8 @@ public class Test_nodesModification extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -917,8 +909,8 @@ public class Test_nodesModification extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -936,8 +928,8 @@ public class Test_nodesModification extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -957,8 +949,8 @@ public class Test_nodesModification extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -977,8 +969,8 @@ public class Test_nodesModification extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -998,8 +990,8 @@ public class Test_nodesModification extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -1017,8 +1009,8 @@ public class Test_nodesModification extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -1038,8 +1030,8 @@ public class Test_nodesModification extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }

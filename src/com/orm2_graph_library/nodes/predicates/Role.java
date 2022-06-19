@@ -1,11 +1,12 @@
 package com.orm2_graph_library.nodes.predicates;
 
 import com.orm2_graph_library.anchor_points.AnchorPosition;
-import com.orm2_graph_library.anchor_points.NodeAnchorPoint;
 import com.orm2_graph_library.anchor_points.RoleAnchorPoint;
-import com.orm2_graph_library.core.*;
+import com.orm2_graph_library.core.AnchorPoint;
+import com.orm2_graph_library.core.Diagram;
+import com.orm2_graph_library.core.DiagramElement;
+import com.orm2_graph_library.core.Node;
 import com.orm2_graph_library.logic_errors.RoleHasNoTextSetLogicError;
-import com.orm2_graph_library.nodes.common.EntityType;
 import com.orm2_graph_library.nodes_shapes.RectangleShape;
 import com.orm2_graph_library.utils.Point2D;
 import org.jetbrains.annotations.NotNull;
@@ -51,7 +52,7 @@ public class Role extends Node {
             return this._text;
         }
         else {
-            throw new RuntimeException("ERROR :: attempt to return text of role without text.");
+            throw new RuntimeException("ERROR :: an attempt to return text of role without text.");
         }
     }
 

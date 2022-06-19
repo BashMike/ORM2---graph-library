@@ -97,7 +97,7 @@ public class RenderTest_nodesShapeRendering extends JFrame implements MouseListe
         this._initDiagramElementsSizes(diagram);
 
         // Modify nodes
-        sp0.moveTo(new Point2D(200, 200));
+        sp0.moveTo(new Point2D(197, 197));
         sp0.setOrientation(DiagramElement.Orientation.VERTICAL);
         sp1.moveTo(new Point2D(20, 20));
 

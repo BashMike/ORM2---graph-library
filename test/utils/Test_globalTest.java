@@ -147,17 +147,56 @@ public class Test_globalTest {
     // ---------------- LOGIC ERRORS ----------------
     private Set<LogicError> test_expLogicErrors = new HashSet<>();
 
-    protected Map<EntityType, Set<LogicError>>           test_entityTypesLogicErrors           = new HashMap<>();
-    protected Map<ValueType, Set<LogicError>>            test_valueTypesLogicErrors            = new HashMap<>();
-    protected Map<Predicate, Set<LogicError>>            test_predicatesLogicErrors            = new HashMap<>();
-    protected Map<Role, Set<LogicError>>                 test_rolesLogicErrors                 = new HashMap<>();
-    protected Map<ObjectifiedPredicate, Set<LogicError>> test_objectifiedPredicatesLogicErrors = new HashMap<>();
-    protected Map<Constraint, Set<LogicError>>           test_constraintsLogicErrors           = new HashMap<>();
+    private Map<EntityType, Set<LogicError>>           test_entityTypesLogicErrors           = new HashMap<>();
+    private Map<ValueType, Set<LogicError>>            test_valueTypesLogicErrors            = new HashMap<>();
+    private Map<Predicate, Set<LogicError>>            test_predicatesLogicErrors            = new HashMap<>();
+    private Map<Role, Set<LogicError>>                 test_rolesLogicErrors                 = new HashMap<>();
+    private Map<ObjectifiedPredicate, Set<LogicError>> test_objectifiedPredicatesLogicErrors = new HashMap<>();
+    private Map<Constraint, Set<LogicError>>           test_constraintsLogicErrors           = new HashMap<>();
+    private Map<RolesSequence, Set<LogicError>>        test_rolesSequencesLogicErrors        = new HashMap<>();
 
-    protected Map<SubtypingRelationEdge, Set<LogicError>>           test_subtypingRelationEdgesLogicErrors           = new HashMap<>();
-    protected Map<RoleRelationEdge, Set<LogicError>>                test_roleRelationEdgesLogicErrors                = new HashMap<>();
-    protected Map<RoleConstraintRelationEdge, Set<LogicError>>      test_roleConstraintRelationEdgesLogicErrors      = new HashMap<>();
-    protected Map<SubtypingConstraintRelationEdge, Set<LogicError>> test_subtypingConstraintRelationEdgesLogicErrors = new HashMap<>();
+    private Map<SubtypingRelationEdge, Set<LogicError>>           test_subtypingRelationEdgesLogicErrors           = new HashMap<>();
+    private Map<RoleRelationEdge, Set<LogicError>>                test_roleRelationEdgesLogicErrors                = new HashMap<>();
+    private Map<SubtypingConstraintRelationEdge, Set<LogicError>> test_subtypingConstraintRelationEdgesLogicErrors = new HashMap<>();
+    private Map<RoleConstraintRelationEdge, Set<LogicError>>      test_roleConstraintRelationEdgesLogicErrors      = new HashMap<>();
+
+    protected void test_addLogicErrorTo(DiagramElement diagramElement, LogicError logicError) {
+        if      (diagramElement instanceof EntityType)                      { test_entityTypesLogicErrors.computeIfAbsent((EntityType)diagramElement, k -> new HashSet<>()).add(logicError); }
+        else if (diagramElement instanceof ValueType)                       { test_valueTypesLogicErrors.computeIfAbsent((ValueType)diagramElement, k -> new HashSet<>()).add(logicError); }
+        else if (diagramElement instanceof Predicate)                       { test_predicatesLogicErrors.computeIfAbsent((Predicate)diagramElement, k -> new HashSet<>()).add(logicError); }
+        else if (diagramElement instanceof Role)                            { test_rolesLogicErrors.computeIfAbsent((Role)diagramElement, k -> new HashSet<>()).add(logicError); }
+        else if (diagramElement instanceof ObjectifiedPredicate)            { test_objectifiedPredicatesLogicErrors.computeIfAbsent((ObjectifiedPredicate)diagramElement, k -> new HashSet<>()).add(logicError); }
+        else if (diagramElement instanceof Constraint)                      { test_constraintsLogicErrors.computeIfAbsent((Constraint)diagramElement, k -> new HashSet<>()).add(logicError); }
+        else if (diagramElement instanceof RolesSequence)                   { test_rolesSequencesLogicErrors.computeIfAbsent((RolesSequence)diagramElement, k -> new HashSet<>()).add(logicError); }
+
+        else if (diagramElement instanceof SubtypingRelationEdge)           { test_subtypingRelationEdgesLogicErrors.computeIfAbsent((SubtypingRelationEdge)diagramElement, k -> new HashSet<>()).add(logicError); }
+        else if (diagramElement instanceof RoleRelationEdge)                { test_roleRelationEdgesLogicErrors.computeIfAbsent((RoleRelationEdge)diagramElement, k -> new HashSet<>()).add(logicError); }
+        else if (diagramElement instanceof SubtypingConstraintRelationEdge) { test_subtypingConstraintRelationEdgesLogicErrors.computeIfAbsent((SubtypingConstraintRelationEdge)diagramElement, k -> new HashSet<>()).add(logicError); }
+        else if (diagramElement instanceof RoleConstraintRelationEdge)      { test_roleConstraintRelationEdgesLogicErrors.computeIfAbsent((RoleConstraintRelationEdge)diagramElement, k -> new HashSet<>()).add(logicError); }
+
+        if (!this._diagram.isInnerElement(diagramElement)) {
+            throw new RuntimeException("TEST_ERROR :: An attempt to add logic error to element which isn't added to the diagram.");
+        }
+    }
+
+    protected void test_addLogicErrorsTo(DiagramElement diagramElement, Collection<LogicError> logicErrors) {
+        if      (diagramElement instanceof EntityType)                      { test_entityTypesLogicErrors.computeIfAbsent((EntityType)diagramElement, k -> new HashSet<>()).addAll(logicErrors); }
+        else if (diagramElement instanceof ValueType)                       { test_valueTypesLogicErrors.computeIfAbsent((ValueType)diagramElement, k -> new HashSet<>()).addAll(logicErrors); }
+        else if (diagramElement instanceof Predicate)                       { test_predicatesLogicErrors.computeIfAbsent((Predicate)diagramElement, k -> new HashSet<>()).addAll(logicErrors); }
+        else if (diagramElement instanceof Role)                            { test_rolesLogicErrors.computeIfAbsent((Role)diagramElement, k -> new HashSet<>()).addAll(logicErrors); }
+        else if (diagramElement instanceof ObjectifiedPredicate)            { test_objectifiedPredicatesLogicErrors.computeIfAbsent((ObjectifiedPredicate)diagramElement, k -> new HashSet<>()).addAll(logicErrors); }
+        else if (diagramElement instanceof Constraint)                      { test_constraintsLogicErrors.computeIfAbsent((Constraint)diagramElement, k -> new HashSet<>()).addAll(logicErrors); }
+        else if (diagramElement instanceof RolesSequence)                   { test_rolesSequencesLogicErrors.computeIfAbsent((RolesSequence)diagramElement, k -> new HashSet<>()).addAll(logicErrors); }
+
+        else if (diagramElement instanceof SubtypingRelationEdge)           { test_subtypingRelationEdgesLogicErrors.computeIfAbsent((SubtypingRelationEdge)diagramElement, k -> new HashSet<>()).addAll(logicErrors); }
+        else if (diagramElement instanceof RoleRelationEdge)                { test_roleRelationEdgesLogicErrors.computeIfAbsent((RoleRelationEdge)diagramElement, k -> new HashSet<>()).addAll(logicErrors); }
+        else if (diagramElement instanceof SubtypingConstraintRelationEdge) { test_subtypingConstraintRelationEdgesLogicErrors.computeIfAbsent((SubtypingConstraintRelationEdge)diagramElement, k -> new HashSet<>()).addAll(logicErrors); }
+        else if (diagramElement instanceof RoleConstraintRelationEdge)      { test_roleConstraintRelationEdgesLogicErrors.computeIfAbsent((RoleConstraintRelationEdge)diagramElement, k -> new HashSet<>()).addAll(logicErrors); }
+
+        if (!this._diagram.isInnerElement(diagramElement)) {
+            throw new RuntimeException("TEST_ERROR :: An attempt to add logic errors to element which isn't added to the diagram.");
+        }
+    }
 
     // ---------------- ACTION ERRORS ---------------
     class TestActionErrorListener implements ActionErrorListener {
@@ -309,7 +348,7 @@ public class Test_globalTest {
         for (var c : test_subtypingConstraintRelationEdgesLogicErrors.values()) { test_expLogicErrors.addAll(c); }
         for (var c : test_roleConstraintRelationEdgesLogicErrors.values())      { test_expLogicErrors.addAll(c); }
 
-        Assertions.assertEquals(test_expLogicErrors, this._diagram.logicErrors().collect(Collectors.toCollection(HashSet::new)));
+        Assertions.assertEquals(test_expLogicErrors, this._diagram.logicErrors(LogicError.class).collect(Collectors.toCollection(HashSet::new)));
     }
 
     @AfterEach

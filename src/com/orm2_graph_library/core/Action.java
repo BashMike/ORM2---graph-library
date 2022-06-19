@@ -3,6 +3,7 @@ package com.orm2_graph_library.core;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public abstract class Action {
     // ================ ATTRIBUTES ================
@@ -12,8 +13,8 @@ public abstract class Action {
 
     protected ArrayList<PostValidator> _postValidators     = new ArrayList<>();
 
-    protected ArrayList<LogicError>    _solvedLogicErrors  = new ArrayList<>();
-    protected ArrayList<LogicError>    _emergedLogicErrors = new ArrayList<>();
+    protected HashSet<LogicError>      _solvedLogicErrors  = new HashSet<>();
+    protected HashSet<LogicError>      _emergedLogicErrors = new HashSet<>();
 
     // ================ OPERATIONS ================
     // ----------------- creating -----------------

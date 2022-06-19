@@ -54,6 +54,7 @@ import java.util.stream.Stream;
 
 public class Diagram implements Serializable {
     // ================ ATTRIBUTES ================
+
     private final Map<Class, ArrayList<DiagramElement>> _innerElements        = new HashMap<>();
 
     protected ActionManager                             _actionManager        = new ActionManager(this);
@@ -89,7 +90,6 @@ public class Diagram implements Serializable {
             FileInputStream fileStream = new FileInputStream(xmlFilePath);
 
             Diagram diagram = (Diagram)xstream.fromXML(fileStream);
-            // diagram.getElements(DiagramElement.class).forEach(e -> e.setOwnerDiagram(diagram));
 
             return diagram;
         }
@@ -116,7 +116,7 @@ public class Diagram implements Serializable {
     }
 
     // ---------------- attributes ----------------
-    public Stream<LogicError> logicErrors() { return this._logicErrors.stream(); }
+    public <T extends LogicError> Stream<T> logicErrors(@NotNull Class<T> logicErrorType) { return (Stream<T>)this._logicErrors.stream().filter(e -> logicErrorType.isAssignableFrom(e.getClass())); }
     public Stream<LogicError> getLogicErrorsFor(DiagramElement diagramElement) { return this._logicErrors.stream().filter(e -> e.isErrorParticipant(diagramElement)); }
 
     void _addLogicError(@NotNull LogicError logicError)    { this._logicErrors.add(logicError); }
@@ -125,7 +125,7 @@ public class Diagram implements Serializable {
     public void addActionErrorListener(ActionErrorListener actionErrorListener) { this._actionErrorListeners.add(actionErrorListener); }
 
     // ----------------- contract -----------------
-    public <T extends Node> T addNode(T node) {
+    public <T extends Node> T addNode(@NotNull T node) {
         if      (node instanceof EntityType)            { this._actionManager.executeAction(new AddEntityTypeAction(this, (EntityType)node)); }
         else if (node instanceof ValueType)             { this._actionManager.executeAction(new AddValueTypeAction (this, (ValueType)node)); }
         else if (node instanceof Predicate)             { this._actionManager.executeAction(new AddPredicateAction(this, (Predicate)node)); }
@@ -345,7 +345,7 @@ public class Diagram implements Serializable {
     // -------------- sub-operations --------------
     protected <T extends DiagramElement> T _addElement(T element) {
         if (element.isOwnerDiagram(this)) {
-            throw new RuntimeException("ERROR :: attempt to add diagram element to the diagram when it is already added.");
+            throw new RuntimeException("ERROR :: An attempt to add diagram element to the diagram when it is already added.");
         }
 
         element.setOwnerDiagram(this);
@@ -356,7 +356,7 @@ public class Diagram implements Serializable {
 
         if (element instanceof Edge) {
             if (!((Edge)element).begin().isOwnerDiagram(this) || !((Edge)element).end().isOwnerDiagram(this)) {
-                throw new RuntimeException("ERROR :: attempt to add connection between elements that is added to different diagram.");
+                throw new RuntimeException("ERROR :: An attempt to add connection between elements that is added to different diagram.");
             }
         }
 
@@ -367,7 +367,7 @@ public class Diagram implements Serializable {
 
     protected void _removeElement(DiagramElement element) {
         if (!element.isOwnerDiagram(this)) {
-            throw new RuntimeException("ERROR :: attempt to remove diagram element from the diagram when it is not in the diagram.");
+            throw new IllegalArgumentException("ERROR :: An attempt to remove diagram element from the diagram when it is not in the diagram.");
         }
 
         element.unsetOwnerDiagram();
@@ -481,17 +481,20 @@ public class Diagram implements Serializable {
     }
 
     public abstract class RemoveNodeAction<T extends Node> extends Action {
-        protected final T               _node;
-        protected final ArrayList<Edge> _incidentEdges;
+        final protected T               _node;
+        final protected ArrayList<Edge> _incidentEdges;
 
         private RemoveNodeAction(Diagram diagram, @NotNull T node) {
             super(diagram);
 
-            this._node          = node;
-            this._incidentEdges = node.getIncidentElements(Edge.class).collect(Collectors.toCollection(ArrayList::new));
+            this._node = node;
+
+            if (node.isOwnerDiagram(diagram)) { this._incidentEdges = node.getIncidentElements(Edge.class).collect(Collectors.toCollection(ArrayList::new)); }
+            else                              { this._incidentEdges = new ArrayList<>(); }
 
             // TODO - @check :: Does we always need to remove logic errors which has removed diagram elements as error participants?
             this._solvedLogicErrors.addAll(diagram.getLogicErrorsFor(node).collect(Collectors.toCollection(ArrayList::new)));
+            for (Edge edge : this._incidentEdges) { this._solvedLogicErrors.addAll(diagram.getLogicErrorsFor(edge).collect(Collectors.toCollection(ArrayList::new))); }
         }
 
         public T node() { return this._node; }
@@ -535,8 +538,8 @@ public class Diagram implements Serializable {
 
         @Override
         public void _undo() {
-            super._undo();
             this._node.roles().forEach(Diagram.this::_addElement);
+            super._undo();
         }
     }
 
@@ -555,9 +558,9 @@ public class Diagram implements Serializable {
 
         @Override
         public void _undo() {
-            super._undo();
             this._diagram._addElement(this._node.innerPredicate());
             this._node.innerPredicate().roles().forEach(Diagram.this::_addElement);
+            super._undo();
         }
     }
 
@@ -738,7 +741,7 @@ public class Diagram implements Serializable {
 
             // Check if edge connects diagram element with itself
             if (this._edge.end() == this._newBeginAnchorPoint.owner()) {
-                this._throwActionError(new DiagramElementSelfConnectedActionError(this._edge.beginAnchorPoint().owner()));
+                this._throwActionError(new DiagramElementSelfConnectedActionError(this._edge.end()));
             }
 
             // Check if edge connects diagram elements twice
@@ -764,7 +767,7 @@ public class Diagram implements Serializable {
 
             // Check if edge connects diagram element with itself
             if (this._edge.begin() == this._newEndAnchorPoint.owner()) {
-                this._throwActionError(new DiagramElementSelfConnectedActionError(this._edge.beginAnchorPoint().owner()));
+                this._throwActionError(new DiagramElementSelfConnectedActionError(this._edge.begin()));
             }
 
             // Check if edge connects diagram elements twice

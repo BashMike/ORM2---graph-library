@@ -2,15 +2,14 @@ package com.orm2_graph_library.post_validators;
 
 import com.orm2_graph_library.core.Action;
 import com.orm2_graph_library.core.Diagram;
-import com.orm2_graph_library.core.LogicError;
 import com.orm2_graph_library.core.PostValidator;
 import com.orm2_graph_library.edges.SubtypingRelationEdge;
-import com.orm2_graph_library.logic_errors.EntityTypeWithNoneRefModeLogicError;
 import com.orm2_graph_library.logic_errors.SubtypingCycleLogicError;
 import com.orm2_graph_library.nodes.common.EntityType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,8 +33,11 @@ public class ConnectBySubtypingRelationPostValidator extends PostValidator {
         while (!currentWave.isEmpty()) {
             ArrayList<ArrayList<EntityType>> newWave = new ArrayList<>();
             for (ArrayList<EntityType> path : currentWave) {
-                if (path.get(0) == path.get(path.size()-1) && path.size() != 1) {
-                    subtypingCycles.add(path);
+                EntityType lastElement = path.get(path.size()-1);
+
+                if (path.stream().filter(e -> e == lastElement).count() > 1) {
+                    ArrayList<EntityType> resultPath = new ArrayList<>(path.subList(path.indexOf(lastElement), path.lastIndexOf(lastElement)+1));
+                    if (path.size() == resultPath.size() && resultPath.contains(this._edge.end())) { subtypingCycles.add(new ArrayList<>(resultPath.subList(0, resultPath.size()-1))); }
                 }
                 else {
                     path.get(path.size()-1).getIncidentElements(EntityType.class)
@@ -52,47 +54,32 @@ public class ConnectBySubtypingRelationPostValidator extends PostValidator {
             currentWave.addAll(newWave);
         }
 
-        for (ArrayList<EntityType> cycle : subtypingCycles) { this._addLogicErrorToDiagram(new SubtypingCycleLogicError(new ArrayList<>(cycle.subList(0, cycle.size()-1)))); }
-
-        // Update inherit paths if current edge doesn't add subtyping cycles
-        if (subtypingCycles.isEmpty()) {
-            if (this._edge.end().hasRefMode()) {
-                if (this._edge.begin().getIncidentElements(SubtypingRelationEdge.class).anyMatch(e -> e != this._edge)) {
-                    this._edge.beNotInheritPathForRefMode();
-                }
-
-                ArrayList<SubtypingRelationEdge> currentWaveEdges = new ArrayList<>(List.of(this._edge));
-
-                while (!currentWaveEdges.isEmpty()) {
-                    ArrayList<SubtypingRelationEdge> newWaveEdges = new ArrayList<>();
-
-                    for (SubtypingRelationEdge edge : currentWaveEdges) {
-                        if (!edge.hasLogicErrors(SubtypingCycleLogicError.class)) {
-                            if (this._canEdgeBeInheritPath(edge)) { edge.beInheritPathForRefMode(); }
-                            else                                  { edge.beNotInheritPathForRefMode(); }
-
-                            ArrayList<LogicError> noneRefModeLogicErrors = edge.begin().getLogicErrors(EntityTypeWithNoneRefModeLogicError.class).collect(Collectors.toCollection(ArrayList::new));
-                            for (LogicError logicError : noneRefModeLogicErrors) { this._removeLogicErrorFromDiagram(logicError); }
-
-                            newWaveEdges.addAll(edge.begin().getIncidentElements(SubtypingRelationEdge.class).filter(e -> e.end() == edge.begin()).collect(Collectors.toCollection(ArrayList::new)));
-                        }
-                    }
-
-                    currentWaveEdges = new ArrayList<>(newWaveEdges);
-                }
-            }
-            else if (this._edge.begin().hasRefMode()) {
-                this._edge.beNotInheritPathForRefMode();
-            }
-        }
+        subtypingCycles = this._removeCycleDuplicates(subtypingCycles);
+        for (ArrayList<EntityType> cycle : subtypingCycles) { this._addLogicErrorToDiagram(new SubtypingCycleLogicError(cycle)); }
     }
 
-    private boolean _canEdgeBeInheritPath(@NotNull SubtypingRelationEdge edge) {
-        boolean result = true;
-        if (edge.begin().isRefModeSet()) { // TODO :: @hack
-            return false;
+    private ArrayList<ArrayList<EntityType>> _removeCycleDuplicates(ArrayList<ArrayList<EntityType>> subtypingCycles) {
+        ArrayList<HashSet<EntityType>> subtypingCyclesSets = subtypingCycles.stream().map(HashSet::new).collect(Collectors.toCollection(ArrayList::new));
+        ArrayList<HashSet<EntityType>> existSubtypingCyclesSets = this._diagram.logicErrors(SubtypingCycleLogicError.class)
+                .map(e -> new HashSet<>(e.cycleAsNodes()))
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        // Remove cycles that diagram already has
+        ArrayList<Integer> indexesToRemove = subtypingCyclesSets.stream()
+                .filter(existSubtypingCyclesSets::contains)
+                .map(subtypingCyclesSets::indexOf)
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        // Remove duplicates cycles from gotten cycles pool
+        for (int i=0; i<subtypingCyclesSets.size() && !indexesToRemove.contains(i); i++) {
+            HashSet<EntityType> current = subtypingCyclesSets.get(i);
+
+            indexesToRemove.addAll(subtypingCyclesSets.stream()
+                    .filter(e -> e != current && e.equals(current))
+                    .map(subtypingCyclesSets::indexOf)
+                    .collect(Collectors.toCollection(ArrayList::new)));
         }
 
-        return result;
+        return subtypingCycles.stream().filter(e -> !indexesToRemove.contains(subtypingCycles.indexOf(e))).collect(Collectors.toCollection(ArrayList::new));
     }
 }

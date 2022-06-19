@@ -1,22 +1,13 @@
 import com.orm2_graph_library.core.AnchorPoint;
-import com.orm2_graph_library.core.Diagram;
 import com.orm2_graph_library.core.DiagramElement;
 import com.orm2_graph_library.core.LogicError;
-import com.orm2_graph_library.edges.RoleConstraintRelationEdge;
-import com.orm2_graph_library.edges.RoleRelationEdge;
-import com.orm2_graph_library.edges.SubtypingConstraintRelationEdge;
-import com.orm2_graph_library.edges.SubtypingRelationEdge;
-import com.orm2_graph_library.logic_errors.ConstraintHasNotEnoughConnectsLogicError;
 import com.orm2_graph_library.logic_errors.EntityTypeWithNoneRefModeLogicError;
 import com.orm2_graph_library.logic_errors.RoleHasNoTextSetLogicError;
 import com.orm2_graph_library.logic_errors.ValueTypeWithNoneDataTypeLogicError;
 import com.orm2_graph_library.nodes.common.EntityType;
 import com.orm2_graph_library.nodes.common.ValueType;
-import com.orm2_graph_library.nodes.constraints.Constraint;
-import com.orm2_graph_library.nodes.predicates.ObjectifiedPredicate;
 import com.orm2_graph_library.nodes.predicates.Predicate;
 import com.orm2_graph_library.nodes.predicates.Role;
-import com.orm2_graph_library.nodes.predicates.RolesSequence;
 import com.orm2_graph_library.utils.Point2D;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
@@ -25,9 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import utils.Test_globalTest;
 
-import java.awt.*;
 import java.util.*;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class Test_nodesGeometry extends Test_globalTest {
@@ -45,8 +34,8 @@ public class Test_nodesGeometry extends Test_globalTest {
 
     @AfterEach
     private void testEnd_nodesGeometry() {
-        for (EntityType entityType : test_entityTypes) { test_entityTypesLogicErrors.put(entityType, new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(entityType)))); }
-        for (ValueType valueType : test_valueTypes) { test_valueTypesLogicErrors.put(valueType, new HashSet<>(List.of(new ValueTypeWithNoneDataTypeLogicError(valueType)))); }
+        for (EntityType entityType : test_entityTypes) { test_addLogicErrorTo(entityType, new EntityTypeWithNoneRefModeLogicError(entityType)); }
+        for (ValueType valueType : test_valueTypes) { test_addLogicErrorTo(valueType, new ValueTypeWithNoneDataTypeLogicError(valueType)); }
 
         ArrayList<DiagramElement> diagramElements = new ArrayList<>();
         diagramElements.addAll(test_entityTypes);
@@ -357,8 +346,8 @@ public class Test_nodesGeometry extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -385,8 +374,8 @@ public class Test_nodesGeometry extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -415,8 +404,8 @@ public class Test_nodesGeometry extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -445,8 +434,8 @@ public class Test_nodesGeometry extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -475,8 +464,8 @@ public class Test_nodesGeometry extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -511,8 +500,8 @@ public class Test_nodesGeometry extends Test_globalTest {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }

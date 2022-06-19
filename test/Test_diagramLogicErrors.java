@@ -4,11 +4,13 @@ import com.orm2_graph_library.logic_errors.*;
 import com.orm2_graph_library.nodes.common.EntityType;
 import com.orm2_graph_library.nodes.constraints.ExclusionConstraint;
 import com.orm2_graph_library.nodes.constraints.SubsetConstraint;
-import com.orm2_graph_library.nodes.predicates.Predicate;
 import org.junit.jupiter.api.Test;
 import utils.Test_globalTest;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Test_diagramLogicErrors extends Test_globalTest {
@@ -30,7 +32,7 @@ public class Test_diagramLogicErrors extends Test_globalTest {
             Set<LogicError> expLogicErrors = new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(entityType)));
             if (entityType.name().equals("Hello")) { expLogicErrors.add(new ObjectTypesNameDuplicationLogicError("Hello", test_entityTypes.stream().filter(e -> e.name().equals("Hello")).collect(Collectors.toCollection(ArrayList::new)))); }
 
-            test_entityTypesLogicErrors.put(entityType, expLogicErrors);
+            test_addLogicErrorsTo(entityType, expLogicErrors.stream().toList());
         }
     }
 
@@ -51,7 +53,7 @@ public class Test_diagramLogicErrors extends Test_globalTest {
             if (entityType.name().equals("Hello"))      { expLogicErrors.add(new ObjectTypesNameDuplicationLogicError("Hello", test_entityTypes.stream().filter(e -> e.name().equals("Hello")).collect(Collectors.toCollection(ArrayList::new)))); }
             else if (entityType.name().equals("Super")) { expLogicErrors.add(new ObjectTypesNameDuplicationLogicError("Super", test_entityTypes.stream().filter(e -> e.name().equals("Super")).collect(Collectors.toCollection(ArrayList::new)))); }
 
-            test_entityTypesLogicErrors.put(entityType, expLogicErrors);
+            test_addLogicErrorsTo(entityType, expLogicErrors.stream().toList());
         }
     }
 
@@ -70,9 +72,7 @@ public class Test_diagramLogicErrors extends Test_globalTest {
         }
 
         // Check result
-        for (var entityType : test_entityTypes) {
-            test_entityTypesLogicErrors.put(entityType, new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(entityType))));
-        }
+        for (var entityType : test_entityTypes) { test_addLogicErrorTo(entityType, new EntityTypeWithNoneRefModeLogicError(entityType)); }
     }
 
     @Test
@@ -93,9 +93,7 @@ public class Test_diagramLogicErrors extends Test_globalTest {
         }
 
         // Check result
-        for (var entityType : test_entityTypes) {
-            test_entityTypesLogicErrors.put(entityType, new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(entityType))));
-        }
+        for (var entityType : test_entityTypes) { test_addLogicErrorTo(entityType, new EntityTypeWithNoneRefModeLogicError(entityType)); }
     }
 
     // Subtyping cycles
@@ -112,13 +110,9 @@ public class Test_diagramLogicErrors extends Test_globalTest {
 
         // Check result
         ArrayList<EntityType> entityTypeCycle = new ArrayList<>(List.of(test_entityTypes.get(2), test_entityTypes.get(0), test_entityTypes.get(1)));
-        for (var entityType : test_entityTypes) {
-            test_entityTypesLogicErrors.put(entityType, new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(entityType), new SubtypingCycleLogicError(entityTypeCycle))));
-        }
 
-        for (var subtypingRelationEdge : test_subtypingRelationEdges) {
-            test_subtypingRelationEdgesLogicErrors.put(subtypingRelationEdge, new HashSet<>(List.of(new SubtypingCycleLogicError(entityTypeCycle))));
-        }
+        for (var entityType : test_entityTypes) { test_addLogicErrorsTo(entityType, List.of(new EntityTypeWithNoneRefModeLogicError(entityType), new SubtypingCycleLogicError(entityTypeCycle))); }
+        for (var subtypingRelationEdge : test_subtypingRelationEdges) { test_addLogicErrorTo(subtypingRelationEdge, new SubtypingCycleLogicError(entityTypeCycle)); }
     }
 
     @Test
@@ -137,15 +131,17 @@ public class Test_diagramLogicErrors extends Test_globalTest {
         ArrayList<EntityType> entityTypeCycle0 = new ArrayList<>(List.of(test_entityTypes.get(2), test_entityTypes.get(0), test_entityTypes.get(1)));
         ArrayList<EntityType> entityTypeCycle1 = new ArrayList<>(List.of(test_entityTypes.get(4), test_entityTypes.get(3)));
 
-        for (var entityType : test_entityTypes) {
-            if (test_entityTypes.indexOf(entityType) <= 2) { test_entityTypesLogicErrors.put(entityType, new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(entityType), new SubtypingCycleLogicError(entityTypeCycle0)))); }
-            else                                           { test_entityTypesLogicErrors.put(entityType, new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(entityType), new SubtypingCycleLogicError(entityTypeCycle1)))); }
-        }
+        test_addLogicErrorsTo(test_entityTypes.get(0), List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(0)), new SubtypingCycleLogicError(entityTypeCycle0)));
+        test_addLogicErrorsTo(test_entityTypes.get(1), List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(1)), new SubtypingCycleLogicError(entityTypeCycle0)));
+        test_addLogicErrorsTo(test_entityTypes.get(2), List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(2)), new SubtypingCycleLogicError(entityTypeCycle0)));
+        test_addLogicErrorsTo(test_entityTypes.get(3), List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(3)), new SubtypingCycleLogicError(entityTypeCycle1)));
+        test_addLogicErrorsTo(test_entityTypes.get(4), List.of(new EntityTypeWithNoneRefModeLogicError(test_entityTypes.get(4)), new SubtypingCycleLogicError(entityTypeCycle1)));
 
-        for (var subtypingRelationEdge : test_subtypingRelationEdges) {
-            if (test_entityTypes.indexOf(subtypingRelationEdge.begin()) <= 2) { test_subtypingRelationEdgesLogicErrors.put(subtypingRelationEdge, new HashSet<>(List.of(new SubtypingCycleLogicError(entityTypeCycle0)))); }
-            else                                                              { test_subtypingRelationEdgesLogicErrors.put(subtypingRelationEdge, new HashSet<>(List.of(new SubtypingCycleLogicError(entityTypeCycle1)))); }
-        }
+        test_addLogicErrorTo(test_subtypingRelationEdges.get(0), new SubtypingCycleLogicError(entityTypeCycle0));
+        test_addLogicErrorTo(test_subtypingRelationEdges.get(1), new SubtypingCycleLogicError(entityTypeCycle0));
+        test_addLogicErrorTo(test_subtypingRelationEdges.get(2), new SubtypingCycleLogicError(entityTypeCycle0));
+        test_addLogicErrorTo(test_subtypingRelationEdges.get(3), new SubtypingCycleLogicError(entityTypeCycle1));
+        test_addLogicErrorTo(test_subtypingRelationEdges.get(4), new SubtypingCycleLogicError(entityTypeCycle1));
     }
 
     @Test
@@ -165,13 +161,9 @@ public class Test_diagramLogicErrors extends Test_globalTest {
 
         // Check result
         ArrayList<EntityType> entityTypeCycle = new ArrayList<>(List.of(test_entityTypes.get(2), test_entityTypes.get(3), test_entityTypes.get(4), test_entityTypes.get(0), test_entityTypes.get(1)));
-        for (var entityType : test_entityTypes) {
-            test_entityTypesLogicErrors.put(entityType, new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(entityType), new SubtypingCycleLogicError(entityTypeCycle))));
-        }
 
-        for (var subtypingRelationEdge : test_subtypingRelationEdges) {
-            test_subtypingRelationEdgesLogicErrors.put(subtypingRelationEdge, new HashSet<>(List.of(new SubtypingCycleLogicError(entityTypeCycle))));
-        }
+        for (EntityType entityType : test_entityTypes) { test_addLogicErrorsTo(entityType, List.of(new EntityTypeWithNoneRefModeLogicError(entityType), new SubtypingCycleLogicError(entityTypeCycle))); }
+        for (SubtypingRelationEdge edge : test_subtypingRelationEdges) { test_addLogicErrorTo(edge, new SubtypingCycleLogicError(entityTypeCycle)); }
     }
 
     @Test
@@ -181,8 +173,8 @@ public class Test_diagramLogicErrors extends Test_globalTest {
         for (int i=0; i<5; i++) { test_addDiagramElement(this._diagram.connectBySubtypingRelation(test_entityTypes.get(i).centerAnchorPoint(), test_entityTypes.get((i+1) % 5).centerAnchorPoint())); }
 
         // Check result
-        for (EntityType entityType : test_entityTypes) { test_entityTypesLogicErrors.put(entityType, new HashSet<>(List.of(new SubtypingCycleLogicError(test_entityTypes), new EntityTypeWithNoneRefModeLogicError(entityType)))); }
-        for (SubtypingRelationEdge edge : test_subtypingRelationEdges) { test_subtypingRelationEdgesLogicErrors.put(edge, new HashSet<>(List.of(new SubtypingCycleLogicError(test_entityTypes)))); }
+        for (EntityType entityType : test_entityTypes) { test_addLogicErrorsTo(entityType, List.of(new EntityTypeWithNoneRefModeLogicError(entityType), new SubtypingCycleLogicError(test_entityTypes))); }
+        for (SubtypingRelationEdge edge : test_subtypingRelationEdges) { test_addLogicErrorTo(edge, new SubtypingCycleLogicError(test_entityTypes)); }
     }
 
     @Test
@@ -195,8 +187,8 @@ public class Test_diagramLogicErrors extends Test_globalTest {
         test_addDiagramElement(this._diagram.connectBySubtypingRelation(test_entityTypes.get(1).centerAnchorPoint(), test_entityTypes.get(0).centerAnchorPoint()));
 
         // Check result
-        for (EntityType entityType : test_entityTypes) { test_entityTypesLogicErrors.put(entityType, new HashSet<>(List.of(new SubtypingCycleLogicError(test_entityTypes), new EntityTypeWithNoneRefModeLogicError(entityType)))); }
-        for (SubtypingRelationEdge edge : test_subtypingRelationEdges) { test_subtypingRelationEdgesLogicErrors.put(edge, new HashSet<>(List.of(new SubtypingCycleLogicError(test_entityTypes)))); }
+        for (EntityType entityType : test_entityTypes) { test_addLogicErrorsTo(entityType, List.of(new EntityTypeWithNoneRefModeLogicError(entityType), new SubtypingCycleLogicError(test_entityTypes))); }
+        for (SubtypingRelationEdge edge : test_subtypingRelationEdges) { test_addLogicErrorTo(edge, new SubtypingCycleLogicError(test_entityTypes)); }
     }
 
     @Test
@@ -210,8 +202,9 @@ public class Test_diagramLogicErrors extends Test_globalTest {
         test_addDiagramElement(this._diagram.connectBySubtypingConstraintRelation(test_constraints.get(0).centerAnchorPoint(), test_subtypingRelationEdges.get(0).anchorPoint()));
 
         // Check result
-        for (var entityType : test_entityTypes) { test_entityTypesLogicErrors.put(entityType, new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(entityType)))); }
-        test_constraintsLogicErrors.put(test_constraints.get(0), new HashSet<>(List.of(new ConstraintHasNotEnoughConnectsLogicError(test_constraints.get(0), test_constraints.get(0).getIncidentElements(SubtypingRelationEdge.class).collect(Collectors.toCollection(ArrayList::new))))));
+        for (EntityType entityType : test_entityTypes) { test_addLogicErrorTo(entityType, new EntityTypeWithNoneRefModeLogicError(entityType)); }
+        test_addLogicErrorTo(test_constraints.get(0), new ConstraintHasNotEnoughConnectsLogicError(test_constraints.get(0), test_constraints.get(0).getIncidentElements(SubtypingRelationEdge.class)
+                .collect(Collectors.toCollection(ArrayList::new))));
     }
 
     // TODO - @test :: Setting reference mode and data type for entity type.
@@ -228,9 +221,9 @@ public class Test_diagramLogicErrors extends Test_globalTest {
         test_addDiagramElement(this._diagram.connectBySubtypingConstraintRelation(test_constraints.get(0).centerAnchorPoint(), test_subtypingRelationEdges.get(0).anchorPoint()));
 
         // Check result
-        for (var entityType : test_entityTypes) { test_entityTypesLogicErrors.put(entityType, new HashSet<>(List.of(new EntityTypeWithNoneRefModeLogicError(entityType)))); }
-        test_subtypingConstraintRelationEdgesLogicErrors.put(test_subtypingConstraintRelationEdges.get(0), new HashSet<>(List.of(new IllegalSubtypingConstraintRelationLogicError(test_subtypingConstraintRelationEdges.get(0)))));
-        test_constraintsLogicErrors.put(test_constraints.get(0), new HashSet<>(List.of(new ConstraintHasNotEnoughConnectsLogicError(test_constraints.get(0), test_constraints.get(0).getIncidentElements(SubtypingRelationEdge.class).collect(Collectors.toCollection(ArrayList::new))))));
-        test_subtypingConstraintRelationEdgesLogicErrors.put(test_subtypingConstraintRelationEdges.get(0), new HashSet<>(List.of(new IllegalSubtypingConstraintRelationLogicError(test_subtypingConstraintRelationEdges.get(0)))));
+        for (EntityType entityType : test_entityTypes) { test_addLogicErrorTo(entityType, new EntityTypeWithNoneRefModeLogicError(entityType)); }
+        test_addLogicErrorTo(test_constraints.get(0), new ConstraintHasNotEnoughConnectsLogicError(test_constraints.get(0), test_constraints.get(0).getIncidentElements(SubtypingRelationEdge.class)
+                .collect(Collectors.toCollection(ArrayList::new))));
+        test_addLogicErrorTo(test_subtypingConstraintRelationEdges.get(0), new IllegalSubtypingConstraintRelationLogicError(test_subtypingConstraintRelationEdges.get(0)));
     }
 }

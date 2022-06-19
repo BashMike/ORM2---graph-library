@@ -17,24 +17,22 @@ import org.junit.jupiter.api.Test;
 import utils.Test_globalTest;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.stream.Collectors;
 
 class Test_nodesLifeCycle extends Test_globalTest {
     // ==================== INIT ====================
     @AfterEach
     private void testEnd_nodesLifeCycle() {
-        for (EntityType entityType : test_entityTypes) { test_entityTypesLogicErrors.computeIfAbsent(entityType, k -> new HashSet<>()).add(new EntityTypeWithNoneRefModeLogicError(entityType)); }
-        for (ValueType valueType : test_valueTypes) { test_valueTypesLogicErrors.put(valueType, new HashSet<>(List.of(new ValueTypeWithNoneDataTypeLogicError(valueType)))); }
-        for (Constraint constraint : test_constraints) { test_constraintsLogicErrors.computeIfAbsent(constraint, k -> new HashSet<>()).add(new ConstraintHasNotEnoughConnectsLogicError(constraint, new ArrayList<>())); }
+        for (EntityType entityType : test_entityTypes) { test_addLogicErrorTo(entityType, new EntityTypeWithNoneRefModeLogicError(entityType)); }
+        for (ValueType valueType : test_valueTypes) { test_addLogicErrorTo(valueType, new ValueTypeWithNoneDataTypeLogicError(valueType)); }
+        for (Constraint constraint : test_constraints) { test_addLogicErrorTo(constraint, new ConstraintHasNotEnoughConnectsLogicError(constraint, new ArrayList<>())); }
 
         for (Predicate predicate : test_predicates) {
             for (Role role : predicate.roles().collect(Collectors.toCollection(ArrayList::new))) {
                 LogicError logicError = new RoleHasNoTextSetLogicError(role);
 
-                test_predicatesLogicErrors.computeIfAbsent(role.ownerPredicate(), k -> new HashSet<>()).add(logicError);
-                test_rolesLogicErrors.computeIfAbsent(role, k -> new HashSet<>()).add(logicError);
+                test_addLogicErrorTo(role.ownerPredicate(), logicError);
+                test_addLogicErrorTo(role, logicError);
             }
         }
     }
@@ -134,6 +132,27 @@ class Test_nodesLifeCycle extends Test_globalTest {
         Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 2")));
         Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 4")));
         Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 5")));
+    }
+
+    @Test
+    void entityType_removingNotInDiagram() {
+        // Prepare data and start testing
+        for (int i=0; i<5; i++) { test_addDiagramElement(this._diagram.addNode(new EntityType())); }
+
+        EntityType entityType = new EntityType();
+        this._diagram.removeNode(test_entityTypes.get(2));
+        this._diagram.removeNode(test_entityTypes.get(0));
+        test_removeDiagramElement(test_entityTypes.get(2));
+        test_removeDiagramElement(test_entityTypes.get(0));
+
+        // Check result
+        Assertions.assertTrue(this._diagram.getElements(DiagramElement.class).allMatch(e -> e instanceof EntityType));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).allMatch(e -> e.refMode().equals(new NoneRefMode())));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 2")));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 4")));
+        Assertions.assertTrue(this._diagram.getElements(EntityType.class).anyMatch(e -> e.name().equals("Entity Type 5")));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> this._diagram.removeNode(entityType));
     }
 
     @Test

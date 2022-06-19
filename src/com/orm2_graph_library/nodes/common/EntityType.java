@@ -1,11 +1,10 @@
 package com.orm2_graph_library.nodes.common;
 
 import com.orm2_graph_library.action_errors.MakeChildEntityTypeIndependentActionError;
-import com.orm2_graph_library.action_errors.MakeIndependentEntityTypeBeInheritedActionError;
+import com.orm2_graph_library.anchor_points.AnchorPosition;
 import com.orm2_graph_library.anchor_points.NodeAnchorPoint;
 import com.orm2_graph_library.core.AnchorPoint;
 import com.orm2_graph_library.core.Diagram;
-import com.orm2_graph_library.anchor_points.AnchorPosition;
 import com.orm2_graph_library.edges.SubtypingRelationEdge;
 import com.orm2_graph_library.logic_errors.EntityTypeWithNoneRefModeLogicError;
 import com.orm2_graph_library.nodes.common.ref_modes.NoneRefMode;
@@ -25,34 +24,7 @@ public class EntityType extends ObjectType {
     @Override public String basicName() { return "Entity Type"; }
 
     // * Reference mode
-    public RefMode refMode() {
-        if (!this._refMode.equals(new NoneRefMode())) {
-            return this._refMode;
-        }
-        else {
-            ArrayList<SubtypingRelationEdge> inheritPathEdges = this.getIncidentElements(SubtypingRelationEdge.class).filter(e -> e.begin() == this && e.isInheritPathForRefMode()).collect(Collectors.toCollection(ArrayList::new));
-
-            if (!inheritPathEdges.isEmpty()) {
-                while (inheritPathEdges.get(0).end()._refMode.equals(new NoneRefMode())) {
-                    ArrayList<SubtypingRelationEdge> newInheritPathEdges = inheritPathEdges.get(0).end().getIncidentElements(SubtypingRelationEdge.class).filter(e -> e.begin() == inheritPathEdges.get(0).end() && e.isInheritPathForRefMode()).collect(Collectors.toCollection(ArrayList::new));
-
-                    if (!newInheritPathEdges.isEmpty()) {
-                        inheritPathEdges.set(0, newInheritPathEdges.get(0));
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                return inheritPathEdges.get(0).end()._refMode;
-            }
-            else {
-                return this._refMode;
-            }
-        }
-    }
-
-    public boolean hasRefMode() { return !this.refMode().equals(new NoneRefMode()); }
+    public RefMode refMode() { return this._refMode; }
     public boolean isRefModeSet() { return !this._refMode.equals(new NoneRefMode()); }
 
     public void setRefMode(RefMode refMode) { this._ownerDiagramActionManager().executeAction(new EntityTypeRefModeChangeAction(this._ownerDiagram, this, this._refMode, refMode)); }
